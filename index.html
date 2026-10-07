@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carlo Pagani</title>
+<meta name="description" content="Carlo Pagani: gerencia financiera fraccionada para pymes, consultoría financiera y docencia universitaria en finanzas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: hoja de libro mayor. Columna de lectura a la izquierda, columna de cifras a la derecha; reglas finas como renglones. */
+:root {
+  --paper: #F1F4F0;
+  --sheet: #FFFFFF;
+  --ink: #16302C;
+  --ink-soft: #4A5F5A;
+  --rule: #D3DDD7;
+  --accent: #1E6A50;
+  --accent-ink: #FFFFFF;
+  --neg: #A3352B;
+  --display: "Spectral", "Iowan Old Style", Georgia, serif;
+  --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --s1: .875rem; --s2: 1rem; --s3: 1.25rem; --s4: 1.75rem; --s5: clamp(2.4rem, 6vw, 4rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1A18; --sheet: #15241F; --ink: #E3ECE7; --ink-soft: #9FB3AC;
+    --rule: #28403A; --accent: #5CC79D; --accent-ink: #0F1A18; --neg: #E8857A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1A18; --sheet: #15241F; --ink: #E3ECE7; --ink-soft: #9FB3AC;
+  --rule: #28403A; --accent: #5CC79D; --accent-ink: #0F1A18; --neg: #E8857A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--body); font-size: var(--s2); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 68rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; text-wrap: balance; margin: 0; }
+.label {
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Cabecera */
+header.top { border-bottom: 1px solid var(--rule); }
+header.top .wrap { display: flex; flex-wrap: wrap; gap: .5rem 2rem; align-items: baseline; justify-content: space-between; padding-block: 1.1rem; }
+.brand { font-family: var(--display); font-size: var(--s3); font-weight: 600; color: var(--ink); text-decoration: none; }
+nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; }
+nav a { color: var(--ink-soft); text-decoration: none; font-size: var(--s1); }
+nav a:hover { color: var(--ink); }
+
+/* Apertura */
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); padding-block: clamp(3rem, 8vw, 6rem); align-items: start; }
+.hero h1 { font-size: var(--s5); letter-spacing: -.01em; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
+.hero p.lede { font-size: var(--s3); color: var(--ink-soft); max-width: 34rem; margin: 1.5rem 0 2rem; }
+.roles { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 2rem; padding: 0; list-style: none; }
+.roles li { border: 1px solid var(--rule); border-radius: 2px; padding: .3rem .7rem; font-size: var(--s1); background: var(--sheet); }
+.btn {
+  display: inline-block; background: var(--accent); color: var(--accent-ink); text-decoration: none;
+  font-weight: 600; padding: .8rem 1.3rem; border-radius: 2px; border: 0; font: inherit; font-weight: 600; cursor: pointer;
+}
+.btn:hover { filter: brightness(1.08); }
+
+/* Herramienta: ciclo de caja */
+.ledger { background: var(--sheet); border: 1px solid var(--rule); border-radius: 3px; padding: 1.5rem; min-width: 0; }
+.ledger h2 { font-size: var(--s4); margin: .35rem 0 .5rem; }
+.ledger p.help { font-size: var(--s1); color: var(--ink-soft); margin: 0 0 1.25rem; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem; gap: 1rem; align-items: center; padding-block: .55rem; border-top: 1px solid var(--rule); }
+.row label { font-size: var(--s1); }
+.row label small { display: block; color: var(--ink-soft); font-size: .78rem; }
+.row input {
+  width: 100%; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--s2); text-align: right;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px; padding: .4rem .5rem;
+}
+.op { font-family: var(--mono); color: var(--ink-soft); }
+.total { border-top: 2px solid var(--ink); margin-top: .25rem; padding-top: .9rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem 1rem; align-items: baseline; }
+.total .big { font-family: var(--mono); font-size: var(--s4); font-variant-numeric: tabular-nums; text-align: right; }
+.total .big.neg { color: var(--neg); }
+.total .sub { font-size: var(--s1); color: var(--ink-soft); }
+.bar { grid-column: 1 / -1; height: 10px; background: var(--paper); border: 1px solid var(--rule); border-radius: 2px; margin-top: .6rem; overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+@media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+.ledger .note { font-size: .78rem; color: var(--ink-soft); margin: 1rem 0 0; }
+
+/* Secciones */
+section.block { border-top: 1px solid var(--rule); }
+section.block .wrap { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 1.5rem clamp(2rem, 5vw, 4.5rem); padding-block: clamp(3rem, 7vw, 5rem); }
+section.block h2 { font-size: var(--s4); }
+.services { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 2rem 2.5rem; }
+.services article h3 { font-size: var(--s3); margin: .4rem 0 .5rem; }
+.services article p { margin: 0; color: var(--ink-soft); }
+.services ul { margin: .75rem 0 0; padding-left: 1.1rem; color: var(--ink-soft); font-size: var(--s1); }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: paso; }
+.steps li { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); gap: 1rem; padding-block: 1.1rem; border-bottom: 1px solid var(--rule); counter-increment: paso; }
+.steps li:first-child { padding-top: 0; }
+.steps li::before { content: counter(paso, decimal-leading-zero); font-family: var(--mono); color: var(--accent); padding-top: .2rem; }
+.steps h3 { font-size: var(--s3); margin: 0 0 .25rem; }
+.steps p { margin: 0; color: var(--ink-soft); max-width: 38rem; }
+
+.prose p { max-width: 38rem; margin: 0 0 1rem; }
+blockquote { margin: 2rem 0 0; padding-left: 1.25rem; border-left: 2px solid var(--accent); font-family: var(--display); font-style: italic; font-size: var(--s3); max-width: 34rem; }
+blockquote cite { display: block; margin-top: .5rem; font-family: var(--mono); font-style: normal; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+
+.contact p { max-width: 36rem; margin: 0 0 1.5rem; }
+footer { border-top: 1px solid var(--rule); }
+footer .wrap { padding-block: 1.5rem; display: flex; flex-wrap: wrap; gap: .5rem 2rem; justify-content: space-between; font-size: var(--s1); color: var(--ink-soft); }
+
+@media (max-width: 52rem) {
+  .hero .wrap, section.block .wrap { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 26rem) {
+  .row { grid-template-columns: minmax(0, 1fr) 6rem; }
+  .steps li { grid-template-columns: 2.5rem minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio">Carlo Pagani</a>
+    <nav aria-label="Secciones">
+      <ul>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#metodo">Cómo trabajo</a></li>
+        <li><a href="#docencia">Docencia</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="label">Finanzas para pymes</p>
+        <h1>Las cifras de tu empresa, <em>ordenadas para decidir.</em></h1>
+        <p class="lede">Soy consultor financiero y profesor universitario de finanzas. Acompaño a pequeñas y medianas empresas como su gerente financiero a tiempo parcial: el criterio de un director financiero, sin el costo de tenerlo en planilla.</p>
+        <ul class="roles">
+          <li>Gerencia financiera fraccionada</li>
+          <li>Consultoría financiera</li>
+          <li>Docencia universitaria</li>
+        </ul>
+        <a class="btn" href="#contacto">Conversemos sobre tu empresa</a>
+      </div>
+
+      <aside class="ledger" aria-labelledby="cce-title">
+        <p class="label">Una cuenta rápida</p>
+        <h2 id="cce-title">¿Cuántos días tarda en volver tu caja?</h2>
+        <p class="help">El ciclo de conversión de efectivo mide los días que tu dinero pasa atrapado entre pagar a proveedores y cobrar a clientes. Cambia las cifras de ejemplo por las tuyas.</p>
+        <form id="cce" autocomplete="off">
+          <div class="row">
+            <label for="dio">Días de inventario<small>lo que tarda en venderse la mercadería</small></label>
+            <input id="dio" type="number" inputmode="numeric" min="0" max="999" value="45">
+          </div>
+          <div class="row">
+            <label for="dso"><span class="op">+</span> Días de cobro<small>lo que tardan en pagarte tus clientes</small></label>
+            <input id="dso" type="number" inputmode="numeric" min="0" max="999" value="60">
+          </div>
+          <div class="row">
+            <label for="dpo"><span class="op">−</span> Días de pago<small>lo que tardas en pagar a proveedores</small></label>
+            <input id="dpo" type="number" inputmode="numeric" min="0" max="999" value="30">
+          </div>
+          <div class="row">
+            <label for="ventas">Ventas mensuales<small>en tu moneda</small></label>
+            <input id="ventas" type="number" inputmode="numeric" min="0" step="1000" value="120000">
+          </div>
+          <div class="total" aria-live="polite">
+            <span>Ciclo de caja</span>
+            <span class="big" id="out-dias">75 días</span>
+            <span class="sub">Capital de trabajo inmovilizado, aprox.</span>
+            <span class="sub num" id="out-monto">300.000</span>
+            <div class="bar" aria-hidden="true"><span id="out-bar"></span></div>
+          </div>
+        </form>
+        <p class="note">Cifras de ejemplo. Cada día que recortas libera, más o menos, un día de ventas en caja.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="block" id="servicios">
+    <div class="wrap">
+      <div>
+        <p class="label">Servicios</p>
+        <h2>Qué hago</h2>
+      </div>
+      <div class="services">
+        <article>
+          <p class="label">Continuo</p>
+          <h3>Gerencia financiera fraccionada</h3>
+          <p>Asumo la función financiera de tu empresa unos días al mes, con responsabilidad sobre los números y presencia en las decisiones.</p>
+          <ul>
+            <li>Flujo de caja proyectado y control semanal</li>
+            <li>Presupuesto y seguimiento mensual</li>
+            <li>Relación con bancos y financiamiento</li>
+            <li>Tablero de indicadores para la gerencia</li>
+          </ul>
+        </article>
+        <article>
+          <p class="label">Por proyecto</p>
+          <h3>Consultoría financiera</h3>
+          <p>Encargos acotados, con entregable y fecha: un diagnóstico, una valorización o un plan para una decisión concreta.</p>
+          <ul>
+            <li>Diagnóstico financiero y de rentabilidad</li>
+            <li>Evaluación de inversiones y proyectos</li>
+            <li>Valorización de empresas</li>
+            <li>Estructura de costos y precios</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="metodo">
+    <div class="wrap">
+      <div>
+        <p class="label">Método</p>
+        <h2>Cómo trabajo</h2>
+      </div>
+      <ol class="steps">
+        <li><div><h3>Diagnóstico</h3><p>Reviso estados financieros, flujo de caja y la forma en que hoy se toman las decisiones. Termina en un informe breve con lo urgente y lo importante.</p></div></li>
+        <li><div><h3>Plan</h3><p>Acordamos prioridades, indicadores y un calendario. Cada objetivo tiene una cifra que permite saber si se cumplió.</p></div></li>
+        <li><div><h3>Acompañamiento</h3><p>Me sumo a la operación con reuniones periódicas, un tablero vivo y disponibilidad para las decisiones que no pueden esperar.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="docencia">
+    <div class="wrap">
+      <div>
+        <p class="label">Docencia</p>
+        <h2>En el aula</h2>
+      </div>
+      <div class="prose">
+        <p>Enseño finanzas en varias universidades e institutos. El aula me obliga a explicar con claridad lo que en la empresa se da por sabido, y la empresa me devuelve al aula con casos reales.</p>
+        <p>Esa doble práctica marca mi forma de asesorar: cada recomendación llega con su porqué, para que el equipo la entienda y la sostenga sin depender de mí.</p>
+        <blockquote>No es que tengamos poco tiempo, es que perdemos mucho.<cite>Séneca, Sobre la brevedad de la vida</cite></blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="block contact" id="contacto">
+    <div class="wrap">
+      <div>
+        <p class="label">Contacto</p>
+        <h2>Conversemos</h2>
+      </div>
+      <div>
+        <p>Cuéntame en pocas líneas a qué se dedica tu empresa y qué decisión financiera tienes por delante. Te respondo personalmente.</p>
+        <p class="label">Correo y enlaces en preparación</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Carlo Pagani · Finanzas para pymes</span>
+    <span class="num" id="anio">2026</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var f = document.getElementById('cce');
+  var fmt = new Intl.NumberFormat('es', { maximumFractionDigits: 0 });
+  function val(id) { var n = parseFloat(document.getElementById(id).value); return isFinite(n) ? n : 0; }
+  function calc() {
+    var dias = val('dio') + val('dso') - val('dpo');
+    var monto = val('ventas') * 12 / 365 * dias;
+    var outD = document.getElementById('out-dias');
+    outD.textContent = fmt.format(dias) + (Math.abs(dias) === 1 ? ' día' : ' días');
+    outD.classList.toggle('neg', dias > 90);
+    document.getElementById('out-monto').textContent = fmt.format(Math.max(monto, 0));
+    document.getElementById('out-bar').style.width = Math.max(0, Math.min(dias / 180, 1)) * 100 + '%';
+  }
+  f.addEventListener('input', calc);
+  f.addEventListener('submit', function (e) { e.preventDefault(); });
+  calc();
+  document.getElementById('anio').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
