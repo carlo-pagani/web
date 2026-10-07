@@ -46,6 +46,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: var(--t-m); line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -275,8 +276,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 
 .contact .wrap { align-items: start; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
 @media (max-width: 52rem) { .contact .wrap { grid-template-columns: minmax(0, 1fr); } }
-.contact .how { margin: 1.5rem 0 1.75rem; padding-left: 1.2rem; color: var(--on-navy-soft); display: grid; gap: .35rem; }
-.contact .btn.li { display: inline-block; }
+.contact .btn.li { display: inline-block; margin-top: 1.5rem; }
 .cform { background: var(--navy-2); border: 1px solid rgba(238,242,247,.12); border-radius: 4px; padding: 1.5rem; min-width: 0; }
 .cgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.1rem; margin-bottom: 1.25rem; }
 .cgrid label { display: grid; gap: .35rem; align-content: end; font-size: var(--t-s); color: var(--on-navy); min-width: 0; }
@@ -292,6 +292,26 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .cstatus { font-size: var(--t-s); color: var(--on-navy-soft); margin: .9rem 0 0; min-height: 1.4em; }
 .cstatus.ok { color: var(--brass); }
 @media (max-width: 30rem) { .cgrid { grid-template-columns: minmax(0, 1fr); } }
+
+.wiz-top { display: flex; align-items: center; gap: .9rem; font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--on-navy-soft); margin-bottom: 1.1rem; }
+.wiz-bar { flex: 1; height: 3px; background: rgba(238,242,247,.14); border-radius: 2px; overflow: hidden; }
+.wiz-bar i { display: block; height: 100%; width: 25%; background: var(--brass); transition: width .3s ease; }
+.wiz .q { font-family: var(--display); font-size: var(--t-l); color: var(--on-navy); margin: 0 0 1rem; max-width: none; }
+.chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.chip { text-align: left; font: inherit; cursor: pointer; background: var(--navy); color: var(--on-navy); border: 1px solid rgba(238,242,247,.2); border-radius: 4px; padding: .85rem .95rem; display: grid; gap: .2rem; align-content: start; transition: border-color .15s, background .15s; }
+.chip b { font-weight: 600; font-size: var(--t-s); }
+.chip small { color: var(--on-navy-soft); font-size: var(--t-xs); }
+.chip:hover { border-color: var(--brass); }
+.chip[aria-pressed="true"] { border-color: var(--brass); background: rgba(201,161,91,.12); }
+.chip:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.resumen { font-size: var(--t-xs); font-family: var(--mono); color: var(--brass); margin: -.4rem 0 1rem; max-width: none; }
+.wiz .cgrid { margin-bottom: 1.1rem; }
+.wiz-foot { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; min-height: 1.5rem; }
+.wiz-foot .cstatus { margin: 0; }
+.back { font: inherit; font-size: var(--t-s); background: none; border: 0; color: var(--on-navy-soft); cursor: pointer; padding: .25rem 0; }
+.back:hover { color: var(--on-navy); }
+@media (prefers-reduced-motion: reduce) { .wiz-bar i, .chip { transition: none; } }
+@media (max-width: 30rem) { .chips { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body>
@@ -663,39 +683,53 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     <div class="wrap">
       <div class="contact-intro">
         <p class="eyebrow" style="color:var(--brass)">Contacto</p>
-        <h2>Conversemos sobre tu empresa</h2>
-        <p>Trabajo con pocas empresas a la vez para darle a cada una la atención que necesita. Por eso te pido unos datos antes de la primera conversación.</p>
-        <ol class="how">
-          <li>Completas el formulario en dos minutos.</li>
-          <li>Reviso las solicitudes cada semana.</li>
-          <li>Si encaja, te escribo para agendar una llamada.</li>
-        </ol>
+        <h2>Cuéntame en un minuto qué necesitas</h2>
+        <p>Son cuatro preguntas, casi todas de un clic. Reviso las solicitudes cada semana y respondo personalmente a cada una que encaje con lo que hago.</p>
         <a class="btn btn-line li" href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener">Ver mi perfil en LinkedIn</a>
       </div>
-      <form class="cform" id="cform" novalidate>
-        <div class="cgrid">
-          <label for="c-nombre">Nombre y apellido<input id="c-nombre" name="nombre" required autocomplete="name"></label>
-          <label for="c-empresa">Empresa<input id="c-empresa" name="empresa" required autocomplete="organization"></label>
-          <label for="c-cargo">Tu cargo<select id="c-cargo" name="cargo" required>
-            <option value="">Elige una opción</option><option>Dueño o socio</option><option>Gerente general</option><option>Gerente de finanzas</option><option>Otro cargo</option>
-          </select></label>
-          <label for="c-correo">Correo<input id="c-correo" name="email" type="email" required autocomplete="email"></label>
-          <label for="c-fact">Facturación anual aproximada<select id="c-fact" name="facturacion" required>
-            <option value="">Elige un rango</option><option value="1">Menos de 100 mil dólares</option><option value="2">De 100 mil a 500 mil dólares</option><option value="3">De 500 mil a 2 millones de dólares</option><option value="4">Más de 2 millones de dólares</option>
-          </select></label>
-          <label for="c-servicio">¿Qué necesitas?<select id="c-servicio" name="servicio" required>
-            <option value="">Elige un servicio</option><option>CFO fraccional</option><option>Consultoría financiera</option><option>Administración de fondos de inversión</option><option>Capacitación en finanzas</option>
-          </select></label>
-          <label for="c-plazo">¿Cuándo quieres empezar?<select id="c-plazo" name="plazo" required>
-            <option value="">Elige un plazo</option><option value="1">Este mes</option><option value="2">En uno a tres meses</option><option value="3">Solo estoy explorando</option>
-          </select></label>
-          <label for="c-tel">WhatsApp <small>(opcional)</small><input id="c-tel" name="whatsapp" type="tel" autocomplete="tel"></label>
-          <label for="c-msg" class="full">En dos o tres líneas, ¿qué situación quieres resolver?<textarea id="c-msg" name="mensaje" rows="3" required minlength="40"></textarea></label>
-          <label class="full chk" for="c-acepto"><input id="c-acepto" type="checkbox" name="entiende_servicio_pagado" value="sí" required><span>Entiendo que es un servicio profesional con honorarios.</span></label>
-          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+      <form class="cform wiz" id="cform" novalidate>
+        <div class="wiz-top" aria-hidden="true"><span id="w-paso">Paso 1 de 4</span><span class="wiz-bar"><i id="w-bar"></i></span></div>
+        <input type="hidden" name="servicio" id="w-servicio">
+        <input type="hidden" name="tamano" id="w-tamano">
+        <input type="hidden" name="plazo" id="w-plazo">
+        <div class="step" data-step="1">
+          <p class="q" id="q1">¿En qué te puedo ayudar?</p>
+          <div class="chips" role="group" aria-labelledby="q1" data-field="servicio">
+            <button type="button" class="chip" data-v="CFO fraccional"><b>Ordenar las finanzas de mi empresa</b><small>CFO fraccional</small></button>
+            <button type="button" class="chip" data-v="Consultoría financiera"><b>Resolver una decisión puntual</b><small>Consultoría financiera</small></button>
+            <button type="button" class="chip" data-v="Fondos de inversión"><b>Invertir mi patrimonio</b><small>Administración de fondos</small></button>
+            <button type="button" class="chip" data-v="Capacitación"><b>Capacitar a mi equipo</b><small>Talleres de finanzas</small></button>
+          </div>
         </div>
-        <button class="btn btn-brass" type="submit" id="c-enviar">Enviar solicitud</button>
-        <p class="cstatus" id="c-status" role="status"></p>
+        <div class="step" data-step="2" hidden>
+          <p class="q" id="q2">¿Cuánto factura tu empresa al año?</p>
+          <div class="chips" role="group" aria-labelledby="q2" data-field="tamano" id="w-opts2"></div>
+        </div>
+        <div class="step" data-step="3" hidden>
+          <p class="q" id="q3">¿Cuándo te gustaría empezar?</p>
+          <div class="chips" role="group" aria-labelledby="q3" data-field="plazo">
+            <button type="button" class="chip" data-v="1"><b>Lo antes posible</b></button>
+            <button type="button" class="chip" data-v="2"><b>En uno a tres meses</b></button>
+            <button type="button" class="chip" data-v="3"><b>Solo estoy explorando</b></button>
+          </div>
+        </div>
+        <div class="step" data-step="4" hidden>
+          <p class="q">¿Cómo te contacto?</p>
+          <p class="resumen" id="w-resumen"></p>
+          <div class="cgrid">
+            <label for="c-nombre"><span>Tu nombre</span><input id="c-nombre" name="nombre" required autocomplete="name"></label>
+            <label for="c-correo"><span>Correo</span><input id="c-correo" name="email" type="email" required autocomplete="email"></label>
+            <label for="c-empresa" id="c-empresa-l"><span>Empresa <small>(opcional)</small></span><input id="c-empresa" name="empresa" autocomplete="organization"></label>
+            <label for="c-tel"><span>WhatsApp <small>(opcional)</small></span><input id="c-tel" name="whatsapp" type="tel" autocomplete="tel"></label>
+            <label for="c-msg" class="full"><span>¿Algo que deba saber antes de hablar? <small>(opcional)</small></span><textarea id="c-msg" name="mensaje" rows="2"></textarea></label>
+            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+          </div>
+          <button class="btn btn-brass" type="submit" id="c-enviar">Quiero conversar</button>
+        </div>
+        <div class="wiz-foot">
+          <button type="button" class="back" id="w-atras" hidden>← Atrás</button>
+          <p class="cstatus" id="c-status" role="status"></p>
+        </div>
       </form>
     </div>
   </section>
@@ -932,31 +966,68 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   }).catch(function () {});
 
 
-  /* ---------- Formulario de contacto ---------- */
+  /* ---------- Formulario de contacto, en cuatro pasos ---------- */
   var FORM_ENDPOINT = ''; // p. ej. 'https://formspree.io/f/xxxxxxxx'
   var cf = document.getElementById('cform'), cs = document.getElementById('c-status');
+  var paso = 1, atras = document.getElementById('w-atras');
+  var TAM = {
+    empresa: { q: '¿Cuánto factura tu empresa al año?', o: ['Menos de 100 mil dólares', 'De 100 mil a 500 mil dólares', 'De 500 mil a 2 millones de dólares', 'Más de 2 millones de dólares'] },
+    fondos: { q: '¿Cuánto planeas invertir?', o: ['Menos de 10 mil dólares', 'De 10 mil a 50 mil dólares', 'De 50 mil a 250 mil dólares', 'Más de 250 mil dólares'] }
+  };
+  var PLAZOS = { 1: 'Lo antes posible', 2: 'En uno a tres meses', 3: 'Solo estoy explorando' };
+  function esFondos() { return document.getElementById('w-servicio').value === 'Fondos de inversión'; }
+  function ir(n) {
+    paso = n;
+    cf.querySelectorAll('.step').forEach(function (s) { s.hidden = +s.dataset.step !== n; });
+    document.getElementById('w-paso').textContent = 'Paso ' + n + ' de 4';
+    document.getElementById('w-bar').style.width = (n * 25) + '%';
+    atras.hidden = n === 1; cs.textContent = '';
+    if (n === 2) {
+      var t = esFondos() ? TAM.fondos : TAM.empresa, actual = document.getElementById('w-tamano').value;
+      document.getElementById('q2').textContent = t.q;
+      document.getElementById('w-opts2').innerHTML = t.o.map(function (o, k) {
+        return '<button type="button" class="chip" data-v="' + (k + 1) + '" aria-pressed="' + (actual === String(k + 1)) + '"><b>' + o + '</b></button>';
+      }).join('');
+    }
+    if (n === 4) {
+      document.getElementById('c-empresa-l').hidden = esFondos();
+      var t2 = esFondos() ? TAM.fondos : TAM.empresa;
+      document.getElementById('w-resumen').textContent = [document.getElementById('w-servicio').value, t2.o[+document.getElementById('w-tamano').value - 1], PLAZOS[document.getElementById('w-plazo').value]].join(' · ');
+    }
+    var foco = cf.querySelector('.step[data-step="' + n + '"] ' + (n === 4 ? 'input' : '.chip'));
+    if (foco && document.activeElement && cf.contains(document.activeElement)) foco.focus();
+  }
+  cf.addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip'); if (!chip) return;
+    var group = chip.parentNode, field = document.getElementById('w-' + group.dataset.field);
+    if (field.id === 'w-servicio' && field.value !== chip.dataset.v) document.getElementById('w-tamano').value = '';
+    field.value = chip.dataset.v;
+    group.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c === chip); });
+    setTimeout(function () { ir(paso + 1); }, 160);
+  });
+  atras.addEventListener('click', function () { ir(Math.max(1, paso - 1)); });
   cf.addEventListener('submit', function (e) {
     e.preventDefault();
-    var invalid = Array.prototype.filter.call(cf.querySelectorAll('[required]'), function (f) {
+    var invalid = Array.prototype.filter.call(cf.querySelectorAll('.step[data-step="4"] [required]'), function (f) {
       var bad = !f.checkValidity(); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
     });
-    if (invalid.length) { cs.className = 'cstatus'; cs.textContent = 'Revisa los campos marcados. El mensaje necesita al menos 40 caracteres.'; invalid[0].focus(); return; }
-    var fact = +cf.facturacion.value, plazo = +cf.plazo.value, decide = cf.cargo.value !== 'Otro cargo';
-    var prio = plazo === 3 || fact === 1 ? 'C' : (decide && fact >= 2 && plazo <= 2 ? 'A' : 'B');
-    var data = new FormData(cf);
-    data.set('facturacion', cf.facturacion.options[cf.facturacion.selectedIndex].text);
-    data.set('plazo', cf.plazo.options[cf.plazo.selectedIndex].text);
-    data.set('prioridad', prio);
-    data.set('_subject', '[Web · Prioridad ' + prio + '] ' + cf.empresa.value + ' · ' + cf.servicio.value);
+    if (invalid.length) { cs.className = 'cstatus'; cs.textContent = 'Necesito tu nombre y un correo válido.'; invalid[0].focus(); return; }
+    var tam = +document.getElementById('w-tamano').value, plazo = +document.getElementById('w-plazo').value;
+    var prio = plazo === 3 || tam === 1 ? 'C' : (plazo <= 2 && tam >= 2 ? 'A' : 'B');
+    var t = esFondos() ? TAM.fondos : TAM.empresa, data = new FormData(cf);
+    data.set('tamano', t.o[tam - 1]); data.set('plazo', PLAZOS[plazo]); data.set('prioridad', prio);
+    data.set('_subject', '[Web · Prioridad ' + prio + '] ' + (cf.empresa.value || cf.nombre.value) + ' · ' + data.get('servicio'));
     if (!FORM_ENDPOINT) { cs.className = 'cstatus'; cs.innerHTML = 'El formulario se activa en los próximos días. Mientras tanto, escríbeme por <a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>.'; return; }
     var btn = document.getElementById('c-enviar'); btn.disabled = true; cs.className = 'cstatus'; cs.textContent = 'Enviando…';
     fetch(FORM_ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
-      cf.reset(); cs.className = 'cstatus ok'; cs.textContent = 'Gracias. Recibí tu solicitud; reviso todas cada semana y, si encaja, te escribo para agendar una llamada.';
+      cf.querySelector('.step[data-step="4"]').innerHTML = '<p class="q">Gracias, ' + esc(cf.nombre.value.split(' ')[0]) + '.</p><p style="color:var(--on-navy-soft)">Recibí tu solicitud. Reviso todas cada semana y, si encaja, te escribo para agendar una conversación.</p>';
+      atras.hidden = true; cs.textContent = '';
     }).catch(function () {
       cs.className = 'cstatus'; cs.textContent = 'No se pudo enviar. Inténtalo de nuevo en unos minutos o escríbeme por LinkedIn.';
     }).then(function () { btn.disabled = false; });
   });
+
   document.getElementById('anio').textContent = new Date().getFullYear();
 })();
 </script>
