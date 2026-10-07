@@ -282,9 +282,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       <a class="brand" href="#inicio">Carlo Pagani</a>
       <nav aria-label="Secciones">
         <ul>
+          <li><a href="#metas">Metas</a></li>
           <li><a href="#servicios">Servicios</a></li>
           <li><a href="#metodo">Método</a></li>
-          <li><a href="#metas">Metas</a></li>
           <li><a href="#inversion">Inversión</a></li>
           <li><a href="#tasas">Tasas</a></li>
           <li><a href="#videos">Videos</a></li>
@@ -332,6 +332,67 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 </div>
 
 <main>
+  <section class="block" id="metas">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Metas financieras</p>
+          <h2>¿Cuánto vale hoy tu meta de mañana?</h2>
+        </div>
+        <p>«El interés compuesto es la octava maravilla del mundo», dice una frase que suele atribuirse a Einstein. Compruébalo: elige un objetivo, cuánto inviertes hoy, cuánto sumas cada mes y por cuántos años.</p>
+      </div>
+      <div class="goal">
+        <form class="ledger" id="meta" autocomplete="off">
+          <div class="seg" role="radiogroup" aria-label="Qué quieres calcular">
+            <label><input type="radio" name="modo" id="modo-futuro" value="futuro" checked><span>¿Cuánto tendré?</span></label>
+            <label><input type="radio" name="modo" id="modo-hoy" value="hoy"><span>¿Cuánto invierto hoy?</span></label>
+          </div>
+          <div class="row wide">
+            <label for="objetivo">Objetivo<small>para qué es este dinero</small></label>
+            <select id="objetivo">
+              <option value="jubilacion">Jubilación</option>
+              <option value="pasivo">Ingreso pasivo</option>
+              <option value="educacion">Educación de los hijos</option>
+              <option value="vivienda">Vivienda</option>
+              <option value="patrimonio">Patrimonio a largo plazo</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="monto" id="monto-label">Capital que invierto hoy<small>en tu moneda</small></label>
+            <input id="monto" type="number" inputmode="numeric" min="0" step="1000" value="10000">
+          </div>
+          <div class="row">
+            <label for="aporte">Aporte mensual<small>lo que sumas cada mes</small></label>
+            <input id="aporte" type="number" inputmode="numeric" min="0" step="50" value="300">
+          </div>
+          <div class="row">
+            <label for="retorno">Rendimiento anual esperado<small>% del instrumento elegido</small></label>
+            <input id="retorno" type="number" inputmode="decimal" min="-20" max="40" step="0.5" value="8">
+          </div>
+          <div class="row">
+            <label for="anios">Años de inversión<small>cuánto mantienes el compromiso</small></label>
+            <input id="anios" type="number" inputmode="numeric" min="1" max="50" value="25">
+          </div>
+          <label class="check" for="inflacion"><input id="inflacion" type="checkbox"><span>Descontar inflación de 3 % anual<br><small style="color:var(--ink-soft)">Muestra el resultado en dinero de hoy, con su poder de compra real. Los aportes suben cada año con la inflación.</small></span></label>
+          <p class="goal-desc" id="objetivo-desc"></p>
+        </form>
+        <div>
+          <div class="result" aria-live="polite">
+            <span class="sub" id="res-label">Tendrás</span>
+            <span class="big num" id="res-valor">—</span>
+            <span class="sub" id="res-detalle"></span>
+          </div>
+          <div class="chart-box" id="meta-chart-box">
+            <ul class="legend"><li><i style="background:var(--c1)"></i>Lo que aportas</li><li><i style="background:var(--c2)"></i>Lo que genera el interés compuesto</li></ul>
+            <svg id="meta-chart" role="img" aria-label="Crecimiento de la inversión año por año"></svg>
+          </div>
+          <a class="video-link" id="meta-video" href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener">Te lo explico en video →</a>
+          <p class="small-note">Ilustración con un rendimiento constante. En la realidad los mercados suben y bajan cada año; lo que se mantiene es el efecto del tiempo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="block" id="sintomas">
     <div class="wrap">
       <div class="head">
@@ -452,62 +513,6 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     </div>
   </section>
 
-  <section class="block" id="metas">
-    <div class="wrap">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Metas financieras</p>
-          <h2>¿Cuánto vale hoy tu meta de mañana?</h2>
-        </div>
-        <p>Elige un objetivo, el rendimiento que esperas de tu inversión y el plazo. La calculadora te dice cuánto tendrás o cuánto necesitas invertir hoy, año por año.</p>
-      </div>
-      <div class="goal">
-        <form class="ledger" id="meta" autocomplete="off">
-          <div class="seg" role="radiogroup" aria-label="Qué quieres calcular">
-            <label><input type="radio" name="modo" id="modo-futuro" value="futuro" checked><span>¿Cuánto tendré?</span></label>
-            <label><input type="radio" name="modo" id="modo-hoy" value="hoy"><span>¿Cuánto invierto hoy?</span></label>
-          </div>
-          <div class="row wide">
-            <label for="objetivo">Objetivo<small>para qué es este dinero</small></label>
-            <select id="objetivo">
-              <option value="jubilacion">Jubilación</option>
-              <option value="pasivo">Ingreso pasivo</option>
-              <option value="educacion">Educación de los hijos</option>
-              <option value="vivienda">Vivienda</option>
-              <option value="patrimonio">Patrimonio a largo plazo</option>
-            </select>
-          </div>
-          <div class="row">
-            <label for="monto" id="monto-label">Capital que invierto hoy<small>en tu moneda</small></label>
-            <input id="monto" type="number" inputmode="numeric" min="0" step="1000" value="20000">
-          </div>
-          <div class="row">
-            <label for="retorno">Rendimiento anual esperado<small>% del instrumento elegido</small></label>
-            <input id="retorno" type="number" inputmode="decimal" min="-20" max="40" step="0.5" value="8">
-          </div>
-          <div class="row">
-            <label for="anios">Años de inversión<small>cuánto mantienes el compromiso</small></label>
-            <input id="anios" type="number" inputmode="numeric" min="1" max="50" value="25">
-          </div>
-          <label class="check" for="inflacion"><input id="inflacion" type="checkbox" checked><span>Descontar inflación de 3 % anual<br><small style="color:var(--ink-soft)">Muestra el resultado en dinero de hoy, con su poder de compra real.</small></span></label>
-          <p class="goal-desc" id="objetivo-desc"></p>
-        </form>
-        <div>
-          <div class="result" aria-live="polite">
-            <span class="sub" id="res-label">Tendrás, en dinero de hoy</span>
-            <span class="big num" id="res-valor">—</span>
-            <span class="sub" id="res-detalle"></span>
-          </div>
-          <div class="chart-box" id="meta-chart-box">
-            <ul class="legend"><li><i style="background:var(--c1)"></i>Capital invertido</li><li><i style="background:var(--c2)"></i>Rendimiento acumulado</li></ul>
-            <svg id="meta-chart" role="img" aria-label="Crecimiento de la inversión año por año"></svg>
-          </div>
-          <a class="video-link" id="meta-video" href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener">Te lo explico en video →</a>
-          <p class="small-note">Ilustración con un rendimiento constante. En la realidad los mercados suben y bajan cada año; lo que se mantiene es el efecto del tiempo.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section class="block" id="inversion">
     <div class="wrap">
@@ -702,36 +707,49 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   function num(id) { var n = parseFloat(document.getElementById(id).value); return isFinite(n) ? n : 0; }
   function modo() { return document.getElementById('modo-hoy').checked ? 'hoy' : 'futuro'; }
 
+  function fvAportes(A, rr, meses) {
+    var m = Math.pow(1 + rr, 1 / 12) - 1;
+    return Math.abs(m) < 1e-12 ? A * meses : A * (Math.pow(1 + m, meses) - 1) / m;
+  }
+  function anios(n) { return n + (n === 1 ? ' año' : ' años'); }
+
   function calcMeta() {
-    var m = modo(), monto = Math.max(num('monto'), 0), r = num('retorno') / 100;
+    var m = modo(), monto = Math.max(num('monto'), 0), A = Math.max(num('aporte'), 0), r = num('retorno') / 100;
     var n = Math.min(Math.max(Math.round(num('anios')), 1), 50);
     var infl = document.getElementById('inflacion').checked;
     var rr = (1 + r) / (infl ? 1.03 : 1) - 1;
-    var capital = m === 'futuro' ? monto : monto / Math.pow(1 + rr, n);
+    var fA = fvAportes(A, rr, 12 * n);
+    var capital = m === 'futuro' ? monto : Math.max((monto - fA) / Math.pow(1 + rr, n), 0);
     var serie = [];
-    for (var t = 1; t <= n; t++) serie.push({ t: t, v: capital * Math.pow(1 + rr, t) });
-    var final = serie[serie.length - 1].v;
-    var hoyTxt = infl ? ', en dinero de hoy' : '';
+    for (var t = 1; t <= n; t++) serie.push({ t: t, v: capital * Math.pow(1 + rr, t) + fvAportes(A, rr, 12 * t), ap: capital + A * 12 * t });
+    var last = serie[n - 1], interes = last.v - last.ap;
+    var hoyTxt = infl ? ', en dinero de hoy,' : '';
+    var tasa = ' Rendimiento ' + (infl ? 'real ' : '') + 'de ' + fmt1.format(rr * 100) + ' % anual.';
+    var reparto = interes > 0
+      ? 'Tú aportas ' + fmt0.format(last.ap) + ' y el interés compuesto genera ' + fmt0.format(interes) + ': el ' + fmt0.format(interes / last.v * 100) + ' % del total.' + tasa
+      : 'Con este rendimiento tu dinero pierde poder de compra frente a la inflación.';
     document.getElementById('monto-label').firstChild.textContent = m === 'futuro' ? 'Capital que invierto hoy' : 'Monto que quiero reunir';
     if (m === 'futuro') {
-      document.getElementById('res-label').textContent = 'En ' + n + (n === 1 ? ' año' : ' años') + ' tendrás' + hoyTxt;
-      document.getElementById('res-valor').textContent = fmt0.format(final);
-      document.getElementById('res-detalle').textContent = final >= capital
-        ? 'Tu capital se multiplica por ' + fmt1.format(final / Math.max(capital, 1e-9)) + '. Rendimiento ' + (infl ? 'real' : '') + ' de ' + fmt1.format(rr * 100) + ' % anual.'
-        : 'Con este rendimiento tu dinero pierde poder de compra frente a la inflación.';
+      document.getElementById('res-label').textContent = 'En ' + anios(n) + hoyTxt + ' tendrás';
+      document.getElementById('res-valor').textContent = fmt0.format(last.v);
+      document.getElementById('res-detalle').textContent = reparto;
+    } else if (capital === 0 && A > 0) {
+      document.getElementById('res-label').textContent = 'Con ' + fmt0.format(A) + ' al mes no necesitas un monto inicial';
+      document.getElementById('res-valor').textContent = fmt0.format(fA);
+      document.getElementById('res-detalle').textContent = 'Es lo que reúnes' + (infl ? ' en dinero de hoy' : '') + ' en ' + anios(n) + ', por encima de tu meta de ' + fmt0.format(monto) + '. ' + reparto;
     } else {
-      document.getElementById('res-label').textContent = 'Para reunir ' + fmt0.format(monto) + hoyTxt + ' en ' + n + (n === 1 ? ' año' : ' años') + ', invierte hoy';
+      document.getElementById('res-label').textContent = 'Para reunir ' + fmt0.format(monto) + hoyTxt + ' en ' + anios(n) + (A > 0 ? ' aportando ' + fmt0.format(A) + ' al mes' : '') + ', invierte hoy';
       document.getElementById('res-valor').textContent = fmt0.format(capital);
-      document.getElementById('res-detalle').textContent = 'El rendimiento aporta ' + fmt0.format(Math.max(monto - capital, 0)) + '. Rendimiento ' + (infl ? 'real' : '') + ' de ' + fmt1.format(rr * 100) + ' % anual.';
+      document.getElementById('res-detalle').textContent = reparto;
     }
-    drawMeta(serie, capital, infl);
+    drawMeta(serie, infl);
   }
 
-  function drawMeta(serie, capital, infl) {
+  function drawMeta(serie, infl) {
     var svg = document.getElementById('meta-chart'), box = document.getElementById('meta-chart-box');
     var W = Math.max(svg.parentNode.clientWidth - 32, 260), H = 260, L = 52, R = 8, T = 10, B = 26;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = '';
-    var max = niceMax(Math.max.apply(null, serie.map(function (d) { return d.v; }).concat([capital])));
+    var max = niceMax(Math.max.apply(null, serie.map(function (d) { return Math.max(d.v, d.ap); })));
     var y = function (v) { return T + (H - T - B) * (1 - v / max); };
     var g = el('g', { 'class': 'axis' }, svg);
     for (var i = 0; i <= 4; i++) {
@@ -743,17 +761,14 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     var every = n <= 10 ? 1 : n <= 20 ? 2 : 5;
     serie.forEach(function (d, k) {
       var x = L + k * band + gap / 2;
-      var cap = Math.min(capital, d.v), gan = Math.max(d.v - capital, 0);
-      var yCap = y(cap), yTop = y(d.v), base = y(0);
+      var ap = Math.min(d.ap, d.v), gan = Math.max(d.v - d.ap, 0);
+      var yAp = y(ap), yTop = y(d.v), base = y(0);
       var gBar = el('g', {}, svg);
-      el('rect', { x: x, y: yCap, width: bw, height: Math.max(base - yCap, 0), fill: 'var(--c1)' }, gBar);
-      if (gan > 0) {
-        var h = Math.max(yCap - yTop - 2, 0);
-        el('path', { d: barTop(x, yTop, bw, h), fill: 'var(--c2)' }, gBar);
-      }
+      el('rect', { x: x, y: yAp, width: bw, height: Math.max(base - yAp, 0), fill: 'var(--c1)' }, gBar);
+      if (gan > 0) el('path', { d: barTop(x, yTop, bw, Math.max(yAp - yTop - 2, 0)), fill: 'var(--c2)' }, gBar);
       var hit = el('rect', { x: L + k * band, y: T, width: band, height: H - T - B, fill: 'transparent' }, gBar);
       hit.addEventListener('mousemove', function () {
-        showTip(box, svg, W, '<b>Año ' + d.t + '</b><br>Total: ' + fmt0.format(d.v) + '<br>Capital: ' + fmt0.format(cap) + '<br>Rendimiento: ' + fmt0.format(gan) + (infl ? '<br><i>en dinero de hoy</i>' : ''), x + bw / 2, yTop);
+        showTip(box, svg, W, '<b>Año ' + d.t + '</b><br>Total: ' + fmt0.format(d.v) + '<br>Aportado: ' + fmt0.format(d.ap) + '<br>Interés compuesto: ' + fmt0.format(gan) + (infl ? '<br><i>en dinero de hoy</i>' : ''), x + bw / 2, yTop);
       });
       hit.addEventListener('mouseleave', function () { hideTip(box); });
       if ((d.t % every === 0) || d.t === 1) txt('text', { x: x + bw / 2, y: H - 8, 'text-anchor': 'middle', 'class': 'lbl' }, d.t, svg);
