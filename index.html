@@ -1238,9 +1238,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       referencia: 'q2_textbox0', tema: 'q3_textbox1', respuestas: 'q4_textarea2', nombre: 'q5_textbox3',
       email: 'q6_email4', whatsapp: 'q7_textbox5', factura: 'q8_textbox6', pago: 'q9_textbox7' } }
   };
-  // Enlace de pago fijo del análisis exprés. Vacío: la solicitud se guarda y Carlo envía el enlace por correo.
-  // Con Stripe (stripe: true) se le agregan la referencia y el correo del cliente.
-  var PAGO = { url: '', stripe: false };
+  // Enlace de cobro de Payphone del análisis exprés: monto fijo de $40.25 (35 + IVA 15 %), de uso múltiple.
+  // Vacío: la solicitud se guarda y Carlo envía el enlace por correo.
+  var PAGO = { url: '' };
   var LINKEDIN = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>';
   function enviar(cfg, datos) {
     var fd = new FormData();
@@ -1346,10 +1346,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     { id: 'e2', si: 'Mi empresa', q: '¿Cuánto factura al año, más o menos?', op: ['Menos de 100 mil dólares', 'De 100 mil a 500 mil', 'De 500 mil a 2 millones', 'Más de 2 millones', 'Prefiero no decirlo'] },
     { id: 'e3', si: 'Mi empresa', q: '¿Qué es lo que más te preocupa hoy de las finanzas de tu empresa? Dímelo con tus palabras.' },
     { id: 'e4', si: 'Mi empresa', q: 'Y la caja, ¿cómo anduvo en los últimos tres meses?', op: ['Sobró dinero a fin de mes', 'Alcanzó justo', 'Faltó y lo cubrimos con deuda'] },
-    { id: 'e5', si: 'Mi empresa', q: '¿Tienen deudas con bancos o proveedores? Si sabes el monto y la tasa, mejor.', ph: 'Por ejemplo: un crédito de 80 mil al 18 % anual', opcional: true },
+    { id: 'e5', si: 'Mi empresa', q: '¿Tienen deudas con bancos o proveedores? Si sabes el monto y la tasa, mejor.', ph: 'Por ejemplo: un crédito de 50 mil al 11 % anual', opcional: true },
     { id: 'e6', si: 'Mi empresa', q: '¿Qué información tienes a mano? Puedes marcar varias.', op: ['Estados financieros', 'Flujo de caja', 'Presupuesto', 'Reporte de ventas', 'Nada formal todavía'], multi: true },
     { id: 'p1', si: 'Mis finanzas personales', q: '¿Qué te gustaría lograr?', op: ['Ordenar mis gastos', 'Salir de deudas', 'Empezar a ahorrar e invertir', 'Planear mi retiro', 'Otra cosa'] },
-    { id: 'p2', si: 'Mis finanzas personales', q: '¿Cuánto ingresas al mes, aproximadamente, y cuánto logras ahorrar?', ph: 'Por ejemplo: 30 mil al mes y casi no ahorro' },
+    { id: 'p2', si: 'Mis finanzas personales', q: '¿Cuánto ingresas al mes, aproximadamente, y cuánto logras ahorrar?', ph: 'Por ejemplo: 1.500 al mes y casi no ahorro' },
     { id: 'p3', si: 'Mis finanzas personales', q: '¿Tienes deudas? Cuéntame cuáles y, si la sabes, a qué tasa.', opcional: true },
     { id: 'p4', si: 'Mis finanzas personales', q: 'Si mañana te quedaras sin ingresos, ¿para cuánto tiempo te alcanzaría lo que tienes ahorrado?', op: ['Menos de un mes', 'De uno a tres meses', 'Más de tres meses'] },
     { id: 'p5', si: 'Mis finanzas personales', q: 'Imagina que pasó un año y todo salió bien. ¿Qué cambió en tus finanzas?' },
@@ -1362,7 +1362,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     { id: 'o3', si: 'Otra decisión de dinero', q: '¿Para cuándo necesitas decidir?', op: ['Esta semana', 'Este mes', 'Sin prisa'] },
     { id: 'mas', q: '¿Hay algo más que deba saber para darte una buena respuesta?', opcional: true },
     { id: 'datos', q: 'Perfecto. ¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
-    { id: 'factura', q: '¿Necesitas factura?', op: ['Sí', 'No'] }
+    { id: 'factura', q: '¿Necesitas factura?', op: ['Sí', 'No'] },
+    { id: 'fdatos', cond: function () { return resp.factura === 'Sí'; }, q: '¿A nombre de quién la emito y con qué RUC o cédula?', ph: 'Por ejemplo: Comercial Andes S.A., RUC 1790000000001' }
   ];
   var INTRO = 'Hola, soy Carlo. Te haré algunas preguntas, como en una primera conversación. Con tus respuestas preparo un informe breve, con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles.\n\nEl análisis cuesta $35 USD + IVA y se paga al final.';
   var dlg = document.getElementById('ae'), log = document.getElementById('ae-log'), chipsEl = document.getElementById('ae-chips');
@@ -1372,7 +1373,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var resp = {}, camino = [], actual = null, enviado = false, ref = '';
   var sinMov = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function aePaso(id) { return AE.filter(function (x) { return x.id === id; })[0]; }
-  function aplica(p) { return !p.si || resp.tema === p.si; }
+  function aplica(p) { return (!p.si || resp.tema === p.si) && (!p.cond || p.cond()); }
   function siguiente() { for (var i = 0; i < AE.length; i++) if (aplica(AE[i]) && !(AE[i].id in resp)) return AE[i]; return null; }
   function burbuja(texto, quien, nuevo, html) {
     var d = document.createElement('div'); d.className = 'msg ' + quien + (nuevo ? ' nuevo' : '');
@@ -1425,25 +1426,24 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     document.getElementById('ae-bar').style.width = '100%';
     if (!ref) ref = 'AE-' + Date.now().toString(36).toUpperCase().slice(-6);
     burbuja('Gracias, ' + resp.datos.nombre.split(' ')[0] + '. Con esto tengo lo necesario para empezar. Tu referencia es ' + ref + '.', 'yo', true);
-    var c = burbuja('<span>Análisis exprés · ' + esc(resp.tema) + '</span><strong>$35 USD + IVA</strong>' +
+    var c = burbuja('<span>Análisis exprés · ' + esc(resp.tema) + '</span><strong>$35 USD + IVA</strong><span>Total con IVA (15 %): $40.25 USD</span>' +
       '<button type="button" class="btn btn-brass" id="ae-pagar">' + (PAGO.url ? 'Ir a pagar' : 'Enviar mi solicitud') + '</button>' +
-      '<small>' + (PAGO.url ? 'Se abre la página segura de pago. En cuanto se acredite, empiezo tu análisis.' : 'Te escribo a ' + esc(resp.datos.email) + ' con el enlace de pago y, en cuanto se acredite, empiezo tu análisis.') + '</small>', 'pago', true, true);
+      '<small>' + (PAGO.url ? 'Se abre la página segura de Payphone para pagar con tarjeta. En cuanto se acredite, empiezo tu análisis.' : 'Te escribo a ' + esc(resp.datos.email) + ' con el enlace de pago y, en cuanto se acredite, empiezo tu análisis.') + '</small>', 'pago', true, true);
     c.querySelector('#ae-pagar').addEventListener('click', pagar);
   }
   function pagar() {
     var btn = document.getElementById('ae-pagar'); btn.disabled = true; errEl.textContent = '';
-    var lineas = camino.filter(function (id) { return id !== 'datos' && id !== 'factura'; })
+    var lineas = camino.filter(function (id) { return ['datos', 'factura', 'fdatos'].indexOf(id) < 0; })
       .map(function (id) { var p = aePaso(id); return p.q + '\n→ ' + textoResp(p, resp[id]); }).join('\n\n');
     var datos = { referencia: ref, tema: resp.tema, respuestas: lineas, nombre: resp.datos.nombre, email: resp.datos.email,
-      whatsapp: resp.datos.whatsapp, factura: resp.factura, pago: PAGO.url ? 'Enviado a la página de pago' : 'Pendiente: enviar enlace de pago' };
+      whatsapp: resp.datos.whatsapp, factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: PAGO.url ? 'Enviado a la página de pago' : 'Pendiente: enviar enlace de pago' };
     var u = PAGO.url;
-    if (u && PAGO.stripe) u += (u.indexOf('?') < 0 ? '?' : '&') + 'client_reference_id=' + encodeURIComponent(ref) + '&prefilled_email=' + encodeURIComponent(resp.datos.email);
     var pestana = u ? window.open('', '_blank') : null;   // se abre en el clic para que el navegador no la bloquee
     enviar(FORMS.analisis, datos).then(function () {
       enviado = true; backBtn.hidden = true; btn.remove();
       if (u) {
         if (pestana) pestana.location = u; else location.href = u;
-        burbuja('Listo. Si la página de pago no se abrió, <a href="' + esc(u) + '" target="_blank" rel="noopener">ábrela aquí</a>.', 'yo', true, true);
+        burbuja('Listo. Completa el pago en la pestaña de Payphone; cuando se acredite, te escribo a ' + esc(resp.datos.email) + ' y empiezo tu análisis. Si no se abrió, <a href="' + esc(u) + '" target="_blank" rel="noopener">ábrela aquí</a>.', 'yo', true, true);
       } else {
         burbuja('Recibí tu solicitud con la referencia ' + ref + '. Te escribo pronto a ' + resp.datos.email + ' con el enlace de pago.', 'yo', true);
       }
