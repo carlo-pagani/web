@@ -1128,8 +1128,11 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   // Destino de cada formulario. Con Jotform: url 'https://submit.jotform.com/submit/<ID>' y
   // campos = { nombreInterno: 'qN_nombre' }. Si la url está vacía, el formulario avisa que aún no está activo.
   var FORMS = {
-    contacto: { url: '', campos: null },
-    masterclass: { url: '', campos: null }
+    contacto: { url: 'https://submit.jotform.com/submit/262790999014065', campos: {
+      servicio: 'q2_textbox0', tamano: 'q3_textbox1', plazo: 'q4_textbox2', prioridad: 'q5_textbox3', nombre: 'q6_textbox4',
+      email: 'q7_email5', empresa: 'q8_textbox6', whatsapp: 'q9_textbox7', mensaje: 'q10_textarea8' } },
+    masterclass: { url: 'https://submit.jotform.com/submit/262791033090049', campos: {
+      nombre: 'q2_textbox0', email: 'q3_email1', whatsapp: 'q4_textbox2', intereses: 'q5_textarea3' } }
   };
   var LINKEDIN = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>';
   function enviar(cfg, datos) {
@@ -1139,7 +1142,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       if (nombre) fd.append(nombre, datos[k]);
     });
     var opaco = /jotform\.com/.test(cfg.url);
-    if (opaco) fd.append('formID', cfg.url.split('/').pop());
+    if (opaco) { var fid = cfg.url.split('/').pop(); fd.append('formID', fid); fd.append('simple_spc', fid + '-' + fid); }
     return fetch(cfg.url, opaco ? { method: 'POST', mode: 'no-cors', body: fd } : { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
       .then(function (r) { if (!opaco && !r.ok) throw new Error(r.status); });
   }

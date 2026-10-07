@@ -1,0 +1,40 @@
+# Prueba temporal: envía los dos formularios de la web publicada desde un navegador real.
+name: Prueba de formularios
+on: workflow_dispatch
+jobs:
+  prueba:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm init -y >/dev/null && npm i playwright@1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
+      - name: Enviar formularios
+        run: |
+          cat > prueba.js <<'JS'
+          const { chromium } = require('playwright');
+          (async () => {
+            const b = await chromium.launch();
+            const p = await b.newPage({ viewport: { width: 390, height: 844 } });
+            p.on('response', r => { if (r.url().includes('jotform')) console.log('respuesta', r.status(), r.url()); });
+            p.on('requestfailed', r => console.log('fallo', r.url(), r.failure() && r.failure().errorText));
+            await p.goto('https://carlogalarza-pagani.com/?prueba=' + Date.now(), { waitUntil: 'networkidle' });
+            console.log('FORMS activo:', await p.evaluate(() => document.documentElement.innerHTML.includes('submit.jotform.com/submit/262791033090049')));
+            await p.fill('#m-nombre', 'Prueba automática de Claude (borrar)');
+            await p.fill('#m-correo', 'prueba@example.com');
+            await p.click('#m-intereses .chip >> nth=0');
+            await p.click('#m-enviar');
+            await p.waitForTimeout(4000);
+            console.log('masterclass:', (await p.textContent('#mform')).replace(/\s+/g, ' ').slice(0, 160));
+            await p.click('#cform .chip >> nth=0'); await p.waitForTimeout(300);
+            await p.click('#w-opts2 .chip >> nth=1'); await p.waitForTimeout(300);
+            await p.click('#cform [data-field=plazo] .chip >> nth=2'); await p.waitForTimeout(300);
+            await p.fill('#c-nombre', 'Prueba automática de Claude (borrar)');
+            await p.fill('#c-correo', 'prueba@example.com');
+            await p.click('#c-enviar');
+            await p.waitForTimeout(4000);
+            console.log('contacto:', (await p.textContent('#cform')).replace(/\s+/g, ' ').slice(0, 160));
+            await b.close();
+          })();
+          JS
+          node prueba.js
