@@ -24,6 +24,8 @@
   --accent: #2F5D9E;
   --accent-ink: #FFFFFF;
   --neg: #A3352B;
+  --c1: #2F5D9E; --c2: #B8893E; --muted-mark: #C3CBD6;
+  --s0: #1E4A8C; --s1: #4672B8; --s2: #7F9FD2; --s3: #B3C6E6;
   --display: "Libre Bodoni", "Didot", "Bodoni 72", Georgia, serif;
   --body: "Figtree", "Helvetica Neue", Arial, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -33,12 +35,14 @@
   :root:not([data-theme="light"]) {
     --bg: #0B1522; --surface: #122133; --ink: #E7ECF3; --ink-soft: #9DAABD; --rule: #24364C;
     --accent: #86AEE8; --accent-ink: #0B1522; --neg: #E8857A; --navy: #08111C; --navy-2: #0F1D2E;
+    --c1: #5B8FD9; --c2: #B88A3E; --muted-mark: #3A4C63; --s0: #A9C4F0; --s1: #7FA3DD; --s2: #5679B5; --s3: #3D5A88;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0B1522; --surface: #122133; --ink: #E7ECF3; --ink-soft: #9DAABD; --rule: #24364C;
   --accent: #86AEE8; --accent-ink: #0B1522; --neg: #E8857A; --navy: #08111C; --navy-2: #0F1D2E;
+    --c1: #5B8FD9; --c2: #B88A3E; --muted-mark: #3A4C63; --s0: #A9C4F0; --s1: #7FA3DD; --s2: #5679B5; --s3: #3D5A88;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -174,6 +178,100 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
   .figures li { padding-inline: 0 .75rem; }
   .row { grid-template-columns: minmax(0, 1fr) 6.5rem; }
 }
+
+/* Carrete de noticias */
+.ticker { background: var(--navy); border-top: 1px solid rgba(238,242,247,.1); }
+.ticker .wrap { display: flex; align-items: center; gap: 1rem; padding-block: .7rem; }
+.ticker .pill { flex: none; font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase; color: #10151C; background: var(--brass); padding: .25rem .55rem; border-radius: 2px; text-decoration: none; }
+.ticker .viewport { overflow: hidden; min-width: 0; flex: 1; mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.ticker .track { display: flex; gap: 2.5rem; width: max-content; animation: desfile 70s linear infinite; }
+.ticker:hover .track, .ticker:focus-within .track { animation-play-state: paused; }
+.ticker .track a { color: var(--on-navy); text-decoration: none; font-size: var(--t-s); white-space: nowrap; }
+.ticker .track a span { color: var(--on-navy-soft); margin-right: .5rem; font-family: var(--mono); font-size: var(--t-xs); }
+.ticker .track a:hover { text-decoration: underline; }
+@keyframes desfile { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker .track { animation: none; } .ticker .viewport { overflow-x: auto; } }
+
+/* Tasas */
+.news { list-style: none; margin: 0; padding: 0; }
+.news li { padding: .9rem 0; border-top: 1px solid var(--rule); }
+.news .meta { font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-soft); letter-spacing: .04em; }
+.news a { color: var(--ink); text-decoration: none; font-weight: 600; display: block; margin-top: .15rem; }
+.news a:hover { color: var(--accent); text-decoration: underline; }
+.news-empty { color: var(--ink-soft); font-size: var(--t-s); }
+.split > .guide { align-self: start; }
+.guide { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 1.5rem; }
+.guide h3 { margin-bottom: .8rem; }
+.guide dl { margin: 0; }
+.guide dt { font-weight: 600; margin-top: .9rem; }
+.guide dd { margin: .2rem 0 0; color: var(--ink-soft); font-size: var(--t-s); }
+.small-note { font-size: var(--t-xs); color: var(--ink-soft); margin: 1rem 0 0; }
+
+/* Metas */
+.goal { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 2rem 3rem; align-items: start; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; margin-bottom: 1rem; flex-wrap: wrap; }
+.seg label { cursor: pointer; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span { display: block; padding: .5rem .9rem; font-size: var(--t-s); color: var(--ink-soft); }
+.seg input:checked + span { background: var(--accent); color: var(--accent-ink); }
+.seg input:focus-visible + span { outline: 2px solid var(--brass); outline-offset: -2px; }
+.row select { width: 100%; font: inherit; font-size: var(--t-s); background: var(--bg); color: var(--ink); border: 1px solid var(--rule); border-radius: 3px; padding: .45rem .5rem; }
+.row.wide { grid-template-columns: minmax(0, 1fr) 11rem; }
+.check { display: flex; gap: .6rem; align-items: flex-start; padding-block: .8rem .2rem; border-top: 1px solid var(--rule); font-size: var(--t-s); }
+.check input { margin-top: .25rem; accent-color: var(--accent); }
+.goal-desc { margin: .8rem 0 0; font-size: var(--t-s); color: var(--ink-soft); }
+.result { display: grid; gap: .2rem; margin-bottom: 1rem; }
+.result .big { font-family: var(--display); font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.1; }
+.result .sub { color: var(--ink-soft); font-size: var(--t-s); }
+.chart-box { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 1rem 1rem .6rem; position: relative; min-width: 0; }
+.chart-box svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; font-size: var(--t-xs); color: var(--ink-soft); margin: 0 0 .5rem; padding: 0; list-style: none; }
+.legend i { display: inline-block; width: .75rem; height: .75rem; border-radius: 2px; margin-right: .35rem; vertical-align: -1px; }
+.legend i.line { height: 2px; border-radius: 0; vertical-align: 3px; }
+.axis text, .lbl { font-family: var(--mono); font-size: 11px; fill: var(--ink-soft); }
+.lbl.strong { fill: var(--ink); font-weight: 500; }
+.grid-line { stroke: var(--rule); stroke-width: 1; }
+.video-link { display: inline-block; margin-top: 1rem; font-weight: 600; }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: var(--t-xs); line-height: 1.45; padding: .45rem .6rem; border-radius: 3px; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); z-index: 2; }
+.tip b { font-weight: 600; }
+
+/* Inversión */
+.charts2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; }
+.chart-card h3 { margin-bottom: .4rem; }
+.chart-card > p { color: var(--ink-soft); font-size: var(--t-s); margin: 0 0 1rem; }
+.hbars { display: grid; gap: .55rem; }
+.hbar { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: .75rem; align-items: center; font-size: var(--t-s); }
+.hbar .name { line-height: 1.25; }
+.hbar .track { position: relative; height: 1.5rem; }
+.hbar .fill { position: absolute; left: 0; top: .2rem; bottom: .2rem; background: var(--muted-mark); border-radius: 0 4px 4px 0; }
+.hbar.hi .fill { background: var(--c1); }
+.hbar .val { position: absolute; top: 50%; transform: translateY(-50%); padding-left: .45rem; font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-soft); white-space: nowrap; }
+.hbar.hi .val, .hbar.hi .name { color: var(--ink); font-weight: 600; }
+details.data { margin-top: 1rem; border: 0; padding: 0; }
+details.data summary { font-weight: 500; font-size: var(--t-s); color: var(--accent); }
+details.data table { border-collapse: collapse; font-size: var(--t-xs); margin-top: .6rem; width: 100%; }
+details.data td, details.data th { padding: .35rem .5rem; border-bottom: 1px solid var(--rule); text-align: right; font-family: var(--mono); }
+details.data td:first-child, details.data th:first-child { text-align: left; font-family: var(--body); }
+.custody { margin-top: 2.5rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem 3rem; border-top: 1px solid var(--rule); padding-top: 2rem; }
+.custody p { margin: 0; color: var(--ink-soft); }
+
+/* Videos */
+.videos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+.video { text-decoration: none; color: var(--ink); display: grid; gap: .5rem; }
+.video .thumb { aspect-ratio: 16 / 9; max-width: 100%; background: var(--navy-2); border-radius: 4px; overflow: hidden; position: relative; }
+.video .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+.video:hover .thumb img { transform: scale(1.03); }
+@media (prefers-reduced-motion: reduce) { .video .thumb img { transition: none; } }
+.video .play { position: absolute; right: .6rem; bottom: .6rem; background: var(--brass); color: #10151C; font-family: var(--mono); font-size: var(--t-xs); padding: .2rem .45rem; border-radius: 2px; }
+.video strong { font-weight: 600; line-height: 1.35; }
+.video span.d { font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-soft); }
+.disclaimer { font-size: var(--t-xs); color: var(--on-navy-soft); max-width: 60rem; }
+
+@media (max-width: 60rem) { .videos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 52rem) { .goal, .charts2, .custody { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 30rem) { .videos { grid-template-columns: minmax(0, 1fr); } .hbar { grid-template-columns: 7rem minmax(0, 1fr); } .row.wide { grid-template-columns: minmax(0, 1fr) 8.5rem; } }
+
+.hbar .name small { display: block; font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-soft); font-weight: 400; }
 </style>
 </head>
 <body>
@@ -186,7 +284,10 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
         <ul>
           <li><a href="#servicios">Servicios</a></li>
           <li><a href="#metodo">Método</a></li>
-          <li><a href="#chequeo">Chequeo de caja</a></li>
+          <li><a href="#metas">Metas</a></li>
+          <li><a href="#inversion">Inversión</a></li>
+          <li><a href="#tasas">Tasas</a></li>
+          <li><a href="#videos">Videos</a></li>
           <li><a href="#docencia">Docencia</a></li>
           <li><a href="#contacto">Contacto</a></li>
         </ul>
@@ -202,7 +303,7 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
         <p class="lede">Hoy dirijo las finanzas de más de diez empresas a la vez. Esa cartera me permite ver patrones antes que nadie y llevar a tu empresa soluciones que ya funcionaron en otras.</p>
         <div class="ctas">
           <a class="btn btn-brass" href="#contacto">Agenda una primera conversación</a>
-          <a class="btn btn-line" href="#chequeo">Haz el chequeo de caja</a>
+          <a class="btn btn-line" href="#metas">Calcula tu meta financiera</a>
         </div>
       </div>
       <figure class="portrait" style="margin:0">
@@ -221,6 +322,13 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
       </ul>
     </div>
   </section>
+  <section class="ticker" id="carrete" aria-label="Noticias recientes sobre tasas de interés" hidden>
+    <div class="wrap">
+      <a class="pill" href="#tasas">Tasas de interés</a>
+      <div class="viewport"><div class="track" id="ticker-track"></div></div>
+    </div>
+  </section>
+
 </div>
 
 <main>
@@ -268,7 +376,7 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
         <article class="service">
           <span class="tag">Patrimonio</span>
           <h3>Administración de fondos de inversión</h3>
-          <p>Gestión de fondos con criterio de riesgo y retorno, política de inversión por escrito y reportes periódicos al inversionista.</p>
+          <p>Gestión de fondos con criterio de riesgo y retorno, con brókers de primer nivel. Las cuentas están siempre a nombre de su titular, que mantiene el control total.</p>
           <ul>
             <li>Definición de la política de inversión</li>
             <li>Asignación de activos y seguimiento</li>
@@ -344,40 +452,135 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
     </div>
   </section>
 
-  <section class="block" id="chequeo">
-    <div class="wrap tool">
-      <div class="intro">
-        <p class="eyebrow">Chequeo de caja</p>
-        <h2>¿Cuántos días tarda en volver tu dinero?</h2>
-        <p>El ciclo de conversión de efectivo mide cuánto tiempo pasa tu dinero atrapado entre pagar a proveedores y cobrar a clientes. Cada día que recortas libera caja sin vender más.</p>
-        <p>Cambia las cifras de ejemplo por las de tu empresa.</p>
+  <section class="block" id="metas">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Metas financieras</p>
+          <h2>¿Cuánto vale hoy tu meta de mañana?</h2>
+        </div>
+        <p>Elige un objetivo, el rendimiento que esperas de tu inversión y el plazo. La calculadora te dice cuánto tendrás o cuánto necesitas invertir hoy, año por año.</p>
       </div>
-      <form class="ledger" id="cce" autocomplete="off">
-        <div class="row">
-          <label for="dio">Días de inventario<small>lo que tarda en venderse la mercadería</small></label>
-          <input id="dio" type="number" inputmode="numeric" min="0" max="999" value="45">
+      <div class="goal">
+        <form class="ledger" id="meta" autocomplete="off">
+          <div class="seg" role="radiogroup" aria-label="Qué quieres calcular">
+            <label><input type="radio" name="modo" id="modo-futuro" value="futuro" checked><span>¿Cuánto tendré?</span></label>
+            <label><input type="radio" name="modo" id="modo-hoy" value="hoy"><span>¿Cuánto invierto hoy?</span></label>
+          </div>
+          <div class="row wide">
+            <label for="objetivo">Objetivo<small>para qué es este dinero</small></label>
+            <select id="objetivo">
+              <option value="jubilacion">Jubilación</option>
+              <option value="pasivo">Ingreso pasivo</option>
+              <option value="educacion">Educación de los hijos</option>
+              <option value="vivienda">Vivienda</option>
+              <option value="patrimonio">Patrimonio a largo plazo</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="monto" id="monto-label">Capital que invierto hoy<small>en tu moneda</small></label>
+            <input id="monto" type="number" inputmode="numeric" min="0" step="1000" value="20000">
+          </div>
+          <div class="row">
+            <label for="retorno">Rendimiento anual esperado<small>% del instrumento elegido</small></label>
+            <input id="retorno" type="number" inputmode="decimal" min="-20" max="40" step="0.5" value="8">
+          </div>
+          <div class="row">
+            <label for="anios">Años de inversión<small>cuánto mantienes el compromiso</small></label>
+            <input id="anios" type="number" inputmode="numeric" min="1" max="50" value="25">
+          </div>
+          <label class="check" for="inflacion"><input id="inflacion" type="checkbox" checked><span>Descontar inflación de 3 % anual<br><small style="color:var(--ink-soft)">Muestra el resultado en dinero de hoy, con su poder de compra real.</small></span></label>
+          <p class="goal-desc" id="objetivo-desc"></p>
+        </form>
+        <div>
+          <div class="result" aria-live="polite">
+            <span class="sub" id="res-label">Tendrás, en dinero de hoy</span>
+            <span class="big num" id="res-valor">—</span>
+            <span class="sub" id="res-detalle"></span>
+          </div>
+          <div class="chart-box" id="meta-chart-box">
+            <ul class="legend"><li><i style="background:var(--c1)"></i>Capital invertido</li><li><i style="background:var(--c2)"></i>Rendimiento acumulado</li></ul>
+            <svg id="meta-chart" role="img" aria-label="Crecimiento de la inversión año por año"></svg>
+          </div>
+          <a class="video-link" id="meta-video" href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener">Te lo explico en video →</a>
+          <p class="small-note">Ilustración con un rendimiento constante. En la realidad los mercados suben y bajan cada año; lo que se mantiene es el efecto del tiempo.</p>
         </div>
-        <div class="row">
-          <label for="dso"><span class="op">+</span> Días de cobro<small>lo que tardan en pagarte tus clientes</small></label>
-          <input id="dso" type="number" inputmode="numeric" min="0" max="999" value="60">
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="inversion">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Inversión</p>
+          <h2>Dos ideas que ordenan cualquier portafolio</h2>
         </div>
-        <div class="row">
-          <label for="dpo"><span class="op">−</span> Días de pago<small>lo que tardas en pagar a proveedores</small></label>
-          <input id="dpo" type="number" inputmode="numeric" min="0" max="999" value="30">
+        <p>Diversificar bien y darle tiempo a la inversión. Las dos se pueden medir, y estas gráficas lo muestran con números.</p>
+      </div>
+      <div class="charts2">
+        <div class="chart-card">
+          <h3>El «santo grial» de Ray Dalio</h3>
+          <p>En <em>Principios</em>, Dalio sostiene que con 15 a 20 fuentes de rendimiento buenas y no correlacionadas entre sí se reduce el riesgo cerca de un 80 %, sin sacrificar rendimiento esperado. La clave no es tener muchas inversiones, sino que no se muevan juntas.</p>
+          <div class="chart-box" id="dalio-box">
+            <ul class="legend">
+              <li><i class="line" style="background:var(--s0)"></i>Correlación 0</li>
+              <li><i class="line" style="background:var(--s1)"></i>0,2</li>
+              <li><i class="line" style="background:var(--s2)"></i>0,4</li>
+              <li><i class="line" style="background:var(--s3)"></i>0,6</li>
+            </ul>
+            <svg id="dalio-chart" role="img" aria-label="Riesgo del portafolio según el número de activos y su correlación"></svg>
+          </div>
+          <p class="small-note">Riesgo (volatilidad anual) de un portafolio con pesos iguales, si cada activo tiene una volatilidad de 10 %. Cálculo propio con la fórmula estándar de varianza de portafolio.</p>
         </div>
-        <div class="row">
-          <label for="ventas">Ventas mensuales<small>en tu moneda</small></label>
-          <input id="ventas" type="number" inputmode="numeric" min="0" step="1000" value="120000">
+        <div class="chart-card">
+          <h3>20 años en el S&amp;P 500</h3>
+          <p>Cuánto se habrían convertido 10.000 dólares invertidos a inicios de 2004 en cada activo, al cierre de 2023. Incluso atravesando la crisis de 2008, cuando cayó 37 % en un año, el S&amp;P 500 terminó primero.</p>
+          <div class="chart-box">
+            <div class="hbars" id="sp-chart"></div>
+          </div>
+          <details class="data"><summary>Ver los datos</summary>
+            <table id="sp-table"><thead><tr><th>Activo</th><th>Valor final</th><th>Rendimiento anual</th></tr></thead><tbody></tbody></table>
+          </details>
+          <p class="small-note">Fuente: rendimientos anuales recopilados por Aswath Damodaran (NYU Stern). En dólares nominales, S&amp;P 500 con dividendos reinvertidos, sin comisiones ni impuestos. Vivienda: índice de precios de vivienda de EE. UU.</p>
         </div>
-        <div class="total" aria-live="polite">
-          <span>Ciclo de caja</span>
-          <span class="big" id="out-dias">75 días</span>
-          <span class="sub">Capital de trabajo inmovilizado, aprox.</span>
-          <span class="sub num" id="out-monto">295.890</span>
-          <p class="verdict" id="out-verdict"></p>
+      </div>
+      <div class="custody">
+        <div>
+          <p class="eyebrow">Fondos de inversión</p>
+          <h3>Tu dinero siempre a tu nombre</h3>
         </div>
-        <p class="note">Cifras de ejemplo. Cálculo aproximado: ventas anuales ÷ 365 × días del ciclo.</p>
-      </form>
+        <p>Para la administración de fondos de inversión trabajo con brókers de primer nivel. Cada cuenta de inversión está a nombre de su titular, que mantiene el control total y puede ver cada movimiento. Yo gestiono la estrategia; tú sigues siendo el dueño.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="tasas">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Tasas de interés</p>
+          <h2>Lo último sobre tasas, y cómo leerlo</h2>
+        </div>
+        <p>Las decisiones de los bancos centrales mueven el costo de tu deuda, el rendimiento de tus ahorros y el precio de tus inversiones. Estos son los titulares más recientes.</p>
+      </div>
+      <div class="split">
+        <div>
+          <ul class="news" id="news-list"><li class="news-empty">Cargando titulares…</li></ul>
+          <p class="small-note" id="news-updated">Se actualiza automáticamente cada seis horas con titulares de medios. Las noticias pertenecen a sus fuentes.</p>
+        </div>
+        <div class="guide">
+          <h3>Cómo leer una decisión de tasas</h3>
+          <dl>
+            <dt>Si el banco central sube la tasa</dt>
+            <dd>El crédito se encarece: conviene revisar la deuda a tasa variable y no apurar nuevos préstamos. Los depósitos y la renta fija nueva pagan más.</dd>
+            <dt>Si la baja</dt>
+            <dd>Financiarse cuesta menos y suele ser buen momento para refinanciar. Los bonos que ya tienes tienden a subir de precio, y el ahorro en depósitos rinde menos.</dd>
+            <dt>Si la mantiene</dt>
+            <dd>Lo importante es el mensaje: qué dice sobre la inflación y los próximos meses. Ahí está la pista de lo que viene.</dd>
+          </dl>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -398,6 +601,19 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
           <li><strong>Decidir por ti.</strong><span>Te doy el análisis y una recomendación clara. La decisión sigue siendo tuya.</span></li>
         </ul>
       </div>
+    </div>
+  </section>
+  <section class="block" id="videos">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Videos</p>
+          <h2>Explicar para que se entienda</h2>
+        </div>
+        <p>Lo que más me apasiona es explicar las finanzas de una manera comprensible, sin jerga innecesaria. En mi canal de YouTube comparto esas explicaciones.</p>
+      </div>
+      <div class="videos" id="video-grid"></div>
+      <p style="margin:1.75rem 0 0"><a href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener">Ver todos los videos en YouTube →</a></p>
     </div>
   </section>
 
@@ -434,31 +650,224 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
     <div class="wrap">
       <span>Carlo Pagani · Dirección financiera para pymes</span>
       <span class="num" id="anio">2026</span>
+      <p class="disclaimer">El contenido de esta página es informativo y educativo; no constituye una recomendación de inversión. Los rendimientos pasados no garantizan rendimientos futuros.</p>
     </div>
   </footer>
 </div>
 
 <script>
 (function () {
-  var f = document.getElementById('cce');
-  var fmt = new Intl.NumberFormat('es', { maximumFractionDigits: 0 });
-  function val(id) { var n = parseFloat(document.getElementById(id).value); return isFinite(n) ? n : 0; }
-  function calc() {
-    var dias = val('dio') + val('dso') - val('dpo');
-    var monto = val('ventas') * 12 / 365 * dias;
-    var outD = document.getElementById('out-dias');
-    outD.textContent = fmt.format(dias) + (Math.abs(dias) === 1 ? ' día' : ' días');
-    outD.classList.toggle('neg', dias > 90);
-    document.getElementById('out-monto').textContent = fmt.format(Math.max(monto, 0));
-    var v = dias <= 0 ? 'Tus proveedores financian tu operación. Es una posición fuerte; cuídala.'
-      : dias <= 45 ? 'Ciclo corto. Hay margen para crecer sin presionar la caja.'
-      : dias <= 90 ? 'Ciclo intermedio. Revisar cobros e inventario suele liberar caja rápido.'
-      : 'Ciclo largo. Tu crecimiento probablemente está consumiendo más caja de la que genera.';
-    document.getElementById('out-verdict').textContent = v;
+  var NS = 'http://www.w3.org/2000/svg';
+  var CANAL = 'https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A';
+  var fmt0 = new Intl.NumberFormat('es', { maximumFractionDigits: 0 });
+  var fmtC = new Intl.NumberFormat('es', { notation: 'compact', maximumFractionDigits: 1 });
+  var fmt1 = new Intl.NumberFormat('es', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  var fmtFecha = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' });
+  var fmtFechaLarga = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  function el(name, attrs, parent) {
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
   }
-  f.addEventListener('input', calc);
-  f.addEventListener('submit', function (e) { e.preventDefault(); });
-  calc();
+  function txt(name, attrs, s, parent) { var n = el(name, attrs, parent); n.textContent = s; return n; }
+  function niceMax(v) {
+    if (v <= 0) return 1;
+    var p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
+    var s = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10;
+    return s * p;
+  }
+  function tooltip(box) {
+    var t = box.querySelector('.tip');
+    if (!t) { t = document.createElement('div'); t.className = 'tip'; t.hidden = true; box.appendChild(t); }
+    return t;
+  }
+  function showTip(box, svg, W, html, x, y) {
+    var t = tooltip(box), sr = svg.getBoundingClientRect(), br = box.getBoundingClientRect(), s = sr.width / W;
+    t.innerHTML = html; t.style.left = (sr.left - br.left + x * s) + 'px'; t.style.top = (sr.top - br.top + y * s) + 'px'; t.hidden = false;
+  }
+  function hideTip(box) { tooltip(box).hidden = true; }
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+
+  /* ---------- Metas financieras ---------- */
+  var OBJ = {
+    jubilacion: { anios: 25, d: 'Jubilación: construir un capital que, cuando dejes de trabajar, te pague una renta sin depender de un sueldo. Es la meta de más largo plazo, y ahí el tiempo hace la mayor parte del trabajo.' },
+    pasivo: { anios: 15, d: 'Ingreso pasivo: un capital cuyo rendimiento te asegure un ingreso fijo para trabajar menos y dedicarte más a lo que te gusta. Como referencia, la regla del 4 % sugiere reunir unas 25 veces el gasto anual que quieras cubrir.' },
+    educacion: { anios: 12, d: 'Educación de los hijos: una fecha conocida y difícil de mover. Conviene ir bajando el riesgo de la inversión a medida que se acerca el ingreso a la universidad.' },
+    vivienda: { anios: 5, d: 'Vivienda: reunir la cuota inicial de una casa. En plazos de tres a siete años, la estabilidad pesa más que el rendimiento.' },
+    patrimonio: { anios: 20, d: 'Patrimonio a largo plazo: hacer crecer tu capital sin un uso definido. Es donde más rinden la diversificación y la paciencia.' }
+  };
+  var form = document.getElementById('meta');
+  function num(id) { var n = parseFloat(document.getElementById(id).value); return isFinite(n) ? n : 0; }
+  function modo() { return document.getElementById('modo-hoy').checked ? 'hoy' : 'futuro'; }
+
+  function calcMeta() {
+    var m = modo(), monto = Math.max(num('monto'), 0), r = num('retorno') / 100;
+    var n = Math.min(Math.max(Math.round(num('anios')), 1), 50);
+    var infl = document.getElementById('inflacion').checked;
+    var rr = (1 + r) / (infl ? 1.03 : 1) - 1;
+    var capital = m === 'futuro' ? monto : monto / Math.pow(1 + rr, n);
+    var serie = [];
+    for (var t = 1; t <= n; t++) serie.push({ t: t, v: capital * Math.pow(1 + rr, t) });
+    var final = serie[serie.length - 1].v;
+    var hoyTxt = infl ? ', en dinero de hoy' : '';
+    document.getElementById('monto-label').firstChild.textContent = m === 'futuro' ? 'Capital que invierto hoy' : 'Monto que quiero reunir';
+    if (m === 'futuro') {
+      document.getElementById('res-label').textContent = 'En ' + n + (n === 1 ? ' año' : ' años') + ' tendrás' + hoyTxt;
+      document.getElementById('res-valor').textContent = fmt0.format(final);
+      document.getElementById('res-detalle').textContent = final >= capital
+        ? 'Tu capital se multiplica por ' + fmt1.format(final / Math.max(capital, 1e-9)) + '. Rendimiento ' + (infl ? 'real' : '') + ' de ' + fmt1.format(rr * 100) + ' % anual.'
+        : 'Con este rendimiento tu dinero pierde poder de compra frente a la inflación.';
+    } else {
+      document.getElementById('res-label').textContent = 'Para reunir ' + fmt0.format(monto) + hoyTxt + ' en ' + n + (n === 1 ? ' año' : ' años') + ', invierte hoy';
+      document.getElementById('res-valor').textContent = fmt0.format(capital);
+      document.getElementById('res-detalle').textContent = 'El rendimiento aporta ' + fmt0.format(Math.max(monto - capital, 0)) + '. Rendimiento ' + (infl ? 'real' : '') + ' de ' + fmt1.format(rr * 100) + ' % anual.';
+    }
+    drawMeta(serie, capital, infl);
+  }
+
+  function drawMeta(serie, capital, infl) {
+    var svg = document.getElementById('meta-chart'), box = document.getElementById('meta-chart-box');
+    var W = Math.max(svg.parentNode.clientWidth - 32, 260), H = 260, L = 52, R = 8, T = 10, B = 26;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = '';
+    var max = niceMax(Math.max.apply(null, serie.map(function (d) { return d.v; }).concat([capital])));
+    var y = function (v) { return T + (H - T - B) * (1 - v / max); };
+    var g = el('g', { 'class': 'axis' }, svg);
+    for (var i = 0; i <= 4; i++) {
+      var v = max * i / 4, yy = y(v);
+      el('line', { x1: L, x2: W - R, y1: yy, y2: yy, 'class': 'grid-line' }, g);
+      txt('text', { x: L - 8, y: yy + 4, 'text-anchor': 'end' }, fmtC.format(v), g);
+    }
+    var n = serie.length, band = (W - L - R) / n, gap = n > 30 ? 1 : 2, bw = Math.max(band - gap, 1);
+    var every = n <= 10 ? 1 : n <= 20 ? 2 : 5;
+    serie.forEach(function (d, k) {
+      var x = L + k * band + gap / 2;
+      var cap = Math.min(capital, d.v), gan = Math.max(d.v - capital, 0);
+      var yCap = y(cap), yTop = y(d.v), base = y(0);
+      var gBar = el('g', {}, svg);
+      el('rect', { x: x, y: yCap, width: bw, height: Math.max(base - yCap, 0), fill: 'var(--c1)' }, gBar);
+      if (gan > 0) {
+        var h = Math.max(yCap - yTop - 2, 0);
+        el('path', { d: barTop(x, yTop, bw, h), fill: 'var(--c2)' }, gBar);
+      }
+      var hit = el('rect', { x: L + k * band, y: T, width: band, height: H - T - B, fill: 'transparent' }, gBar);
+      hit.addEventListener('mousemove', function () {
+        showTip(box, svg, W, '<b>Año ' + d.t + '</b><br>Total: ' + fmt0.format(d.v) + '<br>Capital: ' + fmt0.format(cap) + '<br>Rendimiento: ' + fmt0.format(gan) + (infl ? '<br><i>en dinero de hoy</i>' : ''), x + bw / 2, yTop);
+      });
+      hit.addEventListener('mouseleave', function () { hideTip(box); });
+      if ((d.t % every === 0) || d.t === 1) txt('text', { x: x + bw / 2, y: H - 8, 'text-anchor': 'middle', 'class': 'lbl' }, d.t, svg);
+    });
+    var last = serie[n - 1];
+    txt('text', { x: W - R, y: Math.max(y(last.v) - 6, 10), 'text-anchor': 'end', 'class': 'lbl strong' }, fmtC.format(last.v), svg);
+  }
+  function barTop(x, y, w, h) {
+    var r = Math.min(4, w / 2, h);
+    return 'M' + x + ',' + (y + h) + 'V' + (y + r) + 'Q' + x + ',' + y + ' ' + (x + r) + ',' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + r) + 'V' + (y + h) + 'Z';
+  }
+  function setObjetivo(cambiarAnios) {
+    var o = OBJ[document.getElementById('objetivo').value];
+    document.getElementById('objetivo-desc').textContent = o.d + ' Plazo de referencia: ' + o.anios + ' años.';
+    if (cambiarAnios) document.getElementById('anios').value = o.anios;
+  }
+  document.getElementById('objetivo').addEventListener('change', function () { setObjetivo(true); calcMeta(); });
+  form.addEventListener('input', function (e) { if (e.target.id !== 'objetivo') calcMeta(); });
+  form.addEventListener('change', function (e) { if (e.target.name === 'modo' || e.target.id === 'inflacion') calcMeta(); });
+  form.addEventListener('submit', function (e) { e.preventDefault(); });
+  var VIDEOS = [];
+  var VIDEO_OBJ = { jubilacion: /jubil|retiro/i, pasivo: /metas de inversi|no invertir/i, educacion: /metas de inversi/i, vivienda: /casa/i, patrimonio: /metas de inversi|no invertir/i };
+  function videoMeta() {
+    var re = VIDEO_OBJ[document.getElementById('objetivo').value];
+    var v = VIDEOS.filter(function (x) { return re.test(x.titulo); })[0] || VIDEOS.filter(function (x) { return /metas de inversi/i.test(x.titulo); })[0];
+    var a = document.getElementById('meta-video');
+    if (v) { a.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(v.id); a.textContent = 'Te lo explico en video: «' + v.titulo + '» →'; }
+  }
+  document.getElementById('objetivo').addEventListener('change', videoMeta);
+  setObjetivo(false); calcMeta();
+
+  /* ---------- Dalio: riesgo vs número de activos ---------- */
+  function drawDalio() {
+    var svg = document.getElementById('dalio-chart'), box = document.getElementById('dalio-box');
+    var W = Math.max(svg.parentNode.clientWidth - 32, 260), H = 240, L = 36, R = 44, T = 10, B = 30;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = '';
+    var rhos = [0, 0.2, 0.4, 0.6], cols = ['var(--s0)', 'var(--s1)', 'var(--s2)', 'var(--s3)'];
+    var N = 20, sig = function (n, p) { return 10 * Math.sqrt(1 / n + (1 - 1 / n) * p); };
+    var x = function (n) { return L + (W - L - R) * (n - 1) / (N - 1); };
+    var y = function (v) { return T + (H - T - B) * (1 - v / 10); };
+    var g = el('g', { 'class': 'axis' }, svg);
+    [0, 2.5, 5, 7.5, 10].forEach(function (v) {
+      el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), 'class': 'grid-line' }, g);
+      txt('text', { x: L - 6, y: y(v) + 4, 'text-anchor': 'end' }, fmt0.format(v) + '%', g);
+    });
+    [1, 5, 10, 15, 20].forEach(function (n) { txt('text', { x: x(n), y: H - 12, 'text-anchor': 'middle' }, n, g); });
+    txt('text', { x: (L + W - R) / 2, y: H, 'text-anchor': 'middle', 'class': 'lbl' }, 'número de activos', svg);
+    rhos.slice().reverse().forEach(function (p, i) {
+      var idx = rhos.length - 1 - i, d = '';
+      for (var n = 1; n <= N; n++) d += (n === 1 ? 'M' : 'L') + x(n).toFixed(1) + ',' + y(sig(n, p)).toFixed(1);
+      el('path', { d: d, fill: 'none', stroke: cols[idx], 'stroke-width': idx === 0 ? 2.5 : 2, 'stroke-linejoin': 'round' }, svg);
+      txt('text', { x: x(N) + 6, y: y(sig(N, p)) + 4, 'class': 'lbl' + (idx === 0 ? ' strong' : '') }, 'ρ ' + fmt1.format(p), svg);
+    });
+    el('circle', { cx: x(15), cy: y(sig(15, 0)), r: 4.5, fill: 'var(--s0)', stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
+    txt('text', { x: x(15), y: y(sig(15, 0)) - 12, 'text-anchor': 'middle', 'class': 'lbl strong' }, '−74 %', svg);
+    var cross = el('line', { y1: T, y2: H - B, stroke: 'var(--ink-soft)', 'stroke-width': 1, opacity: 0 }, svg);
+    var hit = el('rect', { x: L, y: T, width: W - L - R, height: H - T - B, fill: 'transparent' }, svg);
+    hit.addEventListener('mousemove', function (e) {
+      var rect = svg.getBoundingClientRect(), sx = rect.width / W;
+      var px = (e.clientX - rect.left) / sx, n = Math.min(N, Math.max(1, Math.round(1 + (px - L) / (W - L - R) * (N - 1))));
+      cross.setAttribute('x1', x(n)); cross.setAttribute('x2', x(n)); cross.setAttribute('opacity', .5);
+      var html = '<b>' + n + (n === 1 ? ' activo' : ' activos') + '</b>' + rhos.map(function (p) { return '<br>Correlación ' + fmt1.format(p) + ': ' + fmt1.format(sig(n, p)) + ' %'; }).join('');
+      showTip(box, svg, W, html, x(n), y(sig(n, 0.6)));
+    });
+    hit.addEventListener('mouseleave', function () { cross.setAttribute('opacity', 0); hideTip(box); });
+  }
+  drawDalio();
+
+  /* ---------- S&P 500 frente a otros activos, 2004–2023 ---------- */
+  var SP = [
+    ['S&P 500', 62540, 9.60, true], ['Oro', 49795, 8.36], ['Bonos corporativos Baa', 30160, 5.67],
+    ['Vivienda en EE. UU.', 22410, 4.12], ['Bonos del Tesoro a 10 años', 17558, 2.85], ['Letras del Tesoro a 3 meses', 13209, 1.40]
+  ];
+  (function () {
+    var c = document.getElementById('sp-chart'), tb = document.querySelector('#sp-table tbody'), max = 90000;
+    SP.forEach(function (d) {
+      var w = d[1] / max * 100;
+      c.insertAdjacentHTML('beforeend', '<div class="hbar' + (d[3] ? ' hi' : '') + '"><span class="name">' + d[0] + '</span><span class="track"><span class="fill" style="width:' + w + '%"></span><span class="val" style="left:' + w + '%">' + fmt0.format(d[1]) + '</span></span></div>');
+      tb.insertAdjacentHTML('beforeend', '<tr><td>' + d[0] + '</td><td>' + fmt0.format(d[1]) + '</td><td>' + fmt1.format(d[2]) + ' %</td></tr>');
+    });
+  })();
+
+  var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { calcMeta(); drawDalio(); }, 150); });
+
+  /* ---------- Noticias y videos (los actualiza una acción programada) ---------- */
+  fetch('data/noticias.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+    var list = document.getElementById('news-list');
+    if (!data || !data.items || !data.items.length) { list.innerHTML = '<li class="news-empty">Los titulares aparecerán aquí en la próxima actualización.</li>'; return; }
+    var items = data.items.slice(0, 5);
+    list.innerHTML = items.map(function (n) {
+      var f = n.fecha ? fmtFecha.format(new Date(n.fecha)) : '';
+      return '<li><span class="meta">' + esc([f, n.fuente].filter(Boolean).join(' · ')) + '</span><a href="' + esc(n.url) + '" target="_blank" rel="noopener">' + esc(n.titulo) + '</a></li>';
+    }).join('');
+    if (data.actualizado) document.getElementById('news-updated').textContent = 'Actualizado el ' + fmtFechaLarga.format(new Date(data.actualizado)) + '. Se renueva automáticamente cada seis horas con titulares de medios; las noticias pertenecen a sus fuentes.';
+    var track = document.getElementById('ticker-track');
+    var once = items.map(function (n) { return '<a href="' + esc(n.url) + '" target="_blank" rel="noopener"><span>' + esc(n.fuente || '') + '</span>' + esc(n.titulo) + '</a>'; }).join('');
+    track.innerHTML = once + once.replace(/<a /g, '<a tabindex="-1" aria-hidden="true" ');
+    document.getElementById('carrete').hidden = false;
+  }).catch(function () {});
+
+  fetch('data/videos.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+    var grid = document.getElementById('video-grid');
+    if (!data || !data.items || !data.items.length) { document.getElementById('videos').hidden = true; return; }
+    var largos = data.items.filter(function (v) { return v.titulo.indexOf('#') === -1; });
+    var DESTACADOS = ['C9m2NIsvO3U', 'ArzyE5pdRbY', 'yR5flMvfkpc', 'GZSyeOmEfJ8', '5hoIyxtzJGQ', 'DJEkMKGF4AA'];
+    var lista = DESTACADOS.map(function (id) { return largos.filter(function (v) { return v.id === id; })[0]; }).filter(Boolean);
+    largos.forEach(function (v) { if (lista.length < 6 && lista.indexOf(v) === -1) lista.push(v); });
+    grid.innerHTML = lista.slice(0, 6).map(function (v) {
+      var f = v.fecha ? fmtFechaLarga.format(new Date(v.fecha)) : '';
+      return '<a class="video" href="https://www.youtube.com/watch?v=' + encodeURIComponent(v.id) + '" target="_blank" rel="noopener"><span class="thumb"><img loading="lazy" src="https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg" alt=""><span class="play">▶ Ver</span></span><strong>' + esc(v.titulo) + '</strong><span class="d">' + esc(f) + '</span></a>';
+    }).join('');
+    VIDEOS = largos; videoMeta();
+  }).catch(function () {});
+
   document.getElementById('anio').textContent = new Date().getFullYear();
 })();
 </script>

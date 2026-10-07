@@ -3,6 +3,7 @@
 Lo ejecuta la acción programada de GitHub; solo usa la biblioteca estándar.
 """
 import json
+import re
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -14,6 +15,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 CANAL = "UCgNAS6dyYXn8vcLnmSci03A"
 CONSULTA = '"tasas de interés" ("banco central" OR "Reserva Federal" OR Fed) when:7d'
 MAX_NOTICIAS = 5
+TEMA = re.compile(r"\btasas?\b|tipos de inter|\blos tipos\b|\bFed\b|Reserva Federal|Banxico|banco central|\bBCE\b", re.I)
 MAX_VIDEOS = 12
 
 
@@ -43,7 +45,10 @@ def noticias():
             fecha = None
         items.append({"titulo": titulo, "fuente": fuente, "url": it.findtext("link"), "fecha": fecha})
     items.sort(key=lambda x: x["fecha"] or "", reverse=True)
-    return items[:MAX_NOTICIAS]
+    # primero los titulares que hablan de tasas; si no alcanzan, se completa con el resto
+    sobre_tasas = [i for i in items if TEMA.search(i["titulo"])]
+    resto = [i for i in items if i not in sobre_tasas]
+    return (sobre_tasas + resto)[:MAX_NOTICIAS]
 
 
 def videos():
