@@ -272,6 +272,26 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 @media (max-width: 30rem) { .videos { grid-template-columns: minmax(0, 1fr); } .hbar { grid-template-columns: 7rem minmax(0, 1fr); } .row.wide { grid-template-columns: minmax(0, 1fr) 8.5rem; } }
 
 .hbar .name small { display: block; font-family: var(--mono); font-size: var(--t-xs); color: var(--ink-soft); font-weight: 400; }
+
+.contact .wrap { align-items: start; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+@media (max-width: 52rem) { .contact .wrap { grid-template-columns: minmax(0, 1fr); } }
+.contact .how { margin: 1.5rem 0 1.75rem; padding-left: 1.2rem; color: var(--on-navy-soft); display: grid; gap: .35rem; }
+.contact .btn.li { display: inline-block; }
+.cform { background: var(--navy-2); border: 1px solid rgba(238,242,247,.12); border-radius: 4px; padding: 1.5rem; min-width: 0; }
+.cgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.1rem; margin-bottom: 1.25rem; }
+.cgrid label { display: grid; gap: .35rem; align-content: end; font-size: var(--t-s); color: var(--on-navy); min-width: 0; }
+.cgrid label small { color: var(--on-navy-soft); }
+.cgrid .full { grid-column: 1 / -1; }
+.cgrid input, .cgrid select, .cgrid textarea { width: 100%; font: inherit; font-size: var(--t-s); color: var(--on-navy); background: var(--navy); border: 1px solid rgba(238,242,247,.22); border-radius: 3px; padding: .6rem .65rem; color-scheme: dark; }
+.cgrid textarea { resize: vertical; }
+.cgrid input:focus-visible, .cgrid select:focus-visible, .cgrid textarea:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+.cgrid .chk { display: flex; gap: .6rem; align-items: flex-start; color: var(--on-navy-soft); }
+.cgrid .chk input { width: auto; margin-top: .2rem; accent-color: var(--brass); }
+.cgrid [aria-invalid="true"] { border-color: #E8857A; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.cstatus { font-size: var(--t-s); color: var(--on-navy-soft); margin: .9rem 0 0; min-height: 1.4em; }
+.cstatus.ok { color: var(--brass); }
+@media (max-width: 30rem) { .cgrid { grid-template-columns: minmax(0, 1fr); } }
 </style>
 </head>
 <body>
@@ -641,19 +661,47 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 <div class="navy">
   <section class="contact" id="contacto">
     <div class="wrap">
-      <div>
+      <div class="contact-intro">
         <p class="eyebrow" style="color:var(--brass)">Contacto</p>
         <h2>Conversemos sobre tu empresa</h2>
-        <p>Cuéntame a qué se dedica tu empresa y qué decisión financiera tienes por delante. Te respondo personalmente.</p>
+        <p>Trabajo con pocas empresas a la vez para darle a cada una la atención que necesita. Por eso te pido unos datos antes de la primera conversación.</p>
+        <ol class="how">
+          <li>Completas el formulario en dos minutos.</li>
+          <li>Reviso las solicitudes cada semana.</li>
+          <li>Si encaja, te escribo para agendar una llamada.</li>
+        </ol>
+        <a class="btn btn-line li" href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener">Ver mi perfil en LinkedIn</a>
       </div>
-      <div>
-        <p class="pending">Correo, WhatsApp y LinkedIn en preparación</p>
-      </div>
+      <form class="cform" id="cform" novalidate>
+        <div class="cgrid">
+          <label for="c-nombre">Nombre y apellido<input id="c-nombre" name="nombre" required autocomplete="name"></label>
+          <label for="c-empresa">Empresa<input id="c-empresa" name="empresa" required autocomplete="organization"></label>
+          <label for="c-cargo">Tu cargo<select id="c-cargo" name="cargo" required>
+            <option value="">Elige una opción</option><option>Dueño o socio</option><option>Gerente general</option><option>Gerente de finanzas</option><option>Otro cargo</option>
+          </select></label>
+          <label for="c-correo">Correo<input id="c-correo" name="email" type="email" required autocomplete="email"></label>
+          <label for="c-fact">Facturación anual aproximada<select id="c-fact" name="facturacion" required>
+            <option value="">Elige un rango</option><option value="1">Menos de 100 mil dólares</option><option value="2">De 100 mil a 500 mil dólares</option><option value="3">De 500 mil a 2 millones de dólares</option><option value="4">Más de 2 millones de dólares</option>
+          </select></label>
+          <label for="c-servicio">¿Qué necesitas?<select id="c-servicio" name="servicio" required>
+            <option value="">Elige un servicio</option><option>CFO fraccional</option><option>Consultoría financiera</option><option>Administración de fondos de inversión</option><option>Capacitación en finanzas</option>
+          </select></label>
+          <label for="c-plazo">¿Cuándo quieres empezar?<select id="c-plazo" name="plazo" required>
+            <option value="">Elige un plazo</option><option value="1">Este mes</option><option value="2">En uno a tres meses</option><option value="3">Solo estoy explorando</option>
+          </select></label>
+          <label for="c-tel">WhatsApp <small>(opcional)</small><input id="c-tel" name="whatsapp" type="tel" autocomplete="tel"></label>
+          <label for="c-msg" class="full">En dos o tres líneas, ¿qué situación quieres resolver?<textarea id="c-msg" name="mensaje" rows="3" required minlength="40"></textarea></label>
+          <label class="full chk" for="c-acepto"><input id="c-acepto" type="checkbox" name="entiende_servicio_pagado" value="sí" required><span>Entiendo que es un servicio profesional con honorarios.</span></label>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+        </div>
+        <button class="btn btn-brass" type="submit" id="c-enviar">Enviar solicitud</button>
+        <p class="cstatus" id="c-status" role="status"></p>
+      </form>
     </div>
   </section>
   <footer>
     <div class="wrap">
-      <span>Carlo Pagani · Dirección financiera para pymes</span>
+      <span>Carlo Pagani · Dirección financiera para pymes · <a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--on-navy)">LinkedIn</a></span>
       <span class="num" id="anio">2026</span>
       <p class="disclaimer">El contenido de esta página es informativo y educativo; no constituye una recomendación de inversión. Los rendimientos pasados no garantizan rendimientos futuros.</p>
     </div>
@@ -883,6 +931,32 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     VIDEOS = largos; videoMeta();
   }).catch(function () {});
 
+
+  /* ---------- Formulario de contacto ---------- */
+  var FORM_ENDPOINT = ''; // p. ej. 'https://formspree.io/f/xxxxxxxx'
+  var cf = document.getElementById('cform'), cs = document.getElementById('c-status');
+  cf.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var invalid = Array.prototype.filter.call(cf.querySelectorAll('[required]'), function (f) {
+      var bad = !f.checkValidity(); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
+    });
+    if (invalid.length) { cs.className = 'cstatus'; cs.textContent = 'Revisa los campos marcados. El mensaje necesita al menos 40 caracteres.'; invalid[0].focus(); return; }
+    var fact = +cf.facturacion.value, plazo = +cf.plazo.value, decide = cf.cargo.value !== 'Otro cargo';
+    var prio = plazo === 3 || fact === 1 ? 'C' : (decide && fact >= 2 && plazo <= 2 ? 'A' : 'B');
+    var data = new FormData(cf);
+    data.set('facturacion', cf.facturacion.options[cf.facturacion.selectedIndex].text);
+    data.set('plazo', cf.plazo.options[cf.plazo.selectedIndex].text);
+    data.set('prioridad', prio);
+    data.set('_subject', '[Web · Prioridad ' + prio + '] ' + cf.empresa.value + ' · ' + cf.servicio.value);
+    if (!FORM_ENDPOINT) { cs.className = 'cstatus'; cs.innerHTML = 'El formulario se activa en los próximos días. Mientras tanto, escríbeme por <a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>.'; return; }
+    var btn = document.getElementById('c-enviar'); btn.disabled = true; cs.className = 'cstatus'; cs.textContent = 'Enviando…';
+    fetch(FORM_ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      cf.reset(); cs.className = 'cstatus ok'; cs.textContent = 'Gracias. Recibí tu solicitud; reviso todas cada semana y, si encaja, te escribo para agendar una llamada.';
+    }).catch(function () {
+      cs.className = 'cstatus'; cs.textContent = 'No se pudo enviar. Inténtalo de nuevo en unos minutos o escríbeme por LinkedIn.';
+    }).then(function () { btn.disabled = false; });
+  });
   document.getElementById('anio').textContent = new Date().getFullYear();
 })();
 </script>
