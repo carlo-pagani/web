@@ -2,220 +2,283 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Carlo Pagani</title>
-<meta name="description" content="Carlo Pagani: gerencia financiera fraccionada para pymes, consultoría financiera y docencia universitaria en finanzas.">
+<meta name="description" content="Carlo Pagani: CFO fraccional para pymes, consultor financiero, administración de fondos de inversión y profesor universitario de finanzas.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: hoja de libro mayor. Columna de lectura a la izquierda, columna de cifras a la derecha; reglas finas como renglones. */
+/* Layout: banda azul marino con retrato y cifras arriba (el traje marca la paleta); debajo, página clara en columnas con reglas finas, como un informe a directorio. */
 :root {
-  --paper: #F1F4F0;
-  --sheet: #FFFFFF;
-  --ink: #16302C;
-  --ink-soft: #4A5F5A;
-  --rule: #D3DDD7;
-  --accent: #1E6A50;
+  --navy: #0E1B2C;
+  --navy-2: #16273D;
+  --on-navy: #EEF2F7;
+  --on-navy-soft: #A9B6C8;
+  --brass: #C9A15B;
+  --bg: #F6F7F9;
+  --surface: #FFFFFF;
+  --ink: #0F1B2A;
+  --ink-soft: #536176;
+  --rule: #DCE1E8;
+  --accent: #2F5D9E;
   --accent-ink: #FFFFFF;
   --neg: #A3352B;
-  --display: "Spectral", "Iowan Old Style", Georgia, serif;
-  --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+  --display: "Libre Bodoni", "Didot", "Bodoni 72", Georgia, serif;
+  --body: "Figtree", "Helvetica Neue", Arial, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-  --s1: .875rem; --s2: 1rem; --s3: 1.25rem; --s4: 1.75rem; --s5: clamp(2.4rem, 6vw, 4rem);
+  --t-xs: .78rem; --t-s: .9rem; --t-m: 1.05rem; --t-l: 1.3rem; --t-xl: clamp(1.7rem, 3.2vw, 2.3rem); --t-hero: clamp(2.3rem, 5.4vw, 3.9rem);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0F1A18; --sheet: #15241F; --ink: #E3ECE7; --ink-soft: #9FB3AC;
-    --rule: #28403A; --accent: #5CC79D; --accent-ink: #0F1A18; --neg: #E8857A;
+    --bg: #0B1522; --surface: #122133; --ink: #E7ECF3; --ink-soft: #9DAABD; --rule: #24364C;
+    --accent: #86AEE8; --accent-ink: #0B1522; --neg: #E8857A; --navy: #08111C; --navy-2: #0F1D2E;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #0F1A18; --sheet: #15241F; --ink: #E3ECE7; --ink-soft: #9FB3AC;
-  --rule: #28403A; --accent: #5CC79D; --accent-ink: #0F1A18; --neg: #E8857A;
+  --bg: #0B1522; --surface: #122133; --ink: #E7ECF3; --ink-soft: #9DAABD; --rule: #24364C;
+  --accent: #86AEE8; --accent-ink: #0B1522; --neg: #E8857A; --navy: #08111C; --navy-2: #0F1D2E;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body {
-  margin: 0; background: var(--paper); color: var(--ink);
-  font-family: var(--body); font-size: var(--s2); line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-}
-.wrap { max-width: 68rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: var(--t-m); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+.wrap { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
 a { color: var(--accent); text-underline-offset: 3px; }
-a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; text-wrap: balance; margin: 0; }
-.label {
-  font-family: var(--mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--ink-soft);
-}
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.12; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--t-xl); }
+h3 { font-size: var(--t-l); }
+.eyebrow { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 .6rem; }
 .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.btn { display: inline-block; font: inherit; font-weight: 600; text-decoration: none; padding: .85rem 1.35rem; border-radius: 3px; border: 1px solid transparent; cursor: pointer; }
+.btn-brass { background: var(--brass); color: #10151C; }
+.btn-brass:hover { filter: brightness(1.06); }
+.btn-line { border-color: rgba(238,242,247,.35); color: var(--on-navy); }
+.btn-line:hover { border-color: var(--on-navy); }
 
-/* Cabecera */
-header.top { border-bottom: 1px solid var(--rule); }
-header.top .wrap { display: flex; flex-wrap: wrap; gap: .5rem 2rem; align-items: baseline; justify-content: space-between; padding-block: 1.1rem; }
-.brand { font-family: var(--display); font-size: var(--s3); font-weight: 600; color: var(--ink); text-decoration: none; }
-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; }
-nav a { color: var(--ink-soft); text-decoration: none; font-size: var(--s1); }
-nav a:hover { color: var(--ink); }
+/* Banda superior */
+.navy { background: var(--navy); color: var(--on-navy); }
+.topbar .wrap { display: flex; flex-wrap: wrap; gap: .75rem 2rem; align-items: center; justify-content: space-between; padding-block: 1rem; border-bottom: 1px solid rgba(238,242,247,.12); }
+.brand { font-family: var(--display); font-size: 1.35rem; font-weight: 600; color: var(--on-navy); text-decoration: none; letter-spacing: .01em; }
+.topbar nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1.4rem; }
+.topbar nav a { color: var(--on-navy-soft); text-decoration: none; font-size: var(--t-s); }
+.topbar nav a:hover { color: var(--on-navy); }
 
-/* Apertura */
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); padding-block: clamp(3rem, 8vw, 6rem); align-items: start; }
-.hero h1 { font-size: var(--s5); letter-spacing: -.01em; }
-.hero h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
-.hero p.lede { font-size: var(--s3); color: var(--ink-soft); max-width: 34rem; margin: 1.5rem 0 2rem; }
-.roles { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 2rem; padding: 0; list-style: none; }
-.roles li { border: 1px solid var(--rule); border-radius: 2px; padding: .3rem .7rem; font-size: var(--s1); background: var(--sheet); }
-.btn {
-  display: inline-block; background: var(--accent); color: var(--accent-ink); text-decoration: none;
-  font-weight: 600; padding: .8rem 1.3rem; border-radius: 2px; border: 0; font: inherit; font-weight: 600; cursor: pointer;
-}
-.btn:hover { filter: brightness(1.08); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: end; padding-top: clamp(2.5rem, 6vw, 4.5rem); }
+.hero .copy { padding-bottom: clamp(2.5rem, 6vw, 4.5rem); }
+.hero .eyebrow { color: var(--brass); }
+.hero h1 { font-size: var(--t-hero); letter-spacing: -.01em; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--brass); }
+.hero .lede { font-size: var(--t-l); color: var(--on-navy-soft); max-width: 34rem; margin: 1.4rem 0 2rem; line-height: 1.5; }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: .75rem; }
+.portrait { align-self: end; justify-self: center; width: min(100%, 26rem); }
+.portrait img { width: 100%; height: auto; }
 
-/* Herramienta: ciclo de caja */
-.ledger { background: var(--sheet); border: 1px solid var(--rule); border-radius: 3px; padding: 1.5rem; min-width: 0; }
-.ledger h2 { font-size: var(--s4); margin: .35rem 0 .5rem; }
-.ledger p.help { font-size: var(--s1); color: var(--ink-soft); margin: 0 0 1.25rem; }
-.row { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem; gap: 1rem; align-items: center; padding-block: .55rem; border-top: 1px solid var(--rule); }
-.row label { font-size: var(--s1); }
-.row label small { display: block; color: var(--ink-soft); font-size: .78rem; }
-.row input {
-  width: 100%; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--s2); text-align: right;
-  background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px; padding: .4rem .5rem;
-}
-.op { font-family: var(--mono); color: var(--ink-soft); }
-.total { border-top: 2px solid var(--ink); margin-top: .25rem; padding-top: .9rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem 1rem; align-items: baseline; }
-.total .big { font-family: var(--mono); font-size: var(--s4); font-variant-numeric: tabular-nums; text-align: right; }
-.total .big.neg { color: var(--neg); }
-.total .sub { font-size: var(--s1); color: var(--ink-soft); }
-.bar { grid-column: 1 / -1; height: 10px; background: var(--paper); border: 1px solid var(--rule); border-radius: 2px; margin-top: .6rem; overflow: hidden; }
-.bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
-@media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
-.ledger .note { font-size: .78rem; color: var(--ink-soft); margin: 1rem 0 0; }
+.figures { background: var(--navy-2); border-top: 1px solid rgba(238,242,247,.1); }
+.figures ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.figures li { padding: 1.5rem 1.25rem 1.6rem; border-left: 1px solid rgba(238,242,247,.12); }
+.figures li:first-child { border-left: 0; padding-left: 0; }
+.figures .big { display: block; font-family: var(--display); font-size: clamp(1.8rem, 3.4vw, 2.5rem); color: var(--on-navy); line-height: 1.1; }
+.figures .big small { font-size: .55em; color: var(--brass); margin-left: .15em; }
+.figures .what { display: block; font-size: var(--t-s); color: var(--on-navy-soft); margin-top: .35rem; line-height: 1.4; }
 
 /* Secciones */
 section.block { border-top: 1px solid var(--rule); }
-section.block .wrap { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 1.5rem clamp(2rem, 5vw, 4.5rem); padding-block: clamp(3rem, 7vw, 5rem); }
-section.block h2 { font-size: var(--s4); }
-.services { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 2rem 2.5rem; }
-.services article h3 { font-size: var(--s3); margin: .4rem 0 .5rem; }
-.services article p { margin: 0; color: var(--ink-soft); }
-.services ul { margin: .75rem 0 0; padding-left: 1.1rem; color: var(--ink-soft); font-size: var(--s1); }
+section.block > .wrap { padding-block: clamp(3rem, 7vw, 5.5rem); }
+.head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 1rem 3rem; align-items: end; margin-bottom: 2.5rem; }
+.head p { margin: 0; color: var(--ink-soft); max-width: 36rem; }
 
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: paso; }
-.steps li { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); gap: 1rem; padding-block: 1.1rem; border-bottom: 1px solid var(--rule); counter-increment: paso; }
-.steps li:first-child { padding-top: 0; }
-.steps li::before { content: counter(paso, decimal-leading-zero); font-family: var(--mono); color: var(--accent); padding-top: .2rem; }
-.steps h3 { font-size: var(--s3); margin: 0 0 .25rem; }
-.steps p { margin: 0; color: var(--ink-soft); max-width: 38rem; }
+.pains { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 2.5rem; }
+.pains li { padding-block: 1rem; border-top: 1px solid var(--rule); }
+.pains strong { display: block; font-weight: 600; margin-bottom: .2rem; }
+.pains span { color: var(--ink-soft); font-size: var(--t-s); }
 
-.prose p { max-width: 38rem; margin: 0 0 1rem; }
-blockquote { margin: 2rem 0 0; padding-left: 1.25rem; border-left: 2px solid var(--accent); font-family: var(--display); font-style: italic; font-size: var(--s3); max-width: 34rem; }
-blockquote cite { display: block; margin-top: .5rem; font-family: var(--mono); font-style: normal; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.services { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.service { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 1.6rem 1.6rem 1.4rem; display: flex; flex-direction: column; gap: .6rem; min-width: 0; }
+.service .tag { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.service p { margin: 0; color: var(--ink-soft); }
+.service ul { margin: .3rem 0 0; padding-left: 1.1rem; font-size: var(--t-s); color: var(--ink-soft); }
+.service.featured { border-color: var(--accent); }
 
-.contact p { max-width: 36rem; margin: 0 0 1.5rem; }
-footer { border-top: 1px solid var(--rule); }
-footer .wrap { padding-block: 1.5rem; display: flex; flex-wrap: wrap; gap: .5rem 2rem; justify-content: space-between; font-size: var(--s1); color: var(--ink-soft); }
+.compare-wrap { overflow-x: auto; }
+table.compare { width: 100%; border-collapse: collapse; min-width: 34rem; font-size: var(--t-s); }
+.compare th, .compare td { text-align: left; padding: .85rem 1rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.compare thead th { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; }
+.compare thead th:last-child { color: var(--accent); }
+.compare td:first-child { font-weight: 600; width: 22%; }
+.compare td:last-child { color: var(--ink); }
+.compare td:nth-child(2) { color: var(--ink-soft); }
 
-@media (max-width: 52rem) {
-  .hero .wrap, section.block .wrap { grid-template-columns: minmax(0, 1fr); }
+.pmi { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; counter-reset: g; }
+.pmi li { counter-increment: g; padding: 1.2rem 1.1rem 1.3rem 0; border-top: 3px solid var(--accent); margin-right: 1rem; }
+.pmi li::before { content: counter(g); font-family: var(--mono); font-size: var(--t-xs); color: var(--accent); display: block; margin-bottom: .4rem; }
+.pmi h3 { font-size: 1.12rem; margin-bottom: .35rem; }
+.pmi p { margin: 0; font-size: var(--t-s); color: var(--ink-soft); }
+.pmi-note { margin: 1.75rem 0 0; font-size: var(--t-s); color: var(--ink-soft); max-width: 44rem; }
+
+.tool { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 2rem 3.5rem; align-items: start; }
+.tool .intro p { color: var(--ink-soft); margin: 1rem 0 0; max-width: 30rem; }
+.ledger { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 1.5rem; min-width: 0; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 8rem; gap: 1rem; align-items: center; padding-block: .6rem; border-top: 1px solid var(--rule); }
+.row:first-child { border-top: 0; }
+.row label { font-size: var(--t-s); }
+.row label small { display: block; color: var(--ink-soft); font-size: var(--t-xs); }
+.row input { width: 100%; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 1rem; text-align: right; background: var(--bg); color: var(--ink); border: 1px solid var(--rule); border-radius: 3px; padding: .45rem .55rem; }
+.op { font-family: var(--mono); color: var(--ink-soft); }
+.total { border-top: 2px solid var(--ink); margin-top: .3rem; padding-top: 1rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .3rem 1rem; align-items: baseline; }
+.total .big { font-family: var(--mono); font-size: 1.6rem; font-variant-numeric: tabular-nums; text-align: right; }
+.total .big.neg { color: var(--neg); }
+.total .sub { font-size: var(--t-s); color: var(--ink-soft); }
+.verdict { grid-column: 1 / -1; margin: .6rem 0 0; font-size: var(--t-s); }
+.ledger .note { font-size: var(--t-xs); color: var(--ink-soft); margin: 1rem 0 0; }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem 4rem; }
+.split p { margin: 0 0 1rem; max-width: 36rem; }
+blockquote { margin: 1.5rem 0 0; padding-left: 1.25rem; border-left: 2px solid var(--brass); font-family: var(--display); font-style: italic; font-size: var(--t-l); max-width: 32rem; }
+blockquote cite { display: block; margin-top: .5rem; font-family: var(--mono); font-style: normal; font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.nopromise { list-style: none; margin: 0; padding: 0; }
+.nopromise li { padding: .8rem 0; border-top: 1px solid var(--rule); }
+.nopromise li strong { display: block; }
+.nopromise li span { color: var(--ink-soft); font-size: var(--t-s); }
+
+details { border-top: 1px solid var(--rule); padding-block: 1rem; }
+details:last-child { border-bottom: 1px solid var(--rule); }
+summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+details p { margin: .6rem 0 0; color: var(--ink-soft); max-width: 46rem; }
+
+.contact .wrap { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 2rem 4rem; align-items: center; padding-block: clamp(3rem, 7vw, 5rem); }
+.contact h2 { font-size: var(--t-xl); }
+.contact p { color: var(--on-navy-soft); margin: 1rem 0 0; max-width: 34rem; }
+.contact .pending { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--on-navy-soft); margin-top: .9rem; }
+footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem 2rem; justify-content: space-between; font-size: var(--t-s); color: var(--on-navy-soft); border-top: 1px solid rgba(238,242,247,.12); }
+
+@media (max-width: 60rem) {
+  .pmi { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1rem; }
+  .figures ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .figures li:nth-child(3) { border-left: 0; padding-left: 0; }
+  .figures li:nth-child(n+3) { border-top: 1px solid rgba(238,242,247,.12); }
 }
-@media (max-width: 26rem) {
-  .row { grid-template-columns: minmax(0, 1fr) 6rem; }
-  .steps li { grid-template-columns: 2.5rem minmax(0, 1fr); }
+@media (max-width: 52rem) {
+  .hero .wrap, .head, .tool, .split, .contact .wrap { grid-template-columns: minmax(0, 1fr); }
+  .hero .copy { padding-bottom: 0; }
+  .portrait { width: min(80%, 20rem); }
+  .pains { grid-template-columns: minmax(0, 1fr); }
+  .services { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 30rem) {
+  .pmi { grid-template-columns: minmax(0, 1fr); }
+  .figures li { padding-inline: 0 .75rem; }
+  .row { grid-template-columns: minmax(0, 1fr) 6.5rem; }
 }
 </style>
 </head>
 <body>
 
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="#inicio">Carlo Pagani</a>
-    <nav aria-label="Secciones">
-      <ul>
-        <li><a href="#servicios">Servicios</a></li>
-        <li><a href="#metodo">Cómo trabajo</a></li>
-        <li><a href="#docencia">Docencia</a></li>
-        <li><a href="#contacto">Contacto</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-
-<main id="inicio">
-  <section class="hero">
+<div class="navy">
+  <header class="topbar">
     <div class="wrap">
-      <div>
-        <p class="label">Finanzas para pymes</p>
-        <h1>Las cifras de tu empresa, <em>ordenadas para decidir.</em></h1>
-        <p class="lede">Soy consultor financiero y profesor universitario de finanzas. Acompaño a pequeñas y medianas empresas como su gerente financiero a tiempo parcial: el criterio de un director financiero, sin el costo de tenerlo en planilla.</p>
-        <ul class="roles">
-          <li>Gerencia financiera fraccionada</li>
-          <li>Consultoría financiera</li>
-          <li>Docencia universitaria</li>
+      <a class="brand" href="#inicio">Carlo Pagani</a>
+      <nav aria-label="Secciones">
+        <ul>
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#metodo">Método</a></li>
+          <li><a href="#chequeo">Chequeo de caja</a></li>
+          <li><a href="#docencia">Docencia</a></li>
+          <li><a href="#contacto">Contacto</a></li>
         </ul>
-        <a class="btn" href="#contacto">Conversemos sobre tu empresa</a>
-      </div>
+      </nav>
+    </div>
+  </header>
 
-      <aside class="ledger" aria-labelledby="cce-title">
-        <p class="label">Una cuenta rápida</p>
-        <h2 id="cce-title">¿Cuántos días tarda en volver tu caja?</h2>
-        <p class="help">El ciclo de conversión de efectivo mide los días que tu dinero pasa atrapado entre pagar a proveedores y cobrar a clientes. Cambia las cifras de ejemplo por las tuyas.</p>
-        <form id="cce" autocomplete="off">
-          <div class="row">
-            <label for="dio">Días de inventario<small>lo que tarda en venderse la mercadería</small></label>
-            <input id="dio" type="number" inputmode="numeric" min="0" max="999" value="45">
-          </div>
-          <div class="row">
-            <label for="dso"><span class="op">+</span> Días de cobro<small>lo que tardan en pagarte tus clientes</small></label>
-            <input id="dso" type="number" inputmode="numeric" min="0" max="999" value="60">
-          </div>
-          <div class="row">
-            <label for="dpo"><span class="op">−</span> Días de pago<small>lo que tardas en pagar a proveedores</small></label>
-            <input id="dpo" type="number" inputmode="numeric" min="0" max="999" value="30">
-          </div>
-          <div class="row">
-            <label for="ventas">Ventas mensuales<small>en tu moneda</small></label>
-            <input id="ventas" type="number" inputmode="numeric" min="0" step="1000" value="120000">
-          </div>
-          <div class="total" aria-live="polite">
-            <span>Ciclo de caja</span>
-            <span class="big" id="out-dias">75 días</span>
-            <span class="sub">Capital de trabajo inmovilizado, aprox.</span>
-            <span class="sub num" id="out-monto">300.000</span>
-            <div class="bar" aria-hidden="true"><span id="out-bar"></span></div>
-          </div>
-        </form>
-        <p class="note">Cifras de ejemplo. Cada día que recortas libera, más o menos, un día de ventas en caja.</p>
-      </aside>
+  <section class="hero" id="inicio">
+    <div class="wrap">
+      <div class="copy">
+        <p class="eyebrow">CFO fraccional · Consultor financiero · Profesor universitario</p>
+        <h1>La dirección financiera que tu empresa necesita, <em>sin cargarla a tu planilla.</em></h1>
+        <p class="lede">Hoy dirijo las finanzas de más de diez empresas a la vez. Esa cartera me permite ver patrones antes que nadie y llevar a tu empresa soluciones que ya funcionaron en otras.</p>
+        <div class="ctas">
+          <a class="btn btn-brass" href="#contacto">Agenda una primera conversación</a>
+          <a class="btn btn-line" href="#chequeo">Haz el chequeo de caja</a>
+        </div>
+      </div>
+      <figure class="portrait" style="margin:0">
+        <img src="assets/carlo-pagani.png" width="511" height="465" alt="Retrato de Carlo Pagani con traje azul">
+      </figure>
+    </div>
+  </section>
+
+  <section class="figures" aria-label="Trayectoria en cifras">
+    <div class="wrap">
+      <ul>
+        <li><span class="big num">+10</span><span class="what">empresas en las que soy CFO actualmente</span></li>
+        <li><span class="big">6 <small>cifras</small></span><span class="what">facturación promedio de las empresas que dirijo</span></li>
+        <li><span class="big num">600 <small>M</small></span><span class="what">en inventarios bajo mi administración</span></li>
+        <li><span class="big">PMI</span><span class="what">metodología de gestión de proyectos en cada encargo</span></li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<main>
+  <section class="block" id="sintomas">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">¿Te reconoces?</p>
+          <h2>Señales de que tu empresa necesita un CFO</h2>
+        </div>
+        <p>Si dos o más de estas frases describen tu semana, el problema no es de contabilidad. Es de dirección financiera.</p>
+      </div>
+      <ul class="pains">
+        <li><strong>Vendes más, pero la caja no alcanza.</strong><span>El crecimiento consume capital de trabajo y nadie lo está midiendo.</span></li>
+        <li><strong>Te enteras de los números cuando ya es tarde.</strong><span>Los estados financieros llegan un mes después y solo sirven para cumplir.</span></li>
+        <li><strong>El inventario se come la liquidez.</strong><span>Hay stock que no rota y dinero inmovilizado que nadie ve.</span></li>
+        <li><strong>El banco te pide información que no tienes.</strong><span>Proyecciones, flujos, indicadores: todo se arma a última hora.</span></li>
+        <li><strong>No sabes qué producto o cliente te deja dinero.</strong><span>Los márgenes se calculan a ojo y los precios se fijan por costumbre.</span></li>
+        <li><strong>Todas las decisiones pasan por ti.</strong><span>Sin presupuesto ni indicadores, cada gasto es una consulta al dueño.</span></li>
+      </ul>
     </div>
   </section>
 
   <section class="block" id="servicios">
     <div class="wrap">
-      <div>
-        <p class="label">Servicios</p>
-        <h2>Qué hago</h2>
+      <div class="head">
+        <div>
+          <p class="eyebrow">Servicios</p>
+          <h2>Cuatro maneras de trabajar juntos</h2>
+        </div>
+        <p>Desde un encargo puntual hasta asumir la función financiera completa. Lo definimos según la etapa y el tamaño de tu empresa.</p>
       </div>
       <div class="services">
-        <article>
-          <p class="label">Continuo</p>
-          <h3>Gerencia financiera fraccionada</h3>
-          <p>Asumo la función financiera de tu empresa unos días al mes, con responsabilidad sobre los números y presencia en las decisiones.</p>
+        <article class="service featured">
+          <span class="tag">Continuo</span>
+          <h3>CFO fraccional</h3>
+          <p>Asumo la dirección financiera de tu empresa unos días al mes, con responsabilidad sobre los números y voz en las decisiones.</p>
           <ul>
             <li>Flujo de caja proyectado y control semanal</li>
-            <li>Presupuesto y seguimiento mensual</li>
+            <li>Presupuesto, indicadores y reporte a la gerencia</li>
             <li>Relación con bancos y financiamiento</li>
-            <li>Tablero de indicadores para la gerencia</li>
+            <li>Gestión de inventarios y capital de trabajo</li>
           </ul>
         </article>
-        <article>
-          <p class="label">Por proyecto</p>
+        <article class="service">
+          <span class="tag">Patrimonio</span>
+          <h3>Administración de fondos de inversión</h3>
+          <p>Gestión de fondos con criterio de riesgo y retorno, política de inversión por escrito y reportes periódicos al inversionista.</p>
+          <ul>
+            <li>Definición de la política de inversión</li>
+            <li>Asignación de activos y seguimiento</li>
+            <li>Reportes de rendimiento y riesgo</li>
+          </ul>
+        </article>
+        <article class="service">
+          <span class="tag">Por proyecto</span>
           <h3>Consultoría financiera</h3>
-          <p>Encargos acotados, con entregable y fecha: un diagnóstico, una valorización o un plan para una decisión concreta.</p>
+          <p>Encargos acotados, con entregable y fecha, para una decisión concreta.</p>
           <ul>
             <li>Diagnóstico financiero y de rentabilidad</li>
             <li>Evaluación de inversiones y proyectos</li>
@@ -223,58 +286,157 @@ footer .wrap { padding-block: 1.5rem; display: flex; flex-wrap: wrap; gap: .5rem
             <li>Estructura de costos y precios</li>
           </ul>
         </article>
+        <article class="service">
+          <span class="tag">Formación</span>
+          <h3>Capacitación en finanzas</h3>
+          <p>Talleres para dueños y equipos que necesitan leer sus números y decidir con ellos, con la experiencia de años de docencia universitaria.</p>
+          <ul>
+            <li>Finanzas para no financieros</li>
+            <li>Flujo de caja y presupuesto</li>
+            <li>Evaluación de proyectos</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="diferencia">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">La diferencia</p>
+          <h2>Tu contador te dice qué pasó. Un CFO te ayuda a decidir qué sigue.</h2>
+        </div>
+        <p>Ambos son necesarios y se complementan. Esta es la frontera entre los dos.</p>
+      </div>
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead><tr><th scope="col">Tema</th><th scope="col">Contabilidad</th><th scope="col">Dirección financiera</th></tr></thead>
+          <tbody>
+            <tr><td>Mirada</td><td>Registra el pasado</td><td>Proyecta los próximos meses</td></tr>
+            <tr><td>Caja</td><td>Concilia lo que entró y salió</td><td>Anticipa faltantes y decide cómo cubrirlos</td></tr>
+            <tr><td>Rentabilidad</td><td>Calcula la utilidad del periodo</td><td>Identifica qué productos, clientes y canales la generan</td></tr>
+            <tr><td>Bancos</td><td>Entrega los estados financieros</td><td>Negocia condiciones con un plan que las sustenta</td></tr>
+            <tr><td>Decisiones</td><td>Informa</td><td>Propone, mide y responde por el resultado</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
 
   <section class="block" id="metodo">
     <div class="wrap">
-      <div>
-        <p class="label">Método</p>
-        <h2>Cómo trabajo</h2>
+      <div class="head">
+        <div>
+          <p class="eyebrow">Método</p>
+          <h2>Cada encargo, gestionado como un proyecto</h2>
+        </div>
+        <p>Trabajo con la metodología del Project Management Institute (PMI): alcance, plazos y entregables acordados desde el inicio, y control hasta el cierre.</p>
       </div>
-      <ol class="steps">
-        <li><div><h3>Diagnóstico</h3><p>Reviso estados financieros, flujo de caja y la forma en que hoy se toman las decisiones. Termina en un informe breve con lo urgente y lo importante.</p></div></li>
-        <li><div><h3>Plan</h3><p>Acordamos prioridades, indicadores y un calendario. Cada objetivo tiene una cifra que permite saber si se cumplió.</p></div></li>
-        <li><div><h3>Acompañamiento</h3><p>Me sumo a la operación con reuniones periódicas, un tablero vivo y disponibilidad para las decisiones que no pueden esperar.</p></div></li>
+      <ol class="pmi">
+        <li><h3>Inicio</h3><p>Diagnóstico de estados financieros, caja y forma de decidir. Definimos el alcance.</p></li>
+        <li><h3>Planificación</h3><p>Prioridades, indicadores, calendario y responsables. Cada meta tiene una cifra.</p></li>
+        <li><h3>Ejecución</h3><p>Implemento flujos, presupuestos y tableros junto a tu equipo.</p></li>
+        <li><h3>Monitoreo y control</h3><p>Reuniones periódicas y tablero vivo para corregir a tiempo.</p></li>
+        <li><h3>Cierre</h3><p>Informe de resultados frente a lo planificado y siguientes pasos.</p></li>
       </ol>
+      <p class="pmi-note">Dirigir las finanzas de más de diez empresas al mismo tiempo me da un portafolio amplio de casos resueltos. Cuando aparece un problema en tu empresa, es probable que ya lo haya visto en otra y sepa qué funciona.</p>
+    </div>
+  </section>
+
+  <section class="block" id="chequeo">
+    <div class="wrap tool">
+      <div class="intro">
+        <p class="eyebrow">Chequeo de caja</p>
+        <h2>¿Cuántos días tarda en volver tu dinero?</h2>
+        <p>El ciclo de conversión de efectivo mide cuánto tiempo pasa tu dinero atrapado entre pagar a proveedores y cobrar a clientes. Cada día que recortas libera caja sin vender más.</p>
+        <p>Cambia las cifras de ejemplo por las de tu empresa.</p>
+      </div>
+      <form class="ledger" id="cce" autocomplete="off">
+        <div class="row">
+          <label for="dio">Días de inventario<small>lo que tarda en venderse la mercadería</small></label>
+          <input id="dio" type="number" inputmode="numeric" min="0" max="999" value="45">
+        </div>
+        <div class="row">
+          <label for="dso"><span class="op">+</span> Días de cobro<small>lo que tardan en pagarte tus clientes</small></label>
+          <input id="dso" type="number" inputmode="numeric" min="0" max="999" value="60">
+        </div>
+        <div class="row">
+          <label for="dpo"><span class="op">−</span> Días de pago<small>lo que tardas en pagar a proveedores</small></label>
+          <input id="dpo" type="number" inputmode="numeric" min="0" max="999" value="30">
+        </div>
+        <div class="row">
+          <label for="ventas">Ventas mensuales<small>en tu moneda</small></label>
+          <input id="ventas" type="number" inputmode="numeric" min="0" step="1000" value="120000">
+        </div>
+        <div class="total" aria-live="polite">
+          <span>Ciclo de caja</span>
+          <span class="big" id="out-dias">75 días</span>
+          <span class="sub">Capital de trabajo inmovilizado, aprox.</span>
+          <span class="sub num" id="out-monto">295.890</span>
+          <p class="verdict" id="out-verdict"></p>
+        </div>
+        <p class="note">Cifras de ejemplo. Cálculo aproximado: ventas anuales ÷ 365 × días del ciclo.</p>
+      </form>
     </div>
   </section>
 
   <section class="block" id="docencia">
-    <div class="wrap">
+    <div class="wrap split">
       <div>
-        <p class="label">Docencia</p>
-        <h2>En el aula</h2>
-      </div>
-      <div class="prose">
-        <p>Enseño finanzas en varias universidades e institutos. El aula me obliga a explicar con claridad lo que en la empresa se da por sabido, y la empresa me devuelve al aula con casos reales.</p>
-        <p>Esa doble práctica marca mi forma de asesorar: cada recomendación llega con su porqué, para que el equipo la entienda y la sostenga sin depender de mí.</p>
+        <p class="eyebrow">Docencia</p>
+        <h2>Del aula a la empresa, y de vuelta</h2>
+        <p style="margin-top:1.25rem">Enseño finanzas en varias universidades e institutos. El aula me obliga a explicar con claridad lo que en la empresa se da por sabido, y la empresa me devuelve al aula con casos reales.</p>
+        <p>Por eso cada recomendación llega con su porqué: para que tu equipo la entienda y la sostenga sin depender de mí.</p>
         <blockquote>No es que tengamos poco tiempo, es que perdemos mucho.<cite>Séneca, Sobre la brevedad de la vida</cite></blockquote>
+      </div>
+      <div>
+        <p class="eyebrow">Lo que no prometo</p>
+        <ul class="nopromise">
+          <li><strong>Milagros en un mes.</strong><span>Ordenar las finanzas toma un ciclo completo de planificación y control.</span></li>
+          <li><strong>Números maquillados.</strong><span>Si una cifra es mala, la verás tal cual y con un plan para corregirla.</span></li>
+          <li><strong>Decidir por ti.</strong><span>Te doy el análisis y una recomendación clara. La decisión sigue siendo tuya.</span></li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="block contact" id="contacto">
+  <section class="block" id="preguntas">
     <div class="wrap">
-      <div>
-        <p class="label">Contacto</p>
-        <h2>Conversemos</h2>
+      <div class="head">
+        <div>
+          <p class="eyebrow">Preguntas frecuentes</p>
+          <h2>Antes de empezar</h2>
+        </div>
       </div>
-      <div>
-        <p>Cuéntame en pocas líneas a qué se dedica tu empresa y qué decisión financiera tienes por delante. Te respondo personalmente.</p>
-        <p class="label">Correo y enlaces en preparación</p>
-      </div>
+      <details><summary>¿Qué es un CFO fraccional?</summary><p>Un director financiero que trabaja para tu empresa una parte del mes. Tienes su criterio y su responsabilidad sobre los números, con un costo proporcional a la dedicación.</p></details>
+      <details><summary>¿Para qué tamaño de empresa es?</summary><p>Para pymes que ya facturan de forma constante y en las que las decisiones financieras pesan, pero que todavía no justifican un gerente de finanzas a tiempo completo.</p></details>
+      <details><summary>¿Reemplaza a mi contador?</summary><p>No. Trabajo con tu contador: él registra y cumple con lo tributario; yo uso esa información para proyectar, controlar y decidir.</p></details>
+      <details><summary>¿Cómo empezamos?</summary><p>Con una conversación para entender tu empresa y lo que necesitas. Si tiene sentido trabajar juntos, te propongo un alcance, un plazo y un costo por escrito.</p></details>
     </div>
   </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <span>Carlo Pagani · Finanzas para pymes</span>
-    <span class="num" id="anio">2026</span>
-  </div>
-</footer>
+<div class="navy">
+  <section class="contact" id="contacto">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow" style="color:var(--brass)">Contacto</p>
+        <h2>Conversemos sobre tu empresa</h2>
+        <p>Cuéntame a qué se dedica tu empresa y qué decisión financiera tienes por delante. Te respondo personalmente.</p>
+      </div>
+      <div>
+        <p class="pending">Correo, WhatsApp y LinkedIn en preparación</p>
+      </div>
+    </div>
+  </section>
+  <footer>
+    <div class="wrap">
+      <span>Carlo Pagani · Dirección financiera para pymes</span>
+      <span class="num" id="anio">2026</span>
+    </div>
+  </footer>
+</div>
 
 <script>
 (function () {
@@ -288,7 +450,11 @@ footer .wrap { padding-block: 1.5rem; display: flex; flex-wrap: wrap; gap: .5rem
     outD.textContent = fmt.format(dias) + (Math.abs(dias) === 1 ? ' día' : ' días');
     outD.classList.toggle('neg', dias > 90);
     document.getElementById('out-monto').textContent = fmt.format(Math.max(monto, 0));
-    document.getElementById('out-bar').style.width = Math.max(0, Math.min(dias / 180, 1)) * 100 + '%';
+    var v = dias <= 0 ? 'Tus proveedores financian tu operación. Es una posición fuerte; cuídala.'
+      : dias <= 45 ? 'Ciclo corto. Hay margen para crecer sin presionar la caja.'
+      : dias <= 90 ? 'Ciclo intermedio. Revisar cobros e inventario suele liberar caja rápido.'
+      : 'Ciclo largo. Tu crecimiento probablemente está consumiendo más caja de la que genera.';
+    document.getElementById('out-verdict').textContent = v;
   }
   f.addEventListener('input', calc);
   f.addEventListener('submit', function (e) { e.preventDefault(); });
