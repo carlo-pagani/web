@@ -1008,6 +1008,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     <div class="ae-foot">
       <button type="button" class="back" id="ae-back" hidden>↶ Corregir la anterior</button>
       <button type="button" class="back" id="ae-skip" hidden>Prefiero no responder</button>
+      <button type="button" class="back" id="ae-duda" hidden>Tengo una duda</button>
       <span class="ae-err" id="ae-err" role="status"></span>
     </div>
   </form>
@@ -1380,42 +1381,42 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', 'Otra decisión de dinero'] },
 
-    { id: 'e1', si: 'Mi empresa', q: '¿A qué se dedica tu empresa? Cuéntame qué vende, a quién y desde cuándo opera.', ph: 'Por ejemplo: distribuidora de alimentos para tiendas y restaurantes, desde 2018' },
+    { id: 'e1', si: 'Mi empresa', para: 'Giro del negocio, tipo de clientes y antigüedad.', q: '¿A qué se dedica tu empresa? Cuéntame qué vende, a quién y desde cuándo opera.', ph: 'Por ejemplo: distribuidora de alimentos para tiendas y restaurantes, desde 2018' },
     { id: 'e2', si: 'Mi empresa', q: '¿Cuántas personas trabajan en ella?', op: ['De 1 a 5', 'De 6 a 20', 'De 21 a 50', 'De 51 a 200', 'Más de 200'] },
-    { id: 'e3', si: 'Mi empresa', q: 'Vamos a las cifras del último año. Aproximadas está bien; deja en blanco lo que no sepas.', opcional: true, ficha: [
+    { id: 'e3', si: 'Mi empresa', para: 'Ventas, costo de ventas y utilidad del último año, para estimar el margen.', q: 'Vamos a las cifras del último año. Aproximadas está bien; deja en blanco lo que no sepas.', opcional: true, ficha: [
       { k: 'ventas', l: 'Ventas del año' },
       { k: 'costo', l: 'Costo de lo vendido', d: 'mercadería, materia prima y producción' },
       { k: 'utilidad', l: 'Utilidad o pérdida del año', d: 'si fue pérdida, anótala con signo menos' }] },
-    { id: 'e4', si: 'Mi empresa', q: '¿Cuánto suman los gastos fijos de cada mes?', opcional: true, total: 'Gastos fijos al mes', ficha: [
+    { id: 'e4', si: 'Mi empresa', para: 'Gastos fijos mensuales por rubro, para estimar el punto de equilibrio.', q: '¿Cuánto suman los gastos fijos de cada mes?', opcional: true, total: 'Gastos fijos al mes', ficha: [
       { k: 'nomina', l: 'Nómina', d: 'sueldos con beneficios de ley y aportes al IESS' },
       { k: 'arriendo', l: 'Arriendo y servicios básicos' },
       { k: 'admin', l: 'Otros gastos administrativos', d: 'contador, sistemas, seguros, movilización' },
       { k: 'ventasg', l: 'Gastos de ventas', d: 'comisiones, publicidad, transporte de entregas' }] },
-    { id: 'e5', si: 'Mi empresa', q: 'Ahora el capital de trabajo, con los saldos de hoy:', opcional: true, ficha: [
+    { id: 'e5', si: 'Mi empresa', para: 'Saldos actuales de caja, cuentas por cobrar, inventario y cuentas por pagar.', q: 'Ahora el capital de trabajo, con los saldos de hoy:', opcional: true, ficha: [
       { k: 'caja', l: 'Caja y bancos' },
       { k: 'cxc', l: 'Cuentas por cobrar a clientes' },
       { k: 'inv', l: 'Inventario' },
       { k: 'cxp', l: 'Cuentas por pagar a proveedores' }] },
     { id: 'e6', si: 'Mi empresa', q: '¿En cuánto tiempo te pagan tus clientes, en promedio?', op: DIAS },
     { id: 'e7', si: 'Mi empresa', q: '¿Y en cuánto tiempo les pagas a tus proveedores?', op: DIAS },
-    { id: 'e8', si: 'Mi empresa', q: 'Anota las deudas de la empresa con su saldo, la cuota mensual y, si la conoces, la tasa.', deudas: DEUDAS_E },
+    { id: 'e8', si: 'Mi empresa', para: 'Detalle de las deudas de la empresa para medir su carga financiera.', q: 'Anota las deudas de la empresa con su saldo, la cuota mensual y, si la conoces, la tasa.', deudas: DEUDAS_E },
     { id: 'e9', si: 'Mi empresa', q: 'En los últimos tres meses, ¿cómo estuvo la caja?', op: ['Hubo excedentes', 'Alcanzó justo', 'Faltó y usamos crédito o sobregiro', 'Tuvimos que atrasar pagos'] },
     { id: 'e10', si: 'Mi empresa', q: '¿Están al día con sus obligaciones? Marca lo que corresponda.', op: ['Todo al día', 'Atrasos con el SRI', 'Atrasos con el IESS', 'Atrasos con bancos', 'Atrasos con proveedores'], multi: true },
     { id: 'e11', si: 'Mi empresa', q: '¿Qué información financiera llevan? Puedes marcar varias.', op: ['Contabilidad al día', 'Estados financieros mensuales', 'Flujo de caja proyectado', 'Presupuesto anual', 'Costos por producto', 'Nada formal todavía'], multi: true },
-    { id: 'e12', si: 'Mi empresa', q: '¿Cuál es el problema o la decisión principal que quieres resolver con este análisis?', ph: 'Por ejemplo: vendemos más que el año pasado, pero no alcanza la caja' },
-    { id: 'e13', si: 'Mi empresa', q: '¿Qué han intentado hasta ahora para resolverlo?', opcional: true },
+    { id: 'e12', si: 'Mi empresa', para: 'El problema financiero concreto que el informe debe atender.', q: '¿Cuál es el problema o la decisión principal que quieres resolver con este análisis?', ph: 'Por ejemplo: vendemos más que el año pasado, pero no alcanza la caja' },
+    { id: 'e13', si: 'Mi empresa', para: 'Acciones ya intentadas, para no repetir recomendaciones.', q: '¿Qué han intentado hasta ahora para resolverlo?', opcional: true },
     { id: 'e14', si: 'Mi empresa', nota: lecturaEmpresa },
 
     { id: 'p1', si: P, q: '¿Qué quieres lograr? Puedes marcar varias.', op: ['Ordenar mi presupuesto', 'Salir de deudas', 'Tener un fondo de emergencia', 'Empezar a invertir', 'Comprar vivienda o vehículo', 'Planear mi jubilación'], multi: true },
     { id: 'p2', si: P, q: '¿En qué rango de edad estás?', op: ['Menos de 30', 'De 30 a 39', 'De 40 a 49', 'De 50 a 59', '60 o más'] },
     { id: 'p3', si: P, q: '¿Cuál es tu situación laboral?', op: ['Empleado con relación de dependencia', 'Independiente o con negocio propio', 'Ambas', 'Jubilado', 'Sin ingresos fijos por ahora'] },
     { id: 'p4', si: P, q: 'Además de ti, ¿cuántas personas dependen económicamente de tus ingresos?', op: ['Ninguna', '1', '2', '3', '4 o más'] },
-    { id: 'p5', si: P, q: 'Empecemos por tus ingresos, ya libres de descuentos.', req: true, total: 'Ingreso mensual', ficha: [
+    { id: 'p5', si: P, para: 'Ingreso neto mensual y extras anuales.', q: 'Empecemos por tus ingresos, ya libres de descuentos.', req: true, total: 'Ingreso mensual', ficha: [
       { k: 'sueldo', l: 'Sueldo o ingreso principal', d: 'al mes' },
       { k: 'extra', l: 'Negocio o trabajos independientes', d: 'al mes' },
       { k: 'otros', l: 'Arriendos, pensiones u otros', d: 'al mes' },
       { k: 'anual', l: 'Ingresos extra del año', d: 'décimos, utilidades y bonos, en total', anual: true }] },
-    { id: 'p6', si: P, q: 'Ahora tus gastos fijos de cada mes. Un estimado basta; deja en blanco lo que no aplique.', req: true, total: 'Gastos fijos al mes', ficha: [
+    { id: 'p6', si: P, para: 'Gastos fijos mensuales por rubro, para armar el presupuesto.', q: 'Ahora tus gastos fijos de cada mes. Un estimado basta; deja en blanco lo que no aplique.', req: true, total: 'Gastos fijos al mes', ficha: [
       { k: 'vivienda', l: 'Vivienda', d: 'arriendo y alícuota; la hipoteca va con las deudas' },
       { k: 'servicios', l: 'Servicios básicos', d: 'luz, agua, gas, internet y celular' },
       { k: 'alimentacion', l: 'Alimentación', d: 'supermercado y mercado' },
@@ -1424,7 +1425,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       { k: 'salud', l: 'Salud', d: 'consultas y medicinas' },
       { k: 'educacion', l: 'Educación', d: 'pensiones escolares, universidad y cursos' },
       { k: 'familia', l: 'Apoyo a familiares' }] },
-    { id: 'p7', si: P, q: 'Y los gastos variables, que suelen ser los que más se escapan:', total: 'Gastos variables al mes', ficha: [
+    { id: 'p7', si: P, para: 'Gastos variables mensuales por rubro, para armar el presupuesto.', q: 'Y los gastos variables, que suelen ser los que más se escapan:', total: 'Gastos variables al mes', ficha: [
       { k: 'comidas', l: 'Comidas fuera y delivery' },
       { k: 'ocio', l: 'Entretenimiento y salidas' },
       { k: 'suscripciones', l: 'Suscripciones', d: 'streaming, aplicaciones y gimnasio' },
@@ -1432,21 +1433,21 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       { k: 'ropa', l: 'Ropa y cuidado personal' },
       { k: 'mascotas', l: 'Mascotas' },
       { k: 'otros', l: 'Otros' }] },
-    { id: 'p8', si: P, q: 'Hablemos de deudas: tarjetas, préstamos, hipoteca, vehículo o cooperativas. Anota cada una con su saldo, la cuota mensual y, si la conoces, la tasa.', deudas: DEUDAS_P },
+    { id: 'p8', si: P, para: 'Cada deuda con saldo, cuota, tasa y plazo, para medir el endeudamiento.', q: 'Hablemos de deudas: tarjetas, préstamos, hipoteca, vehículo o cooperativas. Anota cada una con su saldo, la cuota mensual y, si la conoces, la tasa.', deudas: DEUDAS_P },
     { id: 'p9', si: P, cond: function () { return (resp.p8 || []).some(function (d) { return d.tipo === 'Tarjeta de crédito'; }); }, q: 'Con tus tarjetas de crédito, ¿qué sueles pagar cada mes?', op: ['El total del estado de cuenta', 'Más del mínimo, sin llegar al total', 'Solo el mínimo', 'Difiero la mayoría de las compras'] },
     { id: 'p10', si: P, q: '¿Has tenido atrasos en algún pago en los últimos doce meses?', op: ['Ninguno', 'Alguna vez', 'Sí, tengo pagos atrasados ahora'] },
-    { id: 'p11', si: P, q: '¿Qué ahorros e inversiones tienes hoy?', opcional: true, total: 'Ahorro e inversiones', ficha: [
+    { id: 'p11', si: P, para: 'Ahorros e inversiones disponibles, para medir el colchón de emergencia.', q: '¿Qué ahorros e inversiones tienes hoy?', opcional: true, total: 'Ahorro e inversiones', ficha: [
       { k: 'ahorro', l: 'Ahorro disponible', d: 'cuentas de ahorro y efectivo' },
       { k: 'polizas', l: 'Pólizas y depósitos a plazo' },
       { k: 'inversiones', l: 'Fondos, acciones u otras inversiones' }] },
     { id: 'p12', si: P, q: '¿Qué bienes tienes? Puedes marcar varios.', op: ['Vivienda propia', 'Terreno', 'Vehículo', 'Ninguno'], multi: true },
     { id: 'p13', si: P, q: '¿Con qué protección cuentas? Puedes marcar varias.', op: ['Afiliación al IESS', 'Seguro de salud privado', 'Seguro de vida', 'Ninguna'], multi: true },
     { id: 'p14', si: P, q: '¿Llevas un registro de tus gastos?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
-    { id: 'p15', si: P, q: 'Si tuvieras que fijar una meta concreta para los próximos doce meses, ¿cuál sería? Ponle monto y fecha si puedes.', ph: 'Por ejemplo: pagar la tarjeta de 2,400 antes de junio' },
+    { id: 'p15', si: P, para: 'Una meta medible, con monto y plazo.', q: 'Si tuvieras que fijar una meta concreta para los próximos doce meses, ¿cuál sería? Ponle monto y fecha si puedes.', ph: 'Por ejemplo: pagar la tarjeta de 2,400 antes de junio' },
     { id: 'p16', si: P, nota: lecturaPersonal },
 
-    { id: 'i1', si: 'Una inversión', q: '¿Qué inversión estás evaluando? Cuéntame en qué consiste y quién la ofrece.', ph: 'Por ejemplo: una póliza a un año en una cooperativa, un departamento para arrendar, un fondo…' },
-    { id: 'i2', si: 'Una inversión', q: 'Sus condiciones principales:', opcional: true, ficha: [
+    { id: 'i1', si: 'Una inversión', para: 'Qué es la inversión y quién la ofrece, para evaluar riesgo y regulación.', q: '¿Qué inversión estás evaluando? Cuéntame en qué consiste y quién la ofrece.', ph: 'Por ejemplo: una póliza a un año en una cooperativa, un departamento para arrendar, un fondo…' },
+    { id: 'i2', si: 'Una inversión', para: 'Monto, rendimiento ofrecido y plazo de la inversión.', q: 'Sus condiciones principales:', opcional: true, ficha: [
       { k: 'monto', l: 'Monto que piensas invertir' },
       { k: 'rend', l: 'Rendimiento ofrecido o esperado', d: 'anual', t: 'pct' },
       { k: 'plazo', l: 'Plazo', t: 'meses' }] },
@@ -1458,35 +1459,42 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     { id: 'i8', si: 'Una inversión', q: '¿En qué has invertido antes? Puedes marcar varias.', op: ['Pólizas o depósitos a plazo', 'Fondos de inversión', 'Acciones o ETF', 'Bienes raíces', 'Criptomonedas', 'Nunca he invertido'], multi: true },
     { id: 'i9', si: 'Una inversión', q: '¿Conoces sus costos, sus comisiones y las condiciones para retirar el dinero?', op: ['Sí, los tengo claros', 'Más o menos', 'No'] },
     { id: 'i10', si: 'Una inversión', q: '¿La entidad que la ofrece está controlada por alguna superintendencia (de Bancos, de Compañías o de Economía Popular y Solidaria)?', op: ['Sí', 'No', 'No lo sé'] },
-    { id: 'i11', si: 'Una inversión', q: 'Para ubicar la inversión en tu situación general:', opcional: true, ficha: [
+    { id: 'i11', si: 'Una inversión', para: 'Situación financiera general de quien invierte.', q: 'Para ubicar la inversión en tu situación general:', opcional: true, ficha: [
       { k: 'ingreso', l: 'Ingreso mensual neto' },
       { k: 'gastos', l: 'Gastos mensuales', d: 'incluidas las cuotas de deudas' },
       { k: 'ahorro', l: 'Ahorro disponible', d: 'aparte de esta inversión' },
       { k: 'deuda', l: 'Deudas totales', d: 'saldo pendiente' }] },
-    { id: 'i12', si: 'Una inversión', q: '¿La estás comparando con otras opciones? ¿Con cuáles?', opcional: true },
+    { id: 'i12', si: 'Una inversión', para: 'Alternativas con las que compara la inversión.', q: '¿La estás comparando con otras opciones? ¿Con cuáles?', opcional: true },
 
-    { id: 'o1', si: 'Otra decisión de dinero', q: 'Cuéntame la decisión que tienes que tomar.', ph: 'Por ejemplo: comprar o arrendar local, cambiar de trabajo, refinanciar un crédito…' },
-    { id: 'o2', si: 'Otra decisión de dinero', q: '¿Qué opciones estás considerando? Si ya te inclinas por alguna, dime cuál y por qué.' },
+    { id: 'o1', si: 'Otra decisión de dinero', para: 'La decisión concreta que hay que tomar.', q: 'Cuéntame la decisión que tienes que tomar.', ph: 'Por ejemplo: comprar o arrendar local, cambiar de trabajo, refinanciar un crédito…' },
+    { id: 'o2', si: 'Otra decisión de dinero', para: 'Las opciones en juego y por cuál se inclina.', q: '¿Qué opciones estás considerando? Si ya te inclinas por alguna, dime cuál y por qué.' },
     { id: 'o3', si: 'Otra decisión de dinero', q: '¿La decisión es personal o de tu empresa?', op: ['Personal o familiar', 'De mi empresa'] },
-    { id: 'o4', si: 'Otra decisión de dinero', q: 'Las cifras principales, en lo que aplique:', opcional: true, ficha: [
+    { id: 'o4', si: 'Otra decisión de dinero', para: 'Cifras clave de la decisión.', q: 'Las cifras principales, en lo que aplique:', opcional: true, ficha: [
       { k: 'monto', l: 'Monto involucrado' },
       { k: 'cuota', l: 'Cuota o pago mensual que implicaría' },
       { k: 'ingreso', l: 'Ingreso mensual neto', d: 'tuyo o de la empresa' },
       { k: 'ahorro', l: 'Ahorro o caja disponible' }] },
     { id: 'o5', si: 'Otra decisión de dinero', q: '¿Qué pesa más para ti al decidir? Puedes marcar varias.', op: ['El costo total', 'La cuota mensual', 'El riesgo', 'Tener liquidez', 'El tiempo', 'La tranquilidad'], multi: true },
-    { id: 'o6', si: 'Otra decisión de dinero', q: '¿Qué pasa si no decides nada?', opcional: true },
+    { id: 'o6', si: 'Otra decisión de dinero', para: 'Consecuencias de no decidir.', q: '¿Qué pasa si no decides nada?', opcional: true },
     { id: 'o7', si: 'Otra decisión de dinero', q: '¿Para cuándo necesitas decidir?', op: ['Esta semana', 'Este mes', 'Sin prisa'] },
 
-    { id: 'mas', q: '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?', opcional: true },
+    { id: 'mas', para: 'Cambios, ingresos o gastos previstos que modifiquen el análisis.', q: '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?', opcional: true },
     { id: 'datos', q: 'Perfecto. ¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
     { id: 'factura', q: '¿Necesitas factura?', op: ['Sí', 'No'] },
     { id: 'fdatos', cond: function () { return resp.factura === 'Sí'; }, q: '¿A nombre de quién la emito y con qué RUC o cédula?', ph: 'Por ejemplo: Comercial Andes S.A., RUC 1790000000001' }
   ];
-  var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará unos diez minutos; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Uso tus datos solo para preparar tu análisis.\n\nEl análisis cuesta $35 USD + IVA y se paga al final.';
+  var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará unos diez minutos; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Uso tus datos solo para preparar tu análisis.';
+  var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
+  var INTRO_PRECIO = 'El análisis cuesta $35 USD + IVA y se paga al final.';
+  function intro() { return INTRO + '\n\n' + (IA.url ? INTRO_IA + '\n\n' : '') + INTRO_PRECIO; }
   var dlg = document.getElementById('ae'), log = document.getElementById('ae-log'), chipsEl = document.getElementById('ae-chips');
   var row = document.getElementById('ae-row'), txt = document.getElementById('ae-txt'), camposEl = document.getElementById('ae-campos');
   var okBtn = document.getElementById('ae-ok'), backBtn = document.getElementById('ae-back'), skipBtn = document.getElementById('ae-skip');
-  var errEl = document.getElementById('ae-err'), inForm = document.getElementById('ae-in');
+  var errEl = document.getElementById('ae-err'), inForm = document.getElementById('ae-in'), dudaBtn = document.getElementById('ae-duda');
+  // Asistente con IA (opcional): la dirección llega en data/asistente.json cuando el servicio está desplegado
+  var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
+  fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
+    .then(function (j) { if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url; }).catch(function () {});
   var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {};
   var sinMov = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function aePaso(id) { return AE.filter(function (x) { return x.id === id; })[0]; }
@@ -1558,11 +1566,12 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     return v === '' ? 'Prefiero no responder' : v;
   }
   function pintar() {
-    log.innerHTML = ''; burbuja(INTRO, 'yo');
+    log.innerHTML = ''; burbuja(intro(), 'yo');
     camino.forEach(function (id) {
       var p = aePaso(id);
       if (p.nota) { if (resp[id]) burbuja(resp[id], 'yo'); return; }
       burbuja(p.q, 'yo'); burbuja(textoResp(p, resp[id]), 'tu');
+      (aclar[id] || []).forEach(function (a) { burbuja(a.pregunta, 'yo'); burbuja(a.respuesta, 'tu'); });
     });
   }
   function autoAlto() { txt.style.height = 'auto'; txt.style.height = Math.min(txt.scrollHeight + 2, 144) + 'px'; }
@@ -1577,13 +1586,15 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       if (i < ins.length - 1) ins[i + 1].focus(); else c.querySelector('.f-ok').click();
     });
   }
-  function ficha(p) {
+  function ficha(p, confirmar) {
     var prev = previo[p.id] || {};
     var c = burbuja('<div class="f-list">' + p.ficha.map(function (f) {
         return '<label class="f"><span class="f-l">' + esc(f.l) + (f.d ? '<small>' + esc(f.d) + '</small>' : '') + '</span>' + campo(f.k, prev[f.k], f.t, f.l) + '</label>';
       }).join('') + '</div>' +
       (p.total ? '<p class="f-tot"><span>' + esc(p.total) + '</span><b></b></p>' : '') +
-      '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button></div>', 'ficha', true, true);
+      '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button>' +
+      (confirmar ? '<button type="button" class="btn btn-line f-igual">Está bien así</button>' : '') + '</div>', 'ficha', true, true);
+    if (confirmar) c.querySelector('.f-igual').addEventListener('click', function () { c.remove(); responder(previo[p.id]); });
     var leer = function () {
       var v = {}; c.querySelectorAll('input[data-k]').forEach(function (i) { var n = monto(i.value); if (n != null) v[i.dataset.k] = n; }); return v;
     };
@@ -1606,12 +1617,13 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         return '<label><span>' + x[1] + '</span>' + campo(x[0], d[x[0]], x[2], x[1]) + '</label>';
       }).join('') + '</div></div>';
   }
-  function deudas(p) {
+  function deudas(p, confirmar) {
     var prev = previo[p.id];
     var c = burbuja('<div class="d-list">' + (prev && prev.length ? prev : [{}]).map(function (d) { return filaDeuda(p.deudas, d); }).join('') + '</div>' +
       '<button type="button" class="back d-add">+ Agregar otra deuda</button>' +
       '<p class="f-tot"><span>Cuotas al mes</span><b></b></p>' +
-      '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button><button type="button" class="btn btn-line d-no">No tengo deudas</button></div>', 'ficha', true, true);
+      '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button>' +
+      (confirmar ? '<button type="button" class="btn btn-line f-igual">Está bien así</button>' : '<button type="button" class="btn btn-line d-no">No tengo deudas</button>') + '</div>', 'ficha', true, true);
     var lista = c.querySelector('.d-list'), tot = c.querySelector('.f-tot b');
     var leer = function () {
       return Array.prototype.map.call(lista.querySelectorAll('.d-row'), function (r) {
@@ -1631,6 +1643,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         calc();
       }
       else if (e.target.closest('.d-no')) { c.remove(); responder([]); }
+      else if (e.target.closest('.f-igual')) { c.remove(); responder(previo[p.id]); }
       else if (e.target.closest('.f-ok')) {
         var v = leer();
         if (!v.length) { errEl.textContent = 'Anota el saldo o la cuota de cada deuda, o elige «No tengo deudas».'; return; }
@@ -1640,11 +1653,18 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     enterAvanza(c);
     return c;
   }
+  function mostrarFicha(p, ancla, confirmar) {
+    var c = p.ficha ? ficha(p, confirmar) : deudas(p, confirmar);
+    skipBtn.hidden = !p.opcional || confirmar;
+    dudaBtn.hidden = !IA.url;
+    log.scrollTop += ancla.getBoundingClientRect().top - log.getBoundingClientRect().top - 12;
+    if (dlg.open && window.matchMedia('(hover: hover)').matches) c.querySelector('input, select').focus({ preventScroll: true });
+  }
   function preguntar(conPausa) {
     actual = siguiente(); errEl.textContent = '';
     document.getElementById('ae-bar').style.width = Math.round(100 * camino.length / (AE.filter(aplica).length + 1)) + '%';
     backBtn.hidden = !camino.length || enviado;
-    chipsEl.innerHTML = ''; camposEl.hidden = true; row.hidden = true; skipBtn.hidden = true;
+    chipsEl.innerHTML = ''; camposEl.hidden = true; row.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
     if (!actual) return cierre();
     var p = actual;
     if (p.nota) {
@@ -1657,13 +1677,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     }
     var mostrar = function () {
       var qb = burbuja(p.q, 'yo', true);
-      if (p.ficha || p.deudas) {
-        var c = p.ficha ? ficha(p) : deudas(p);
-        skipBtn.hidden = !p.opcional;
-        log.scrollTop += qb.getBoundingClientRect().top - log.getBoundingClientRect().top - 12;
-        if (dlg.open && window.matchMedia('(hover: hover)').matches) c.querySelector('input, select').focus({ preventScroll: true });
-        return;
-      }
+      dudaBtn.hidden = !IA.url || !!p.campos || p.id === 'factura' || p.id === 'fdatos';
+      if (p.ficha || p.deudas) return mostrarFicha(p, qb, false);
       if (p.op) {
         var antes = previo[p.id];
         chipsEl.innerHTML = p.op.map(function (o) {
@@ -1685,11 +1700,78 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   }
   function responder(v) {
     var p = actual; if (!p) return;
-    actual = null; resp[p.id] = v; camino.push(p.id);
+    actual = null; modoDuda = false; resp[p.id] = v; camino.push(p.id);
     burbuja(textoResp(p, v), 'tu', true);
-    chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true;
+    chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
+    if (revisada[p.id] && !aclar[p.id]) {
+      aclar[p.id] = [{ pregunta: revisada[p.id], respuesta: JSON.stringify(v) === JSON.stringify(previo[p.id]) ? 'Confirmó las cifras.' : 'Ajustó las cifras.' }];
+      return preguntar(true);
+    }
+    if (IA.url && !p.op && !p.campos && p.id !== 'fdatos' && !(v === '' || (p.ficha && !Object.keys(v).length))) return revisar(p);
     preguntar(true);
   }
+  function contexto(hasta) {
+    var t = camino.filter(function (id) { return id !== hasta && !aePaso(id).nota; })
+      .map(function (id) { var p = aePaso(id); return p.q + '\n' + textoResp(p, resp[id]); }).join('\n\n');
+    return t.slice(-5000);
+  }
+  function pedirIA(datos) {
+    var ctl = window.AbortController ? new AbortController() : null;
+    var reloj = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
+    return fetch(IA.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos), signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { return r.ok ? r.json() : { accion: 'seguir' }; })
+      .catch(function () { return { accion: 'seguir' }; })
+      .then(function (r) { clearTimeout(reloj); return r || { accion: 'seguir' }; });
+  }
+  function abrirTexto(ph, conSkip, boton) {
+    row.hidden = false; row.classList.remove('solo'); txt.hidden = false; camposEl.hidden = true;
+    okBtn.textContent = boton || 'Enviar'; txt.value = ''; txt.placeholder = ph; autoAlto(); txt.focus();
+    skipBtn.hidden = !conSkip; log.scrollTop = log.scrollHeight;
+  }
+  function revisar(p) {
+    var lista = aclar[p.id] || [];
+    var espera = burbuja('• • •', 'yo escribe');
+    pedirIA({ modo: 'revisar', tema: resp.tema, pregunta: p.q, proposito: p.para || '', respuesta: textoResp(p, resp[p.id]), aclaraciones: lista, contexto: contexto(p.id) })
+      .then(function (r) {
+        espera.remove();
+        if (camino[camino.length - 1] !== p.id || enviado) return;   // el cliente corrigió mientras tanto
+        if (r.accion === 'seguir' || !r.mensaje || lista.length >= 2) return preguntar(false);
+        if (p.ficha || p.deudas) {
+          previo[p.id] = resp[p.id]; delete resp[p.id]; camino.pop();
+          revisada[p.id] = r.mensaje; actual = p;
+          return mostrarFicha(p, burbuja(r.mensaje, 'yo', true), true);
+        }
+        burbuja(r.mensaje, 'yo', true);
+        pendiente = { id: p.id, q: r.mensaje };
+        abrirTexto('Escribe tu respuesta…', true);
+      });
+  }
+  function aclarar(a) {
+    var pe = pendiente; pendiente = null;
+    (aclar[pe.id] = aclar[pe.id] || []).push({ pregunta: pe.q, respuesta: a });
+    burbuja(a, 'tu', true); row.hidden = true; skipBtn.hidden = true;
+    if (a === 'Prefiero no responder') return preguntar(true);
+    revisar(aePaso(pe.id));
+  }
+  function enviarDuda(d) {
+    var p = actual; modoDuda = false;
+    burbuja(d, 'tu', true); row.hidden = true;
+    var espera = burbuja('• • •', 'yo escribe');
+    pedirIA({ modo: 'duda', tema: resp.tema || '', pregunta: p.q, proposito: p.para || '', duda: d, contexto: contexto() }).then(function (r) {
+      espera.remove();
+      if (actual !== p) return;
+      var m = r.mensaje || 'Ahora no pude responderte. Responde como mejor puedas; si algo no queda claro, lo vemos en el informe.';
+      burbuja(m, 'yo', true); dudas.push({ pregunta: p.q, duda: d, respuesta: m });
+      var c = log.querySelector('.msg.ficha'); if (c) log.appendChild(c);   // la ficha queda al final, a la vista
+      if (!p.op && !p.ficha && !p.deudas) abrirTexto(p.ph || 'Escribe tu respuesta…', p.opcional);
+      dudaBtn.hidden = false; log.scrollTop = log.scrollHeight;
+    });
+  }
+  dudaBtn.addEventListener('click', function () {
+    if (!actual || !IA.url) return;
+    modoDuda = true; dudaBtn.hidden = true; errEl.textContent = '';
+    abrirTexto('Escribe tu duda…', false, 'Preguntar');
+  });
   function cierre() {
     document.getElementById('ae-bar').style.width = '100%';
     if (!ref) ref = 'AE-' + Date.now().toString(36).toUpperCase().slice(-6);
@@ -1705,8 +1787,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       .map(function (id) {
         var p = aePaso(id);
         if (p.nota) return 'Primer vistazo calculado en la web\n→ ' + resp[id];
-        return p.q + '\n→ ' + textoResp(p, resp[id]).replace(/\n/g, '\n→ ');
-      }).join('\n\n');
+        return p.q + '\n→ ' + textoResp(p, resp[id]).replace(/\n/g, '\n→ ') +
+          (aclar[id] || []).map(function (a) { return '\n  Asistente: ' + a.pregunta + '\n  → ' + a.respuesta; }).join('');
+      }).join('\n\n') +
+      (dudas.length ? '\n\nDudas que planteó\n' + dudas.map(function (d) { return '· ' + d.duda + ' (en «' + d.pregunta + '»)\n  Asistente: ' + d.respuesta; }).join('\n') : '');
     var datos = { referencia: ref, tema: resp.tema, respuestas: lineas, nombre: resp.datos.nombre, email: resp.datos.email,
       whatsapp: resp.datos.whatsapp, factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: PAGO.url ? 'Enviado a la página de pago' : 'Pendiente: enviar enlace de pago' };
     var u = PAGO.url;
@@ -1732,7 +1816,14 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       .map(function (x) { return x.dataset.v; }));
   });
   inForm.addEventListener('submit', function (e) {
-    e.preventDefault(); if (!actual || actual.op || actual.ficha || actual.deudas) return;
+    e.preventDefault();
+    if (modoDuda || pendiente) {
+      var t = txt.value.trim();
+      if (!t) { errEl.textContent = modoDuda ? 'Escribe tu duda.' : 'Escríbeme aunque sea una frase.'; txt.focus(); return; }
+      errEl.textContent = '';
+      return modoDuda ? enviarDuda(t) : aclarar(t);
+    }
+    if (!actual || actual.op || actual.ficha || actual.deudas) return;
     if (actual.campos) {
       var n = document.getElementById('ae-nombre'), c = document.getElementById('ae-correo');
       var okN = n.value.trim().length > 1, okC = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c.value.trim());
@@ -1750,13 +1841,16 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   });
   txt.addEventListener('input', autoAlto);
   skipBtn.addEventListener('click', function () {
+    if (pendiente) return aclarar('Prefiero no responder');
     if (!actual || !actual.opcional) return;
     var c = log.querySelector('.msg.ficha'); if (c) c.remove();
     responder(actual.ficha ? {} : '');
   });
   backBtn.addEventListener('click', function () {
     if (!camino.length || enviado) return;
-    var quitar = function () { var id = camino.pop(); previo[id] = resp[id]; delete resp[id]; };
+    pendiente = null; modoDuda = false;
+    if (actual) delete revisada[actual.id];
+    var quitar = function () { var id = camino.pop(); previo[id] = resp[id]; delete resp[id]; delete aclar[id]; delete revisada[id]; };
     var esNota = function () { return camino.length && aePaso(camino[camino.length - 1]).nota; };
     while (esNota()) quitar();
     if (camino.length) quitar();
@@ -1765,7 +1859,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   });
   function abrir() {
     if (typeof dlg.showModal !== 'function') { location.hash = '#contacto'; return; }
-    if (enviado) { resp = {}; camino = []; previo = {}; ref = ''; enviado = false; log.innerHTML = ''; }
+    if (enviado) { resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; log.innerHTML = ''; }
     dlg.showModal(); document.documentElement.style.overflow = 'hidden';
     if (!log.children.length) { pintar(); preguntar(true); }
   }

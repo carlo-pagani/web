@@ -1,0 +1,6 @@
+# Asistente con IA del análisis exprés. Lo despliega la acción .github/workflows/asistente.yml
+name = "asistente-analisis"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
