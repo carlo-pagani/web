@@ -80,7 +80,7 @@ h3 { font-size: var(--t-l); }
 .hero h1 em { font-style: italic; font-weight: 500; color: var(--brass); }
 .hero .lede { font-size: var(--t-l); color: var(--on-navy-soft); max-width: 34rem; margin: 1.4rem 0 2rem; line-height: 1.5; }
 .hero .ctas { display: flex; flex-wrap: wrap; gap: .75rem; }
-.portrait { align-self: end; justify-self: center; width: min(100%, 26rem); }
+.portrait { align-self: end; justify-self: center; width: min(100%, 27rem); }
 .portrait img { width: 100%; height: auto; }
 
 .figures { background: var(--navy-2); border-top: 1px solid rgba(238,242,247,.1); }
@@ -108,6 +108,8 @@ section.block > .wrap { padding-block: clamp(3rem, 7vw, 5.5rem); }
 .service p { margin: 0; color: var(--ink-soft); }
 .service ul { margin: .3rem 0 0; padding-left: 1.1rem; font-size: var(--t-s); color: var(--ink-soft); }
 .service.featured { border-color: var(--accent); }
+.service .price { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .45rem; margin: .2rem 0 .1rem; padding: .7rem 0; border-block: 1px solid var(--rule); font-size: var(--t-s); }
+.service .price strong { font-family: var(--display); font-size: 1.6rem; font-weight: 600; color: var(--ink); line-height: 1.1; }
 
 .compare-wrap { overflow-x: auto; }
 table.compare { width: 100%; border-collapse: collapse; min-width: 34rem; font-size: var(--t-s); }
@@ -296,7 +298,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .wiz-top { display: flex; align-items: center; gap: .9rem; font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--on-navy-soft); margin-bottom: 1.1rem; }
 .wiz-bar { flex: 1; height: 3px; background: rgba(238,242,247,.14); border-radius: 2px; overflow: hidden; }
 .wiz-bar i { display: block; height: 100%; width: 25%; background: var(--brass); transition: width .3s ease; }
-.wiz .q { font-family: var(--display); font-size: var(--t-l); color: var(--on-navy); margin: 0 0 1rem; max-width: none; }
+.wiz .q, .mform .q { font-family: var(--display); font-size: var(--t-l); color: var(--on-navy); margin: 0 0 1rem; max-width: none; }
 .chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
 .chip { text-align: left; font: inherit; cursor: pointer; background: var(--navy); color: var(--on-navy); border: 1px solid rgba(238,242,247,.2); border-radius: 4px; padding: .85rem .95rem; display: grid; gap: .2rem; align-content: start; transition: border-color .15s, background .15s; }
 .chip b { font-weight: 600; font-size: var(--t-s); }
@@ -310,6 +312,24 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .wiz-foot .cstatus { margin: 0; }
 .back { font: inherit; font-size: var(--t-s); background: none; border: 0; color: var(--on-navy-soft); cursor: pointer; padding: .25rem 0; }
 .back:hover { color: var(--on-navy); }
+.aviso { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .25rem .6rem; margin: 0 0 1.4rem; padding: .4rem .95rem; border: 1px solid rgba(201,161,91,.55); border-radius: 999px; color: var(--on-navy); text-decoration: none; font-size: var(--t-s); }
+.aviso b { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--brass); font-weight: 500; }
+.aviso:hover { border-color: var(--brass); }
+
+.mclass .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 2rem 4rem; align-items: start; padding-block: clamp(3rem, 7vw, 5rem); }
+.mclass h2 { font-size: var(--t-xl); color: var(--on-navy); }
+.mclass .mc-copy > p { color: var(--on-navy-soft); margin: 1rem 0 0; max-width: 36rem; }
+.mc-datos { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.3rem 0 0; padding: 0; list-style: none; }
+.mc-datos li { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--on-navy); border: 1px solid rgba(238,242,247,.22); border-radius: 999px; padding: .35rem .8rem; }
+.mc-temas { list-style: none; margin: 1.6rem 0 0; padding: 0; display: grid; gap: 1rem; max-width: 36rem; }
+.mc-temas li { padding-left: 1rem; border-left: 2px solid var(--brass); color: var(--on-navy-soft); font-size: var(--t-s); }
+.mc-temas strong { display: block; color: var(--on-navy); font-weight: 600; font-size: 1rem; margin-bottom: .1rem; }
+.mclass .mc-nota { font-size: var(--t-s); }
+.mform .sub { font-size: var(--t-s); color: var(--on-navy); margin: 0 0 .6rem; max-width: none; }
+.mform .sub small { color: var(--on-navy-soft); }
+.mform .chips { margin-bottom: 1.25rem; }
+.mform .chip { padding: .65rem .8rem; }
+@media (max-width: 52rem) { .mclass .wrap { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .wiz-bar i, .chip { transition: none; } }
 @media (max-width: 30rem) { .chips { grid-template-columns: minmax(0, 1fr); } }
 </style>
@@ -323,6 +343,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       <nav aria-label="Secciones">
         <ul>
           <li><a href="#metas">Metas</a></li>
+          <li><a href="#masterclass">Masterclass</a></li>
           <li><a href="#servicios">Servicios</a></li>
           <li><a href="#metodo">Método</a></li>
           <li><a href="#inversion">Inversión</a></li>
@@ -338,6 +359,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   <section class="hero" id="inicio">
     <div class="wrap">
       <div class="copy">
+        <a class="aviso" href="#masterclass"><b>Masterclass</b> Finanzas personales · sábado 31 de octubre <span aria-hidden="true">→</span></a>
         <p class="eyebrow">CFO fraccional · Consultor financiero · Profesor universitario</p>
         <h1>La dirección financiera que tu empresa necesita, <em>sin cargarla a tu planilla.</em></h1>
         <p class="lede">Hoy dirijo las finanzas de más de diez empresas a la vez. Esa cartera me permite ver patrones antes que nadie y llevar a tu empresa soluciones que ya funcionaron en otras.</p>
@@ -347,7 +369,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         </div>
       </div>
       <figure class="portrait" style="margin:0">
-        <img src="assets/carlo-pagani.png" width="511" height="465" alt="Retrato de Carlo Pagani con traje azul">
+        <img src="assets/carlo-pagani.webp" width="960" height="1194" alt="Retrato de Carlo Pagani con traje azul">
       </figure>
     </div>
   </section>
@@ -433,6 +455,45 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     </div>
   </section>
 
+  <section class="mclass navy" id="masterclass" aria-labelledby="mc-t">
+    <div class="wrap">
+      <div class="mc-copy">
+        <p class="eyebrow" style="color:var(--brass)">Masterclass</p>
+        <h2 id="mc-t">Tus finanzas personales, con orden y con criterio</h2>
+        <ul class="mc-datos">
+          <li>Sábado 31 de octubre</li>
+          <li>En línea</li>
+          <li>Cupo limitado</li>
+        </ul>
+        <p>Una sesión para aprender a ordenar el dinero propio con las mismas herramientas con las que dirijo las finanzas de una empresa, explicadas con claridad y sin tecnicismos.</p>
+        <ul class="mc-temas">
+          <li><strong>Finanzas personales</strong>Ahorro, deuda e inversión: qué va primero y por qué.</li>
+          <li><strong>Presupuesto</strong>Cómo armar uno realista y sostenerlo mes a mes.</li>
+          <li><strong>Ética financiera</strong>Qué significa usar bien el dinero propio y el ajeno.</li>
+        </ul>
+        <p class="mc-nota">Reservar tu lugar no tiene costo ni te compromete. La masterclass se confirma al reunir un grupo mínimo; si se abre, te escribo con la hora y el enlace.</p>
+      </div>
+      <form class="cform mform" id="mform" novalidate>
+        <p class="q">Reserva tu lugar</p>
+        <div class="cgrid">
+          <label for="m-nombre"><span>Tu nombre</span><input id="m-nombre" name="nombre" required autocomplete="name"></label>
+          <label for="m-correo"><span>Correo</span><input id="m-correo" name="email" type="email" required autocomplete="email"></label>
+          <label for="m-tel" class="full"><span>WhatsApp <small>(opcional)</small></span><input id="m-tel" name="whatsapp" type="tel" autocomplete="tel"></label>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+        </div>
+        <p class="sub" id="m-q">¿Qué te gustaría resolver? <small>(opcional, puedes elegir varias)</small></p>
+        <div class="chips" role="group" aria-labelledby="m-q" id="m-intereses">
+          <button type="button" class="chip" aria-pressed="false" data-v="Armar un presupuesto que se cumpla"><b>Armar un presupuesto que se cumpla</b></button>
+          <button type="button" class="chip" aria-pressed="false" data-v="Ordenar o salir de deudas"><b>Ordenar o salir de deudas</b></button>
+          <button type="button" class="chip" aria-pressed="false" data-v="Empezar a ahorrar e invertir"><b>Empezar a ahorrar e invertir</b></button>
+          <button type="button" class="chip" aria-pressed="false" data-v="Decidir con criterio ético"><b>Decidir con criterio ético</b></button>
+        </div>
+        <button class="btn btn-brass" type="submit" id="m-enviar">Reservar mi lugar</button>
+        <p class="cstatus" id="m-status" role="status"></p>
+      </form>
+    </div>
+  </section>
+
   <section class="block" id="sintomas">
     <div class="wrap">
       <div class="head">
@@ -466,7 +527,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         <article class="service featured">
           <span class="tag">Continuo</span>
           <h3>CFO fraccional</h3>
-          <p>Asumo la dirección financiera de tu empresa unos días al mes, con responsabilidad sobre los números y voz en las decisiones.</p>
+          <p>Asumo la dirección financiera de tu empresa con una dedicación fija cada semana, con responsabilidad sobre los números y voz en las decisiones.</p>
+          <p class="price"><span>Desde</span> <strong>$500 USD</strong> <span>al mes, con 6 horas semanales</span></p>
           <ul>
             <li>Flujo de caja proyectado y control semanal</li>
             <li>Presupuesto, indicadores y reporte a la gerencia</li>
@@ -671,6 +733,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         </div>
       </div>
       <details><summary>¿Qué es un CFO fraccional?</summary><p>Un director financiero que trabaja para tu empresa una parte del mes. Tienes su criterio y su responsabilidad sobre los números, con un costo proporcional a la dedicación.</p></details>
+      <details><summary>¿Cuánto cuesta?</summary><p>El servicio de CFO fraccional parte de $500 USD al mes por seis horas semanales de dedicación. Si tu empresa necesita más horas o más frentes, el costo se ajusta a esa dedicación y te lo propongo por escrito antes de empezar.</p></details>
       <details><summary>¿Para qué tamaño de empresa es?</summary><p>Para pymes que ya facturan de forma constante y en las que las decisiones financieras pesan, pero que todavía no justifican un gerente de finanzas a tiempo completo.</p></details>
       <details><summary>¿Reemplaza a mi contador?</summary><p>No. Trabajo con tu contador: él registra y cumple con lo tributario; yo uso esa información para proyectar, controlar y decidir.</p></details>
       <details><summary>¿Cómo empezamos?</summary><p>Con una conversación para entender tu empresa y lo que necesitas. Si tiene sentido trabajar juntos, te propongo un alcance, un plazo y un costo por escrito.</p></details>
@@ -695,7 +758,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         <div class="step" data-step="1">
           <p class="q" id="q1">¿En qué te puedo ayudar?</p>
           <div class="chips" role="group" aria-labelledby="q1" data-field="servicio">
-            <button type="button" class="chip" data-v="CFO fraccional"><b>Ordenar las finanzas de mi empresa</b><small>CFO fraccional</small></button>
+            <button type="button" class="chip" data-v="CFO fraccional"><b>Ordenar las finanzas de mi empresa</b><small>CFO fraccional, desde $500 USD al mes</small></button>
             <button type="button" class="chip" data-v="Consultoría financiera"><b>Resolver una decisión puntual</b><small>Consultoría financiera</small></button>
             <button type="button" class="chip" data-v="Fondos de inversión"><b>Invertir mi patrimonio</b><small>Administración de fondos</small></button>
             <button type="button" class="chip" data-v="Capacitación"><b>Capacitar a mi equipo</b><small>Talleres de finanzas</small></button>
@@ -967,7 +1030,24 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 
 
   /* ---------- Formulario de contacto, en cuatro pasos ---------- */
-  var FORM_ENDPOINT = ''; // p. ej. 'https://formspree.io/f/xxxxxxxx'
+  // Destino de cada formulario. Con Jotform: url 'https://submit.jotform.com/submit/<ID>' y
+  // campos = { nombreInterno: 'qN_nombre' }. Si la url está vacía, el formulario avisa que aún no está activo.
+  var FORMS = {
+    contacto: { url: '', campos: null },
+    masterclass: { url: '', campos: null }
+  };
+  var LINKEDIN = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>';
+  function enviar(cfg, datos) {
+    var fd = new FormData();
+    Object.keys(datos).forEach(function (k) {
+      var nombre = cfg.campos ? cfg.campos[k] : k;
+      if (nombre) fd.append(nombre, datos[k]);
+    });
+    var opaco = /jotform\.com/.test(cfg.url);
+    if (opaco) fd.append('formID', cfg.url.split('/').pop());
+    return fetch(cfg.url, opaco ? { method: 'POST', mode: 'no-cors', body: fd } : { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
+      .then(function (r) { if (!opaco && !r.ok) throw new Error(r.status); });
+  }
   var cf = document.getElementById('cform'), cs = document.getElementById('c-status');
   var paso = 1, atras = document.getElementById('w-atras');
   var TAM = {
@@ -1014,18 +1094,44 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     if (invalid.length) { cs.className = 'cstatus'; cs.textContent = 'Necesito tu nombre y un correo válido.'; invalid[0].focus(); return; }
     var tam = +document.getElementById('w-tamano').value, plazo = +document.getElementById('w-plazo').value;
     var prio = plazo === 3 || tam === 1 ? 'C' : (plazo <= 2 && tam >= 2 ? 'A' : 'B');
-    var t = esFondos() ? TAM.fondos : TAM.empresa, data = new FormData(cf);
-    data.set('tamano', t.o[tam - 1]); data.set('plazo', PLAZOS[plazo]); data.set('prioridad', prio);
-    data.set('_subject', '[Web · Prioridad ' + prio + '] ' + (cf.empresa.value || cf.nombre.value) + ' · ' + data.get('servicio'));
-    if (!FORM_ENDPOINT) { cs.className = 'cstatus'; cs.innerHTML = 'El formulario se activa en los próximos días. Mientras tanto, escríbeme por <a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>.'; return; }
+    var t = esFondos() ? TAM.fondos : TAM.empresa;
+    var datos = {
+      servicio: document.getElementById('w-servicio').value, tamano: t.o[tam - 1], plazo: PLAZOS[plazo], prioridad: prio,
+      nombre: cf.nombre.value.trim(), email: cf.email.value.trim(), empresa: esFondos() ? '' : cf.empresa.value.trim(),
+      whatsapp: cf.whatsapp.value.trim(), mensaje: cf.mensaje.value.trim()
+    };
+    if (!FORMS.contacto.url) { cs.className = 'cstatus'; cs.innerHTML = 'El formulario se activa en los próximos días. Mientras tanto, escríbeme por ' + LINKEDIN + '.'; return; }
     var btn = document.getElementById('c-enviar'); btn.disabled = true; cs.className = 'cstatus'; cs.textContent = 'Enviando…';
-    fetch(FORM_ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } }).then(function (r) {
-      if (!r.ok) throw new Error(r.status);
+    (cf._gotcha.value ? Promise.resolve() : enviar(FORMS.contacto, datos)).then(function () {
       cf.querySelector('.step[data-step="4"]').innerHTML = '<p class="q">Gracias, ' + esc(cf.nombre.value.split(' ')[0]) + '.</p><p style="color:var(--on-navy-soft)">Recibí tu solicitud. Reviso todas cada semana y, si encaja, te escribo para agendar una conversación.</p>';
       atras.hidden = true; cs.textContent = '';
     }).catch(function () {
       cs.className = 'cstatus'; cs.textContent = 'No se pudo enviar. Inténtalo de nuevo en unos minutos o escríbeme por LinkedIn.';
     }).then(function () { btn.disabled = false; });
+  });
+
+  /* ---------- Registro a la masterclass ---------- */
+  var mf = document.getElementById('mform'), ms = document.getElementById('m-status');
+  document.getElementById('m-intereses').addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip'); if (!chip) return;
+    chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed') !== 'true');
+  });
+  mf.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var invalid = Array.prototype.filter.call(mf.querySelectorAll('[required]'), function (f) {
+      var bad = !f.checkValidity(); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
+    });
+    if (invalid.length) { ms.className = 'cstatus'; ms.textContent = 'Necesito tu nombre y un correo válido.'; invalid[0].focus(); return; }
+    if (!FORMS.masterclass.url) { ms.className = 'cstatus'; ms.innerHTML = 'El registro se activa en los próximos días. Mientras tanto, puedes apartar tu lugar escribiéndome por ' + LINKEDIN + '.'; return; }
+    var intereses = Array.prototype.filter.call(mf.querySelectorAll('.chip'), function (c) { return c.getAttribute('aria-pressed') === 'true'; })
+      .map(function (c) { return c.dataset.v; }).join('; ');
+    var datos = { nombre: mf.nombre.value.trim(), email: mf.email.value.trim(), whatsapp: mf.whatsapp.value.trim(), intereses: intereses };
+    var btn = document.getElementById('m-enviar'); btn.disabled = true; ms.className = 'cstatus'; ms.textContent = 'Enviando…';
+    (mf._gotcha.value ? Promise.resolve() : enviar(FORMS.masterclass, datos)).then(function () {
+      mf.innerHTML = '<p class="q">Tu lugar está reservado, ' + esc(datos.nombre.split(' ')[0]) + '.</p><p style="color:var(--on-navy-soft);margin:0">Si la masterclass se confirma, te escribo a ' + esc(datos.email) + ' con la hora y el enlace.</p>';
+    }).catch(function () {
+      ms.className = 'cstatus'; ms.textContent = 'No se pudo enviar. Inténtalo de nuevo en unos minutos.';
+    }).then(function () { if (document.body.contains(btn)) btn.disabled = false; });
   });
 
   document.getElementById('anio').textContent = new Date().getFullYear();
