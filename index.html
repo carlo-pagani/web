@@ -1492,7 +1492,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   function aePaso(id) { return AE.filter(function (x) { return x.id === id; })[0]; }
   function aplica(p) { return (!p.si || resp.tema === p.si) && (!p.cond || p.cond()); }
   // Montos: acepta 1500, 1.500, 1,500.50 o 1.500,50
-  function num(x) {
+  function monto(x) {
     var t = String(x == null ? '' : x).replace(/−/g, '-').replace(/[^\d.,-]/g, '');
     if (!/\d/.test(t)) return null;
     var c = t.lastIndexOf(','), d = t.lastIndexOf('.');
@@ -1585,7 +1585,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       (p.total ? '<p class="f-tot"><span>' + esc(p.total) + '</span><b></b></p>' : '') +
       '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button></div>', 'ficha', true, true);
     var leer = function () {
-      var v = {}; c.querySelectorAll('input[data-k]').forEach(function (i) { var n = num(i.value); if (n != null) v[i.dataset.k] = n; }); return v;
+      var v = {}; c.querySelectorAll('input[data-k]').forEach(function (i) { var n = monto(i.value); if (n != null) v[i.dataset.k] = n; }); return v;
     };
     var tot = c.querySelector('.f-tot b'), calc = function () { if (tot) tot.textContent = usd(sumar(leer())); };
     c.addEventListener('input', calc); calc();
@@ -1616,7 +1616,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     var leer = function () {
       return Array.prototype.map.call(lista.querySelectorAll('.d-row'), function (r) {
         var d = { tipo: r.querySelector('select').value };
-        r.querySelectorAll('input[data-k]').forEach(function (i) { var n = num(i.value); if (n != null) d[i.dataset.k] = n; });
+        r.querySelectorAll('input[data-k]').forEach(function (i) { var n = monto(i.value); if (n != null) d[i.dataset.k] = n; });
         return d;
       }).filter(function (d) { return d.saldo != null || d.cuota != null; });
     };
