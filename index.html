@@ -397,10 +397,6 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .msg.yo { align-self: flex-start; background: var(--navy-2); border: 1px solid rgba(238,242,247,.1); border-bottom-left-radius: 3px; }
 .msg.tu { align-self: flex-end; background: rgba(201,161,91,.16); border: 1px solid rgba(201,161,91,.45); border-bottom-right-radius: 3px; }
 .msg.escribe { color: var(--on-navy-soft); letter-spacing: .2em; }
-.msg.pago { align-self: stretch; max-width: none; background: var(--navy-2); border: 1px solid var(--brass); display: grid; gap: .6rem; }
-.msg.pago strong { font-family: var(--display); font-size: 1.5rem; font-weight: 600; }
-.msg.pago .btn { justify-self: start; }
-.msg.pago small { color: var(--on-navy-soft); }
 .ae-in { flex: none; padding: .8rem 1.25rem 1rem; border-top: 1px solid rgba(238,242,247,.1); background: var(--navy); }
 .ae-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
 .ae-chips:not(:empty) { margin-bottom: .6rem; }
@@ -419,6 +415,34 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .ae-foot { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem 1.2rem; margin-top: .5rem; min-height: 1.4rem; }
 .ae-foot .back { font-size: var(--t-xs); }
 .ae-err { font-size: var(--t-xs); color: #E8857A; }
+.ae-err:empty { display: none; }
+.ae-res { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.ae-res[hidden] { display: none; }
+.ae-res-body { flex: 1; min-height: 0; overflow-y: auto; padding: 1.1rem 1.25rem 1.5rem; overscroll-behavior: contain; }
+.ae-res-body:focus { outline: none; }
+.res-intro { margin: 0 0 .9rem; font-size: var(--t-s); color: var(--on-navy-soft); }
+.res-list { list-style: none; margin: 0; padding: 0; }
+.res-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; padding: .75rem 0; border-top: 1px solid rgba(238,242,247,.1); }
+.res-list li:last-child { border-bottom: 1px solid rgba(238,242,247,.1); }
+.res-q { font-size: var(--t-xs); letter-spacing: .02em; color: var(--on-navy-soft); }
+.res-a { grid-column: 1; font-size: var(--t-s); line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
+.res-a i { display: block; margin-top: .25rem; font-style: normal; color: var(--on-navy-soft); }
+.res-edit { grid-column: 2; grid-row: 1 / span 2; align-self: start; font-size: var(--t-xs); color: var(--brass); }
+.res-aviso { margin: 1.2rem 0 1rem; padding: .75rem .9rem; border-left: 2px solid var(--brass); background: rgba(201,161,91,.08); font-size: var(--t-s); line-height: 1.5; }
+.res-legal { font-size: .72rem; line-height: 1.55; color: var(--on-navy-soft); }
+.res-legal p { margin: 0 0 .45rem; }
+.res-legal b { font-weight: 600; color: var(--on-navy); }
+.res-pie { flex: none; display: grid; gap: .65rem; padding: .8rem 1.25rem 1rem; border-top: 1px solid rgba(238,242,247,.1); background: var(--navy); }
+.res-ok { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .6rem; align-items: start; font-size: var(--t-xs); line-height: 1.45; cursor: pointer; }
+.res-ok input { width: 1.15rem; height: 1.15rem; margin: .05rem 0 0; accent-color: var(--brass); }
+.res-pagar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1rem; }
+.res-pagar span { display: block; font-size: var(--t-xs); color: var(--on-navy-soft); }
+.res-pagar strong { font-family: var(--display); font-size: 1.45rem; font-weight: 600; }
+.res-pagar .btn[disabled] { opacity: .45; cursor: not-allowed; }
+.res-nota { margin: 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
+.res-nota:empty { display: none; }
+@keyframes resIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) { .ae-res.entra { animation: resIn .45s cubic-bezier(.2,.7,.2,1); } }
 .msg.ficha { align-self: stretch; max-width: none; white-space: normal; display: grid; gap: .8rem; background: var(--navy-2); border: 1px solid rgba(238,242,247,.14); padding: .9rem 1rem 1rem; }
 .msg.ficha, .f-list, .d-list { grid-template-columns: minmax(0, 1fr); }
 .f-list { display: grid; }
@@ -1012,6 +1036,31 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       <span class="ae-err" id="ae-err" role="status"></span>
     </div>
   </form>
+  <section class="ae-res" id="ae-res" hidden aria-label="Resumen de tus respuestas">
+    <div class="ae-res-body" id="ae-res-body" tabindex="-1">
+      <p class="res-intro">Este es el resumen de lo que ingresaste. Si algo no está bien, pulsa «Corregir» junto a ese dato.</p>
+      <ol class="res-list" id="ae-res-list"></ol>
+      <p class="res-aviso">Con esta información hago los cálculos y el informe, así que revísala con cuidado: un dato mal ingresado cambia el resultado.</p>
+      <div class="res-legal">
+        <p><b>Condiciones del análisis exprés.</b></p>
+        <p><b>1. Información del cliente.</b> El análisis y el informe se elaboran exclusivamente con la información que ingresaste en este formulario, que no se audita ni se verifica. Al confirmar, declaras que es verdadera, completa y exacta, y que la ingresaste con la debida rigurosidad.</p>
+        <p><b>2. Errores de ingreso.</b> No asumo responsabilidad por errores, omisiones o inexactitudes en los datos que ingresaste, ni por los cálculos, conclusiones o recomendaciones que se deriven de ellos. Si después de pagar notas un error, escríbeme antes de recibir el informe.</p>
+        <p><b>3. Alcance.</b> El informe es una opinión profesional de carácter orientativo, basada en una revisión breve. No es una auditoría ni un peritaje, no sustituye la asesoría legal, tributaria o contable, no constituye una recomendación de comprar o vender valores específicos y no garantiza resultados. Las decisiones que tomes con base en él son de tu exclusiva responsabilidad.</p>
+        <p><b>4. Datos personales.</b> Autorizas el tratamiento de tus datos personales y financieros con la única finalidad de preparar este análisis, emitir la factura y comunicarme contigo, conforme a la Ley Orgánica de Protección de Datos Personales. Se almacenan en proveedores tecnológicos que pueden estar fuera del Ecuador. Puedes pedir el acceso, la rectificación o la eliminación de tus datos por los canales de contacto de esta web.</p>
+        <p><b>5. Entrega.</b> Envío el informe al correo que indicaste en un máximo de tres días hábiles desde que se acredite el pago.</p>
+        <p><b>6. Ley aplicable.</b> Estas condiciones se rigen por la ley ecuatoriana y se aplican en la medida en que esta lo permita; nada de lo aquí dicho limita los derechos que la Ley Orgánica de Defensa del Consumidor te reconoce.</p>
+      </div>
+    </div>
+    <div class="res-pie">
+      <label class="res-ok"><input type="checkbox" id="ae-acepto"><span>Revisé mis respuestas, confirmo que son correctas y acepto las condiciones.</span></label>
+      <div class="res-pagar">
+        <div><span>Total con IVA (15 %)</span><strong>$40.25 USD</strong></div>
+        <button type="button" class="btn btn-brass" id="ae-pagar" disabled>Confirmar y pagar</button>
+      </div>
+      <p class="res-nota" id="ae-res-nota"></p>
+      <span class="ae-err" id="ae-res-err" role="status"></span>
+    </div>
+  </section>
 </dialog>
 
 <script>
@@ -1414,14 +1463,14 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     { id: 'p5', si: P, para: 'Ingreso neto mensual y extras anuales.', q: 'Empecemos por tus ingresos, ya libres de descuentos.', req: true, total: 'Ingreso mensual', ficha: [
       { k: 'sueldo', l: 'Sueldo o ingreso principal', d: 'al mes' },
       { k: 'extra', l: 'Negocio o trabajos independientes', d: 'al mes' },
-      { k: 'otros', l: 'Arriendos, pensiones u otros', d: 'al mes' },
+      { k: 'otros', l: 'Otros ingresos', d: 'alquileres que cobras, jubilación u otros, al mes' },
       { k: 'anual', l: 'Ingresos extra del año', d: 'décimos, utilidades y bonos, en total', anual: true }] },
     { id: 'p6', si: P, para: 'Gastos fijos mensuales por rubro, para armar el presupuesto.', q: 'Ahora tus gastos fijos de cada mes. Un estimado basta; deja en blanco lo que no aplique.', req: true, total: 'Gastos fijos al mes', ficha: [
       { k: 'vivienda', l: 'Vivienda', d: 'arriendo y alícuota; la hipoteca va con las deudas' },
       { k: 'servicios', l: 'Servicios básicos', d: 'luz, agua, gas, internet y celular' },
       { k: 'alimentacion', l: 'Alimentación', d: 'supermercado y mercado' },
-      { k: 'transporte', l: 'Transporte', d: 'combustible, pasajes, parqueo y mantenimiento' },
-      { k: 'seguros', l: 'Seguros', d: 'salud, vida y vehículo' },
+      { k: 'transporte', l: 'Transporte', d: 'gasolina, pasajes, parqueadero y mantenimiento' },
+      { k: 'seguros', l: 'Seguros', d: 'médico, de vida y del vehículo' },
       { k: 'salud', l: 'Salud', d: 'consultas y medicinas' },
       { k: 'educacion', l: 'Educación', d: 'pensiones escolares, universidad y cursos' },
       { k: 'familia', l: 'Apoyo a familiares' }] },
@@ -1441,7 +1490,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       { k: 'polizas', l: 'Pólizas y depósitos a plazo' },
       { k: 'inversiones', l: 'Fondos, acciones u otras inversiones' }] },
     { id: 'p12', si: P, q: '¿Qué bienes tienes? Puedes marcar varios.', op: ['Vivienda propia', 'Terreno', 'Vehículo', 'Ninguno'], multi: true },
-    { id: 'p13', si: P, q: '¿Con qué protección cuentas? Puedes marcar varias.', op: ['Afiliación al IESS', 'Seguro de salud privado', 'Seguro de vida', 'Ninguna'], multi: true },
+    { id: 'p13', si: P, q: '¿Con qué protección cuentas? Puedes marcar varias.', op: ['Afiliación al IESS', 'Seguro médico privado', 'Seguro de vida', 'Ninguna'], multi: true },
     { id: 'p14', si: P, q: '¿Llevas un registro de tus gastos?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
     { id: 'p15', si: P, para: 'Una meta medible, con monto y plazo.', q: 'Si tuvieras que fijar una meta concreta para los próximos doce meses, ¿cuál sería? Ponle monto y fecha si puedes.', ph: 'Por ejemplo: pagar la tarjeta de 2,400 antes de junio' },
     { id: 'p16', si: P, nota: lecturaPersonal },
@@ -1483,9 +1532,25 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     { id: 'factura', q: '¿Necesitas factura?', op: ['Sí', 'No'] },
     { id: 'fdatos', cond: function () { return resp.factura === 'Sí'; }, q: '¿A nombre de quién la emito y con qué RUC o cédula?', ph: 'Por ejemplo: Comercial Andes S.A., RUC 1790000000001' }
   ];
+  // Etiquetas cortas para el resumen previo al pago
+  var RES = {
+    tema: 'Tema del análisis', mas: 'Algo más a considerar', datos: 'Informe a nombre de', factura: 'Factura', fdatos: 'Datos para la factura',
+    e1: 'A qué se dedica la empresa', e2: 'Personas que trabajan', e3: 'Cifras del último año', e4: 'Gastos fijos al mes', e5: 'Capital de trabajo',
+    e6: 'Plazo de cobro a clientes', e7: 'Plazo de pago a proveedores', e8: 'Deudas de la empresa', e9: 'Caja en los últimos tres meses',
+    e10: 'Obligaciones', e11: 'Información financiera que llevan', e12: 'Problema o decisión principal', e13: 'Lo que han intentado',
+    p1: 'Lo que quieres lograr', p2: 'Edad', p3: 'Situación laboral', p4: 'Personas que dependen de ti', p5: 'Ingresos', p6: 'Gastos fijos',
+    p7: 'Gastos variables', p8: 'Deudas', p9: 'Pago de tarjetas', p10: 'Atrasos en los últimos doce meses', p11: 'Ahorros e inversiones',
+    p12: 'Bienes', p13: 'Protección', p14: 'Registro de gastos', p15: 'Meta para los próximos doce meses',
+    i1: 'Inversión que evalúas', i2: 'Condiciones de la inversión', i3: 'Objetivo del dinero', i4: 'Origen del dinero', i5: 'Peso en tu patrimonio',
+    i6: 'Necesidad del dinero antes del plazo', i7: 'Si cayera 20 % en un año', i8: 'Inversiones anteriores', i9: 'Costos y condiciones de retiro',
+    i10: 'Control de una superintendencia', i11: 'Tu situación general', i12: 'Alternativas que comparas',
+    o1: 'La decisión', o2: 'Opciones que consideras', o3: 'Ámbito de la decisión', o4: 'Cifras principales', o5: 'Lo que más pesa',
+    o6: 'Si no decides nada', o7: 'Plazo para decidir'
+  };
+  var CONDICIONES = 'versión del 8 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará unos diez minutos; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Uso tus datos solo para preparar tu análisis.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
-  var INTRO_PRECIO = 'El análisis cuesta $35 USD + IVA y se paga al final.';
+  var INTRO_PRECIO = 'El análisis cuesta $35 USD + IVA. Antes de pagar verás un resumen de tus respuestas para revisarlas y corregir lo que haga falta.';
   function intro() { return INTRO + '\n\n' + (IA.url ? INTRO_IA + '\n\n' : '') + INTRO_PRECIO; }
   var dlg = document.getElementById('ae'), log = document.getElementById('ae-log'), chipsEl = document.getElementById('ae-chips');
   var row = document.getElementById('ae-row'), txt = document.getElementById('ae-txt'), camposEl = document.getElementById('ae-campos');
@@ -1495,7 +1560,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
   fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
     .then(function (j) { if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url; }).catch(function () {});
-  var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {};
+  var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {}, editando = null, respaldo = null;
+  var resEl = document.getElementById('ae-res'), resLista = document.getElementById('ae-res-list'), acepto = document.getElementById('ae-acepto');
+  var pagarBtn = document.getElementById('ae-pagar'), resErr = document.getElementById('ae-res-err'), tituloAE = document.getElementById('ae-t');
   var sinMov = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function aePaso(id) { return AE.filter(function (x) { return x.id === id; })[0]; }
   function aplica(p) { return (!p.si || resp.tema === p.si) && (!p.cond || p.cond()); }
@@ -1661,9 +1728,11 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     if (dlg.open && window.matchMedia('(hover: hover)').matches) c.querySelector('input, select').focus({ preventScroll: true });
   }
   function preguntar(conPausa) {
+    if (editando && editando in resp) depurar();
     actual = siguiente(); errEl.textContent = '';
     document.getElementById('ae-bar').style.width = Math.round(100 * camino.length / (AE.filter(aplica).length + 1)) + '%';
-    backBtn.hidden = !camino.length || enviado;
+    backBtn.hidden = !camino.length || enviado || (editando && editando in resp);
+    backBtn.textContent = editando ? '↶ Volver al resumen' : '↶ Corregir la anterior';
     chipsEl.innerHTML = ''; camposEl.hidden = true; row.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
     if (!actual) return cierre();
     var p = actual;
@@ -1682,7 +1751,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       if (p.op) {
         var antes = previo[p.id];
         chipsEl.innerHTML = p.op.map(function (o) {
-          var marcado = Array.isArray(antes) ? antes.indexOf(o) > -1 : false;
+          var marcado = Array.isArray(antes) ? antes.indexOf(o) > -1 : antes === o;
           return '<button type="button" class="chip" aria-pressed="' + marcado + '" data-v="' + esc(o) + '"><b>' + esc(o) + '</b></button>'; }).join('') +
           (p.multi ? '<button type="button" class="chip listo" data-listo><b>Listo</b></button>' : '');
         if (dlg.open) chipsEl.querySelector('.chip').focus();
@@ -1775,14 +1844,69 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   function cierre() {
     document.getElementById('ae-bar').style.width = '100%';
     if (!ref) ref = 'AE-' + Date.now().toString(36).toUpperCase().slice(-6);
-    burbuja('Gracias, ' + resp.datos.nombre.split(' ')[0] + '. Con esto tengo lo necesario para empezar. Tu referencia es ' + ref + '.', 'yo', true);
-    var c = burbuja('<span>Análisis exprés · ' + esc(resp.tema) + '</span><strong>$35 USD + IVA</strong><span>Total con IVA (15 %): $40.25 USD</span>' +
-      '<button type="button" class="btn btn-brass" id="ae-pagar">' + (PAGO.url ? 'Ir a pagar' : 'Enviar mi solicitud') + '</button>' +
-      '<small>' + (PAGO.url ? 'Se abre la página segura de Payphone para pagar con tarjeta. En cuanto se acredite, empiezo tu análisis.' : 'Te escribo a ' + esc(resp.datos.email) + ' con el enlace de pago y, en cuanto se acredite, empiezo tu análisis.') + '</small>', 'pago', true, true);
-    c.querySelector('#ae-pagar').addEventListener('click', pagar);
+    if (editando) { editando = null; respaldo = null; return mostrarResumen(); }
+    burbuja('Gracias, ' + resp.datos.nombre.split(' ')[0] + '. Antes de pagar, revisa el resumen de tus respuestas.', 'yo', true);
+    setTimeout(mostrarResumen, sinMov ? 0 : 900);
   }
+  // Tras corregir un dato: quita respuestas que ya no aplican y recalcula los primeros vistazos
+  function depurar() {
+    AE.forEach(function (p) {
+      if (p.id in resp && !aplica(p)) { previo[p.id] = resp[p.id]; delete resp[p.id]; delete aclar[p.id]; delete revisada[p.id]; }
+    });
+    AE.forEach(function (p) { if (p.nota && p.id in resp) resp[p.id] = p.nota(); });
+    camino = camino.filter(function (id) { return id in resp; });
+  }
+  function enOrden() { return AE.map(function (p) { return p.id; }).filter(function (id) { return id in resp; }); }
+  function mostrarResumen() {
+    camino = enOrden();
+    resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota; }).map(function (id) {
+      var p = aePaso(id);
+      var extra = (aclar[id] || []).filter(function (a) { return !/^(Confirmó|Ajustó) las cifras\.$/.test(a.respuesta); })
+        .map(function (a) { return '<i>Aclaraste: ' + esc(a.respuesta) + '</i>'; }).join('');
+      return '<li><span class="res-q">' + esc(RES[id] || p.q) + '</span><span class="res-a">' + esc(textoResp(p, resp[id])) + extra + '</span>' +
+        '<button type="button" class="back res-edit" data-id="' + id + '">Corregir</button></li>';
+    }).join('');
+    acepto.checked = false; pagarBtn.disabled = true; resErr.textContent = '';
+    pagarBtn.textContent = PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
+    document.getElementById('ae-res-nota').textContent = PAGO.url ? 'Se abre la página segura de Payphone para pagar con tarjeta.' :
+      'Te escribiré a ' + resp.datos.email + ' con el enlace de pago; en cuanto se acredite, empiezo tu análisis.';
+    tituloAE.textContent = 'Revisa tus respuestas';
+    log.hidden = true; inForm.hidden = true; resEl.hidden = false;
+    resEl.classList.remove('entra'); void resEl.offsetWidth; resEl.classList.add('entra');
+    document.getElementById('ae-res-body').scrollTop = 0;
+    if (dlg.open) document.getElementById('ae-res-body').focus({ preventScroll: true });
+  }
+  function cerrarResumen() {
+    resEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
+  }
+  function corregir(id) {
+    cerrarResumen();
+    editando = id; pendiente = null; modoDuda = false;
+    respaldo = { v: resp[id], aclar: aclar[id], revisada: revisada[id] };
+    previo[id] = resp[id]; delete resp[id]; delete aclar[id]; delete revisada[id];
+    camino = camino.filter(function (x) { return x !== id; });
+    burbuja(id === 'tema' ? 'Si cambias el tema, te haré las preguntas que correspondan a ese tema.' : 'Corrijamos ese dato.', 'yo', true);
+    preguntar(false);
+  }
+  function cancelarCorreccion() {
+    var id = editando;
+    log.querySelectorAll('.msg.ficha').forEach(function (c) { c.remove(); });
+    if (!(id in resp)) {
+      resp[id] = respaldo.v; camino.push(id);
+      if (respaldo.aclar) aclar[id] = respaldo.aclar;
+      if (respaldo.revisada) revisada[id] = respaldo.revisada;
+    }
+    editando = null; respaldo = null; actual = null; pendiente = null; modoDuda = false;
+    chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true; errEl.textContent = '';
+    mostrarResumen();
+  }
+  resLista.addEventListener('click', function (e) { var b = e.target.closest('.res-edit'); if (b) corregir(b.dataset.id); });
+  acepto.addEventListener('change', function () { pagarBtn.disabled = !acepto.checked; if (acepto.checked) resErr.textContent = ''; });
+  pagarBtn.addEventListener('click', pagar);
   function pagar() {
-    var btn = document.getElementById('ae-pagar'); btn.disabled = true; errEl.textContent = '';
+    if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
+    var btn = pagarBtn; btn.disabled = true; resErr.textContent = '';
+    camino = enOrden();
     var lineas = camino.filter(function (id) { return ['datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
       .map(function (id) {
         var p = aePaso(id);
@@ -1790,13 +1914,16 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         return p.q + '\n→ ' + textoResp(p, resp[id]).replace(/\n/g, '\n→ ') +
           (aclar[id] || []).map(function (a) { return '\n  Asistente: ' + a.pregunta + '\n  → ' + a.respuesta; }).join('');
       }).join('\n\n') +
-      (dudas.length ? '\n\nDudas que planteó\n' + dudas.map(function (d) { return '· ' + d.duda + ' (en «' + d.pregunta + '»)\n  Asistente: ' + d.respuesta; }).join('\n') : '');
+      (dudas.length ? '\n\nDudas que planteó\n' + dudas.map(function (d) { return '· ' + d.duda + ' (en «' + d.pregunta + '»)\n  Asistente: ' + d.respuesta; }).join('\n') : '') +
+      '\n\nRevisó el resumen y aceptó las condiciones (' + CONDICIONES + ') el ' +
+      new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'long', timeStyle: 'short' }) + ', hora de Ecuador.';
     var datos = { referencia: ref, tema: resp.tema, respuestas: lineas, nombre: resp.datos.nombre, email: resp.datos.email,
       whatsapp: resp.datos.whatsapp, factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: PAGO.url ? 'Enviado a la página de pago' : 'Pendiente: enviar enlace de pago' };
     var u = PAGO.url;
     var pestana = u ? window.open('', '_blank') : null;   // se abre en el clic para que el navegador no la bloquee
     enviar(FORMS.analisis, datos).then(function () {
-      enviado = true; backBtn.hidden = true; btn.remove();
+      enviado = true; backBtn.hidden = true; cerrarResumen();
+      chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
       if (u) {
         if (pestana) pestana.location = u; else location.href = u;
         burbuja('Listo. Completa el pago en la pestaña de Payphone; cuando se acredite, te escribo a ' + esc(resp.datos.email) + ' y empiezo tu análisis. Si no se abrió, <a href="' + esc(u) + '" target="_blank" rel="noopener">ábrela aquí</a>.', 'yo', true, true);
@@ -1805,7 +1932,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       }
     }).catch(function () {
       if (pestana) pestana.close();
-      btn.disabled = false; errEl.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
+      btn.disabled = false; resErr.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
     });
   }
   chipsEl.addEventListener('click', function (e) {
@@ -1847,6 +1974,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     responder(actual.ficha ? {} : '');
   });
   backBtn.addEventListener('click', function () {
+    if (editando) return cancelarCorreccion();
     if (!camino.length || enviado) return;
     pendiente = null; modoDuda = false;
     if (actual) delete revisada[actual.id];
@@ -1859,7 +1987,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   });
   function abrir() {
     if (typeof dlg.showModal !== 'function') { location.hash = '#contacto'; return; }
-    if (enviado) { resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; log.innerHTML = ''; }
+    if (enviado) { resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; editando = null; log.innerHTML = ''; cerrarResumen(); }
     dlg.showModal(); document.documentElement.style.overflow = 'hidden';
     if (!log.children.length) { pintar(); preguntar(true); }
   }
