@@ -447,9 +447,12 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .dp-qr strong { font-family: var(--display); font-size: 1.45rem; font-weight: 600; }
 .dp-pasos { margin: 0 0 .9rem; padding-left: 1.25rem; display: grid; gap: .4rem; font-size: var(--t-s); line-height: 1.55; }
 .dp-pasos b { font-weight: 600; color: var(--brass); }
-.dp-movil { margin: 0; font-size: var(--t-xs); line-height: 1.5; color: var(--on-navy-soft); }
-.dp-movil a { color: var(--brass); }
+.dp-movil { display: grid; gap: .55rem; font-size: var(--t-xs); line-height: 1.5; color: var(--on-navy-soft); }
+.dp-movil p { margin: 0; }
+.dp-movil p a { color: var(--brass); }
+.dp-movil .btn { justify-self: stretch; text-align: center; font-size: var(--t-s); padding: .7rem 1.1rem; }
 @media (hover: hover) and (pointer: fine) { .dp-movil { display: none; } }
+@media (hover: none), (pointer: coarse) { .dp-qr img { width: min(10.5rem, 48vw); } .dp-movil { margin: 0 0 1.1rem; padding: .85rem .9rem; border: 1px solid rgba(238,242,247,.12); border-radius: 4px; background: var(--navy-2); } }
 .dp-comp { display: grid; gap: .3rem; font-size: var(--t-xs); color: var(--on-navy-soft); }
 .dp-comp input { width: 100%; font: inherit; font-size: 1rem; color: var(--on-navy); background: var(--navy-2); border: 1px solid rgba(238,242,247,.22); border-radius: 4px; padding: .6rem .7rem; color-scheme: dark; }
 .dp-comp input[aria-invalid="true"] { border-color: #E8857A; }
@@ -1079,12 +1082,16 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         <img id="ae-dp-qr" alt="Código QR de Deuna para pagar el análisis exprés a Carlo Pagani">
         <span>Total con IVA (15 %)</span><strong>$40.25 USD</strong>
       </div>
+      <div class="dp-movil">
+        <p>¿Estás en el celular y tienes Deuna? Ábrela directamente, sin escanear:</p>
+        <a class="btn btn-line" id="ae-dp-abrir">Abrir Deuna y pagar</a>
+        <p>Si pagas desde la app de otro banco, <a id="ae-dp-baja" download="deuna-carlo-pagani.png">guarda el código</a> y elígelo desde la galería en su lector de QR.</p>
+      </div>
       <ol class="dp-pasos">
         <li>Abre <b>Deuna</b>, o la app de tu banco en su opción para pagar con Deuna, y escanea este código.</li>
         <li>Paga <b>$40.25</b>. Si la app te pide un motivo, escribe tu referencia: <b id="ae-dp-ref"></b>.</li>
         <li>Escribe aquí abajo el número de comprobante que te muestra la app al terminar.</li>
       </ol>
-      <p class="dp-movil">¿Estás en el celular? <a id="ae-dp-baja" download="deuna-carlo-pagani.png">Guarda el código</a> y, en el lector de QR de tu app, elígelo desde la galería.</p>
     </div>
     <div class="res-pie">
       <label class="dp-comp"><span>Número de comprobante</span><input id="ae-dp-num" autocomplete="off" maxlength="40" spellcheck="false"></label>
@@ -1594,9 +1601,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
   // Cobro con el Botón de Pagos del Banco Pichincha (opcional): el servicio consulta el pago y solo entonces se guardan las respuestas
   var COBRO = { url: '' }, ESTADO = 'ae-cobro';
-  // Cobro con Deuna (Banco Pichincha): imagen del código QR de la app Deuna Negocios. Vacío: apagado.
+  // Cobro con Deuna (Banco Pichincha): imagen del código QR de la app Deuna Negocios y el enlace que lleva dentro
+  // (en el celular abre la app de Deuna). qr vacío: apagado.
   // El cliente paga escaneando el código, escribe el número de comprobante y entonces se guardan sus respuestas; Carlo confirma el pago en la app.
-  var DEUNA = { qr: '' }, DEUNA_ESTADO = 'ae-deuna';
+  var DEUNA = { qr: 'assets/deuna-qr.png', enlace: 'https://pagar.deuna.app/H92p/merchant?id=483ec645f2079389f720c415b239291097384309' }, DEUNA_ESTADO = 'ae-deuna';
   var servicios = fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
     .then(function (j) {
       if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url;
@@ -2022,6 +2030,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     guardarDeuna({ datos: datos, estado: { resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref }, t: Date.now() });
     document.getElementById('ae-dp-qr').src = DEUNA.qr;
     document.getElementById('ae-dp-baja').href = DEUNA.qr;
+    var abrirDeuna = document.getElementById('ae-dp-abrir');
+    abrirDeuna.hidden = !DEUNA.enlace; if (DEUNA.enlace) abrirDeuna.href = DEUNA.enlace;
     document.getElementById('ae-dp-ref').textContent = ref;
     dpErr.textContent = ''; dpNum.removeAttribute('aria-invalid'); dpOk.disabled = false; dpOk.textContent = 'Ya pagué, enviar mis respuestas';
     tituloAE.textContent = 'Paga con Deuna';
