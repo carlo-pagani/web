@@ -441,6 +441,18 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .res-pagar .btn[disabled] { opacity: .45; cursor: not-allowed; }
 .res-nota { margin: 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
 .res-nota:empty { display: none; }
+.dp-qr { display: grid; justify-items: center; gap: .15rem; margin: .1rem 0 1.1rem; text-align: center; }
+.dp-qr img { width: min(15rem, 68vw); height: auto; padding: .6rem; margin-bottom: .6rem; background: #fff; border-radius: 6px; }
+.dp-qr span { font-size: var(--t-xs); color: var(--on-navy-soft); }
+.dp-qr strong { font-family: var(--display); font-size: 1.45rem; font-weight: 600; }
+.dp-pasos { margin: 0 0 .9rem; padding-left: 1.25rem; display: grid; gap: .4rem; font-size: var(--t-s); line-height: 1.55; }
+.dp-pasos b { font-weight: 600; color: var(--brass); }
+.dp-movil { margin: 0; font-size: var(--t-xs); line-height: 1.5; color: var(--on-navy-soft); }
+.dp-movil a { color: var(--brass); }
+@media (hover: hover) and (pointer: fine) { .dp-movil { display: none; } }
+.dp-comp { display: grid; gap: .3rem; font-size: var(--t-xs); color: var(--on-navy-soft); }
+.dp-comp input { width: 100%; font: inherit; font-size: 1rem; color: var(--on-navy); background: var(--navy-2); border: 1px solid rgba(238,242,247,.22); border-radius: 4px; padding: .6rem .7rem; color-scheme: dark; }
+.dp-comp input[aria-invalid="true"] { border-color: #E8857A; }
 @keyframes resIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) { .ae-res.entra { animation: resIn .45s cubic-bezier(.2,.7,.2,1); } }
 .msg.ficha { align-self: stretch; max-width: none; white-space: normal; display: grid; gap: .8rem; background: var(--navy-2); border: 1px solid rgba(238,242,247,.14); padding: .9rem 1rem 1rem; }
@@ -1061,6 +1073,28 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       <span class="ae-err" id="ae-res-err" role="status"></span>
     </div>
   </section>
+  <section class="ae-res" id="ae-dp" hidden aria-label="Pago con Deuna">
+    <div class="ae-res-body" id="ae-dp-body" tabindex="-1">
+      <div class="dp-qr">
+        <img id="ae-dp-qr" alt="Código QR de Deuna para pagar el análisis exprés a Carlo Pagani">
+        <span>Total con IVA (15 %)</span><strong>$40.25 USD</strong>
+      </div>
+      <ol class="dp-pasos">
+        <li>Abre <b>Deuna</b>, o la app de tu banco en su opción para pagar con Deuna, y escanea este código.</li>
+        <li>Paga <b>$40.25</b>. Si la app te pide un motivo, escribe tu referencia: <b id="ae-dp-ref"></b>.</li>
+        <li>Escribe aquí abajo el número de comprobante que te muestra la app al terminar.</li>
+      </ol>
+      <p class="dp-movil">¿Estás en el celular? <a id="ae-dp-baja" download="deuna-carlo-pagani.png">Guarda el código</a> y, en el lector de QR de tu app, elígelo desde la galería.</p>
+    </div>
+    <div class="res-pie">
+      <label class="dp-comp"><span>Número de comprobante</span><input id="ae-dp-num" autocomplete="off" maxlength="40" spellcheck="false"></label>
+      <div class="res-pagar">
+        <button type="button" class="back" id="ae-dp-volver">↶ Volver al resumen</button>
+        <button type="button" class="btn btn-brass" id="ae-dp-ok">Ya pagué, enviar mis respuestas</button>
+      </div>
+      <span class="ae-err" id="ae-dp-err" role="status"></span>
+    </div>
+  </section>
 </dialog>
 
 <script>
@@ -1560,6 +1594,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
   // Cobro con el Botón de Pagos del Banco Pichincha (opcional): el servicio consulta el pago y solo entonces se guardan las respuestas
   var COBRO = { url: '' }, ESTADO = 'ae-cobro';
+  // Cobro con Deuna (Banco Pichincha): imagen del código QR de la app Deuna Negocios. Vacío: apagado.
+  // El cliente paga escaneando el código, escribe el número de comprobante y entonces se guardan sus respuestas; Carlo confirma el pago en la app.
+  var DEUNA = { qr: '' }, DEUNA_ESTADO = 'ae-deuna';
   var servicios = fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
     .then(function (j) {
       if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url;
@@ -1568,6 +1605,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {}, editando = null, respaldo = null;
   var resEl = document.getElementById('ae-res'), resLista = document.getElementById('ae-res-list'), acepto = document.getElementById('ae-acepto');
   var pagarBtn = document.getElementById('ae-pagar'), resErr = document.getElementById('ae-res-err'), tituloAE = document.getElementById('ae-t');
+  var dpEl = document.getElementById('ae-dp'), dpNum = document.getElementById('ae-dp-num'), dpOk = document.getElementById('ae-dp-ok'), dpErr = document.getElementById('ae-dp-err');
   var sinMov = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function aePaso(id) { return AE.filter(function (x) { return x.id === id; })[0]; }
   function aplica(p) { return (!p.si || resp.tema === p.si) && (!p.cond || p.cond()); }
@@ -1872,18 +1910,19 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         '<button type="button" class="back res-edit" data-id="' + id + '">Corregir</button></li>';
     }).join('');
     acepto.checked = false; pagarBtn.disabled = true; resErr.textContent = '';
-    pagarBtn.textContent = COBRO.url || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
+    pagarBtn.textContent = COBRO.url || DEUNA.qr || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
     document.getElementById('ae-res-nota').textContent = COBRO.url ? 'Te llevo a la página segura del Botón de Pagos del Banco Pichincha para pagar con tarjeta; tus respuestas me llegan cuando el pago se aprueba.' :
+      DEUNA.qr ? 'Pagas con Deuna, o con la app de tu banco, escaneando mi código QR; tus respuestas me llegan cuando escribas el número de comprobante.' :
       PAGO.url ? 'Se abre la página de pago en otra pestaña.' :
       'Te escribiré a ' + resp.datos.email + ' con el enlace de pago; en cuanto se acredite, empiezo tu análisis.';
     tituloAE.textContent = 'Revisa tus respuestas';
-    log.hidden = true; inForm.hidden = true; resEl.hidden = false;
+    log.hidden = true; inForm.hidden = true; dpEl.hidden = true; resEl.hidden = false;
     resEl.classList.remove('entra'); void resEl.offsetWidth; resEl.classList.add('entra');
     document.getElementById('ae-res-body').scrollTop = 0;
     if (dlg.open) document.getElementById('ae-res-body').focus({ preventScroll: true });
   }
   function cerrarResumen() {
-    resEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
+    resEl.hidden = true; dpEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
   }
   function corregir(id) {
     cerrarResumen();
@@ -1929,6 +1968,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
     var datos = paquete();
     if (COBRO.url) return iniciarCobro(datos);
+    if (DEUNA.qr) return mostrarDeuna(datos);
     var btn = pagarBtn; btn.disabled = true; resErr.textContent = '';
     var u = PAGO.url;
     var pestana = u ? window.open('', '_blank') : null;   // se abre en el clic para que el navegador no la bloquee
@@ -1972,6 +2012,56 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         pagarBtn.disabled = !acepto.checked; pagarBtn.textContent = 'Confirmar y pagar';
         resErr.textContent = 'No pude abrir el pago en este momento. Inténtalo de nuevo en unos minutos.';
       });
+  }
+  // Pago con Deuna: se muestra el código QR; las respuestas quedan guardadas en este navegador por si la página se recarga
+  // mientras el cliente paga en la app, y se envían cuando escribe el número de comprobante.
+  var porPagar = null;
+  function guardarDeuna(v) { try { if (v) localStorage.setItem(DEUNA_ESTADO, JSON.stringify(v)); else localStorage.removeItem(DEUNA_ESTADO); } catch (e) {} }
+  function mostrarDeuna(datos) {
+    porPagar = datos;
+    guardarDeuna({ datos: datos, estado: { resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref }, t: Date.now() });
+    document.getElementById('ae-dp-qr').src = DEUNA.qr;
+    document.getElementById('ae-dp-baja').href = DEUNA.qr;
+    document.getElementById('ae-dp-ref').textContent = ref;
+    dpErr.textContent = ''; dpNum.removeAttribute('aria-invalid'); dpOk.disabled = false; dpOk.textContent = 'Ya pagué, enviar mis respuestas';
+    tituloAE.textContent = 'Paga con Deuna';
+    log.hidden = true; inForm.hidden = true; resEl.hidden = true; dpEl.hidden = false;
+    dpEl.classList.remove('entra'); void dpEl.offsetWidth; dpEl.classList.add('entra');
+    document.getElementById('ae-dp-body').scrollTop = 0;
+    if (dlg.open) document.getElementById('ae-dp-body').focus({ preventScroll: true });
+  }
+  document.getElementById('ae-dp-volver').addEventListener('click', function () { guardarDeuna(null); mostrarResumen(); });
+  dpNum.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); dpOk.click(); } });
+  dpNum.addEventListener('input', function () { dpNum.removeAttribute('aria-invalid'); dpErr.textContent = ''; });
+  dpOk.addEventListener('click', function () {
+    var n = dpNum.value.trim().replace(/\s+/g, ' ');
+    if (!/^[A-Za-z0-9][A-Za-z0-9 .\/#-]{3,39}$/.test(n)) {
+      dpNum.setAttribute('aria-invalid', 'true'); dpErr.textContent = 'Escribe el número de comprobante que te mostró la app al pagar.'; dpNum.focus(); return;
+    }
+    dpOk.disabled = true; dpOk.textContent = 'Enviando…'; dpErr.textContent = '';
+    enviar(FORMS.analisis, Object.assign({}, porPagar, { pago: 'Deuna: comprobante ' + n + ' por $40.25. Por confirmar en Deuna Negocios.' })).then(function () {
+      guardarDeuna(null); enviado = true; backBtn.hidden = true; cerrarResumen();
+      chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
+      document.getElementById('ae-bar').style.width = '100%';
+      burbuja('Recibí tus respuestas con la referencia ' + ref + ' y tu comprobante de Deuna ' + n + '. Confirmo el pago y te envío el informe a ' + resp.datos.email + ' en un máximo de tres días hábiles.', 'yo', true);
+    }).catch(function () {
+      dpOk.disabled = false; dpOk.textContent = 'Ya pagué, enviar mis respuestas';
+      dpErr.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo; tu pago no se pierde.';
+    });
+  });
+  // Si la página se recargó mientras el cliente pagaba con Deuna, vuelve al código QR con sus respuestas
+  function retomarDeuna() {
+    if (!DEUNA.qr || COBRO.url || new URLSearchParams(location.search).get('pago') || typeof dlg.showModal !== 'function') return;
+    var g = null; try { g = JSON.parse(localStorage.getItem(DEUNA_ESTADO)); } catch (e) {}
+    if (!g) return;
+    if (!g.datos || !g.estado || !(Date.now() - g.t < 72e5)) return guardarDeuna(null);
+    resp = g.estado.resp || {}; aclar = g.estado.aclar || {}; dudas = g.estado.dudas || []; revisada = g.estado.revisada || {};
+    ref = g.estado.ref || ''; previo = {}; camino = enOrden(); enviado = false; editando = null;
+    if (!dlg.open) dlg.showModal();
+    document.documentElement.style.overflow = 'hidden';
+    pintar(); document.getElementById('ae-bar').style.width = '100%';
+    chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
+    mostrarDeuna(g.datos);
   }
   // Paso 2: de vuelta del banco, el servicio consulta el pago y solo con el pago aprobado se guardan las respuestas
   function retornoPago() {
@@ -2087,7 +2177,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   document.getElementById('ae-x').addEventListener('click', function () { dlg.close(); });
   document.querySelectorAll('[data-ae]').forEach(function (b) { b.addEventListener('click', abrir); });
   if (location.hash === '#analisis-expres') abrir();
-  servicios.then(retornoPago);
+  servicios.then(function () { retornoPago(); retomarDeuna(); });
 
   /* ---------- Aparición progresiva al desplazarse ---------- */
   if ('IntersectionObserver' in window && window.matchMedia && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
