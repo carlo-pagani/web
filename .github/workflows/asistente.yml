@@ -3,7 +3,7 @@ name: Desplegar asistente con IA y cobro
 # Publica worker/ en Cloudflare y deja sus direcciones en data/asistente.json, que la web lee al abrir el análisis exprés.
 # Necesita los secretos CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID, y además los de cada servicio que se active:
 #   asistente con IA: ANTHROPIC_API_KEY
-#   cobro con Payphone: PAYPHONE_TOKEN y PAYPHONE_STORE_ID
+#   cobro con el Botón de Pagos del Banco Pichincha (Placetopay): PLACETOPAY_LOGIN y PLACETOPAY_SECRET_KEY
 
 on:
   push:
@@ -32,17 +32,17 @@ jobs:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_CUENTA: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
-          PP_TOKEN: ${{ secrets.PAYPHONE_TOKEN }}
-          PP_TIENDA: ${{ secrets.PAYPHONE_STORE_ID }}
+          P2P_LOGIN: ${{ secrets.PLACETOPAY_LOGIN }}
+          P2P_CLAVE: ${{ secrets.PLACETOPAY_SECRET_KEY }}
         run: |
           IA=no; PAGO=no
           [ -n "$ANTHROPIC" ] && IA=si
-          [ -n "$PP_TOKEN" ] && [ -n "$PP_TIENDA" ] && PAGO=si
+          [ -n "$P2P_LOGIN" ] && [ -n "$P2P_CLAVE" ] && PAGO=si
           echo "ia=$IA" >> "$GITHUB_OUTPUT"
           echo "pago=$PAGO" >> "$GITHUB_OUTPUT"
           if [ -n "$CF_TOKEN" ] && [ -n "$CF_CUENTA" ] && { [ "$IA" = si ] || [ "$PAGO" = si ]; }; then
             echo "listas=si" >> "$GITHUB_OUTPUT"
-            echo "Asistente con IA: $IA · Cobro con Payphone: $PAGO"
+            echo "Asistente con IA: $IA · Cobro con el Botón del Pichincha: $PAGO"
           else
             echo "listas=no" >> "$GITHUB_OUTPUT"
             echo "Faltan secretos del repositorio; no se despliega todavía."
@@ -65,13 +65,13 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          PAYPHONE_TOKEN: ${{ secrets.PAYPHONE_TOKEN }}
-          PAYPHONE_STORE_ID: ${{ secrets.PAYPHONE_STORE_ID }}
+          PLACETOPAY_LOGIN: ${{ secrets.PLACETOPAY_LOGIN }}
+          PLACETOPAY_SECRET_KEY: ${{ secrets.PLACETOPAY_SECRET_KEY }}
         run: |
           npx wrangler deploy | tee despliegue.txt
           if [ -n "$ANTHROPIC_API_KEY" ]; then printf '%s' "$ANTHROPIC_API_KEY" | npx wrangler secret put ANTHROPIC_API_KEY; fi
-          if [ -n "$PAYPHONE_TOKEN" ]; then printf '%s' "$PAYPHONE_TOKEN" | npx wrangler secret put PAYPHONE_TOKEN; fi
-          if [ -n "$PAYPHONE_STORE_ID" ]; then printf '%s' "$PAYPHONE_STORE_ID" | npx wrangler secret put PAYPHONE_STORE_ID; fi
+          if [ -n "$PLACETOPAY_LOGIN" ]; then printf '%s' "$PLACETOPAY_LOGIN" | npx wrangler secret put PLACETOPAY_LOGIN; fi
+          if [ -n "$PLACETOPAY_SECRET_KEY" ]; then printf '%s' "$PLACETOPAY_SECRET_KEY" | npx wrangler secret put PLACETOPAY_SECRET_KEY; fi
 
       - name: Guardar las direcciones para la web
         if: steps.claves.outputs.listas == 'si'

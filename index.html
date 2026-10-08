@@ -441,8 +441,6 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .res-pagar .btn[disabled] { opacity: .45; cursor: not-allowed; }
 .res-nota { margin: 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
 .res-nota:empty { display: none; }
-.pp-caja { min-height: 7rem; padding: .75rem; border-radius: 8px; background: #fff; color: #10151C; }
-.pp-msg { margin-top: .8rem; }
 @keyframes resIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) { .ae-res.entra { animation: resIn .45s cubic-bezier(.2,.7,.2,1); } }
 .msg.ficha { align-self: stretch; max-width: none; white-space: normal; display: grid; gap: .8rem; background: var(--navy-2); border: 1px solid rgba(238,242,247,.14); padding: .9rem 1rem 1rem; }
@@ -1063,16 +1061,6 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       <span class="ae-err" id="ae-res-err" role="status"></span>
     </div>
   </section>
-  <section class="ae-res" id="ae-pp" hidden aria-label="Pago">
-    <div class="ae-res-body">
-      <p class="res-intro">Pagas con tarjeta en el formulario seguro de Payphone. Cuando el pago se aprueba, Payphone te devuelve a esta página y en ese momento me llegan tus respuestas.</p>
-      <div class="pp-caja"><div id="pp-button"></div></div>
-      <p class="res-nota pp-msg" id="ae-pp-msg"></p>
-    </div>
-    <div class="res-pie">
-      <button type="button" class="back" id="ae-pp-volver">↶ Volver al resumen</button>
-    </div>
-  </section>
 </dialog>
 
 <script>
@@ -1333,7 +1321,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       referencia: 'q2_textbox0', tema: 'q3_textbox1', respuestas: 'q4_textarea2', nombre: 'q5_textbox3',
       email: 'q6_email4', whatsapp: 'q7_textbox5', factura: 'q8_textbox6', pago: 'q9_textbox7' } }
   };
-  // Enlace de cobro de Payphone del análisis exprés: monto fijo de $40.25 (35 + IVA 15 %), de uso múltiple.
+  // Enlace de cobro fijo (opcional), si no se usa el Botón de Pagos: monto de $40.25 (35 + IVA 15 %), de uso múltiple.
   // Vacío: la solicitud se guarda y Carlo envía el enlace por correo.
   var PAGO = { url: '' };
   var LINKEDIN = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>';
@@ -1570,8 +1558,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var errEl = document.getElementById('ae-err'), inForm = document.getElementById('ae-in'), dudaBtn = document.getElementById('ae-duda');
   // Asistente con IA (opcional): la dirección llega en data/asistente.json cuando el servicio está desplegado
   var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
-  // Cobro con la Cajita de Pagos de Payphone (opcional): el servicio confirma el pago y solo entonces guarda las respuestas
-  var COBRO = { url: '' }, ESTADO = 'ae-cobro', CAJITA = 'https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box', cajita = null;
+  // Cobro con el Botón de Pagos del Banco Pichincha (opcional): el servicio consulta el pago y solo entonces se guardan las respuestas
+  var COBRO = { url: '' }, ESTADO = 'ae-cobro';
   var servicios = fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
     .then(function (j) {
       if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url;
@@ -1579,7 +1567,6 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     }).catch(function () {});
   var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {}, editando = null, respaldo = null;
   var resEl = document.getElementById('ae-res'), resLista = document.getElementById('ae-res-list'), acepto = document.getElementById('ae-acepto');
-  var ppEl = document.getElementById('ae-pp'), ppMsg = document.getElementById('ae-pp-msg');
   var pagarBtn = document.getElementById('ae-pagar'), resErr = document.getElementById('ae-res-err'), tituloAE = document.getElementById('ae-t');
   var sinMov = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function aePaso(id) { return AE.filter(function (x) { return x.id === id; })[0]; }
@@ -1886,8 +1873,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     }).join('');
     acepto.checked = false; pagarBtn.disabled = true; resErr.textContent = '';
     pagarBtn.textContent = COBRO.url || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
-    document.getElementById('ae-res-nota').textContent = COBRO.url ? 'Pagas con tarjeta en el formulario seguro de Payphone; tus respuestas me llegan cuando el pago se aprueba.' :
-      PAGO.url ? 'Se abre la página segura de Payphone para pagar con tarjeta.' :
+    document.getElementById('ae-res-nota').textContent = COBRO.url ? 'Te llevo a la página segura del Botón de Pagos del Banco Pichincha para pagar con tarjeta; tus respuestas me llegan cuando el pago se aprueba.' :
+      PAGO.url ? 'Se abre la página de pago en otra pestaña.' :
       'Te escribiré a ' + resp.datos.email + ' con el enlace de pago; en cuanto se acredite, empiezo tu análisis.';
     tituloAE.textContent = 'Revisa tus respuestas';
     log.hidden = true; inForm.hidden = true; resEl.hidden = false;
@@ -1896,7 +1883,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     if (dlg.open) document.getElementById('ae-res-body').focus({ preventScroll: true });
   }
   function cerrarResumen() {
-    resEl.hidden = true; ppEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
+    resEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
   }
   function corregir(id) {
     cerrarResumen();
@@ -1950,7 +1937,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
       if (u) {
         if (pestana) pestana.location = u; else location.href = u;
-        burbuja('Listo. Completa el pago en la pestaña de Payphone; cuando se acredite, te escribo a ' + esc(resp.datos.email) + ' y empiezo tu análisis. Si no se abrió, <a href="' + esc(u) + '" target="_blank" rel="noopener">ábrela aquí</a>.', 'yo', true, true);
+        burbuja('Listo. Completa el pago en la otra pestaña; cuando se acredite, te escribo a ' + esc(resp.datos.email) + ' y empiezo tu análisis. Si no se abrió, <a href="' + esc(u) + '" target="_blank" rel="noopener">ábrela aquí</a>.', 'yo', true, true);
       } else {
         burbuja('Recibí tu solicitud con la referencia ' + ref + '. Te escribo pronto a ' + resp.datos.email + ' con el enlace de pago.', 'yo', true);
       }
@@ -1960,58 +1947,39 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     });
   }
   function guardarEstado(v) { try { if (v) localStorage.setItem(ESTADO, JSON.stringify(v)); else localStorage.removeItem(ESTADO); return true; } catch (e) { return false; } }
-  function cargarCajita() {
-    if (cajita) return cajita;
-    cajita = new Promise(function (ok, mal) {
-      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = CAJITA + '.css'; document.head.appendChild(l);
-      var sc = document.createElement('script'); sc.type = 'module'; sc.src = CAJITA + '.js';
-      sc.onload = function () {
-        var n = 0;
-        (function esperar() { if (window.PPaymentButtonBox) return ok(); if (++n > 50) return mal(); setTimeout(esperar, 100); })();
-      };
-      sc.onerror = mal; document.head.appendChild(sc);
-    });
-    cajita.catch(function () { cajita = null; });
-    return cajita;
+  function consultar(ruta, cuerpo) {
+    return fetch(COBRO.url + ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) })
+      .then(function (r) { return r.json(); });
   }
-  // Paso 1 del cobro: guarda las respuestas en este navegador y muestra la Cajita de Payphone.
-  // Payphone vuelve a esta página con ?id=…&clientTransactionId=… y ahí se confirma (retornoPago).
+  // Paso 1 del cobro: guarda las respuestas en este navegador, crea la sesión de pago y lleva al cliente a la página del banco.
+  // El banco lo devuelve a esta página con ?pago=<referencia> y ahí se consulta el resultado (retornoPago).
   function iniciarCobro(datos) {
     var tx = ref + '-' + Date.now().toString(36).toUpperCase().slice(-5);
+    var estado = { tx: tx, datos: datos, estado: { resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref }, t: Date.now() };
     resErr.textContent = '';
-    if (!guardarEstado({ tx: tx, datos: datos, estado: { resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref }, t: Date.now() })) {
+    if (!guardarEstado(estado)) {
       resErr.textContent = 'Tu navegador no deja guardar tus respuestas mientras pagas. Prueba sin navegación privada o con otro navegador.'; return;
     }
     pagarBtn.disabled = true; pagarBtn.textContent = 'Abriendo el pago…';
-    Promise.all([fetch(COBRO.url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }), cargarCajita()])
-      .then(function (x) {
-        var c = x[0];
-        resEl.hidden = true; ppEl.hidden = false; tituloAE.textContent = 'Pago seguro';
-        document.getElementById('pp-button').innerHTML = '';
-        ppMsg.textContent = 'El formulario de pago vence a los diez minutos; si se vence, vuelve al resumen y pulsa de nuevo «Confirmar y pagar».';
-        new window.PPaymentButtonBox({
-          token: c.token, storeId: c.storeId, clientTransactionId: tx, reference: 'Análisis exprés ' + ref,
-          amount: c.amount, amountWithTax: c.amountWithTax, tax: c.tax, amountWithoutTax: c.amountWithoutTax, service: 0, tip: 0,
-          currency: 'USD', email: resp.datos.email, lang: 'es', defaultMethod: 'card', timeZone: -5
-        }).render('pp-button');
+    consultar('/sesion', { referencia: tx, nombre: resp.datos.nombre, email: resp.datos.email })
+      .then(function (r) {
+        if (!r.processUrl || !r.requestId) throw new Error('sin sesión');
+        estado.requestId = r.requestId; guardarEstado(estado);
+        location.href = r.processUrl;
       })
       .catch(function () {
         guardarEstado(null);
+        pagarBtn.disabled = !acepto.checked; pagarBtn.textContent = 'Confirmar y pagar';
         resErr.textContent = 'No pude abrir el pago en este momento. Inténtalo de nuevo en unos minutos.';
-      })
-      .then(function () { pagarBtn.disabled = !acepto.checked; pagarBtn.textContent = 'Confirmar y pagar'; });
+      });
   }
-  document.getElementById('ae-pp-volver').addEventListener('click', function () {
-    guardarEstado(null);
-    ppEl.hidden = true; resEl.hidden = false; tituloAE.textContent = 'Revisa tus respuestas';
-  });
-  // Paso 2: de vuelta de Payphone, el servicio confirma el pago y solo entonces se guardan las respuestas
+  // Paso 2: de vuelta del banco, el servicio consulta el pago y solo con el pago aprobado se guardan las respuestas
   function retornoPago() {
-    var q = new URLSearchParams(location.search), id = q.get('id'), tx = q.get('clientTransactionId');
-    if (!id || !tx || typeof dlg.showModal !== 'function') return;
+    var tx = new URLSearchParams(location.search).get('pago');
+    if (!tx || typeof dlg.showModal !== 'function') return;
     var limpiar = function () { history.replaceState(null, '', location.pathname + location.hash); };
     var g = null; try { g = JSON.parse(localStorage.getItem(ESTADO)); } catch (e) {}
-    var mio = g && g.tx === tx && g.estado && g.datos;
+    var mio = g && g.tx === tx && g.requestId && g.estado && g.datos;
     if (mio) {
       resp = g.estado.resp || {}; aclar = g.estado.aclar || {}; dudas = g.estado.dudas || []; revisada = g.estado.revisada || {};
       ref = g.estado.ref || ''; previo = {}; camino = enOrden();
@@ -2022,32 +1990,41 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; backBtn.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
     if (!mio || !COBRO.url) {
       limpiar(); enviado = true;   // al reabrir, el cuestionario empieza de cero
-      burbuja('Volviste del pago, pero no encontré tus respuestas en este navegador. Si se llegó a cobrar, Payphone anula el cargo en unos minutos. Puedes llenar el cuestionario de nuevo o escribirme por ' + LINKEDIN + '.', 'yo', true, true);
+      burbuja('Volviste del pago, pero no encontré tus respuestas en este navegador. Si se llegó a cobrar, escríbeme por ' + LINKEDIN + ' con la referencia ' + esc(tx) + ' y lo resolvemos.', 'yo', true, true);
       return;
     }
     pintar();
     document.getElementById('ae-bar').style.width = '100%';
-    var espera = burbuja('Confirmando tu pago con Payphone…', 'yo', true);
-    fetch(COBRO.url + '/confirmar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, clientTxId: tx }) })
-      .then(function (r) { return r.json(); })
-      .then(function (r) {
-        espera.remove(); limpiar(); guardarEstado(null);
-        if (!r.aprobado) {
-          burbuja((r.motivo || 'El pago no se completó.') + ' Tus respuestas siguen aquí: revisa el resumen e inténtalo de nuevo.', 'yo', true);
-          return setTimeout(mostrarResumen, sinMov ? 0 : 1400);
-        }
-        enviado = true;
-        var gracias = function () {
-          burbuja('Pago aprobado, autorización ' + r.autorizacion + '. Recibí tu solicitud con la referencia ' + ref + ' y te envío el informe a ' + resp.datos.email + ' en un máximo de tres días hábiles.', 'yo', true);
-        };
-        return enviar(FORMS.analisis, Object.assign({}, g.datos, { pago: r.pago })).then(gracias, function () {
-          burbuja('Tu pago está aprobado (autorización ' + r.autorizacion + '), pero no pude guardar tus respuestas. Escríbeme por ' + LINKEDIN + ' con tu referencia, ' + ref + ', y lo resolvemos.', 'yo', true, true);
-        });
-      })
-      .catch(function () {
-        espera.remove();
-        burbuja('No pude confirmar tu pago todavía. Recarga esta página en un momento para intentarlo de nuevo; si no se confirma en unos minutos, Payphone anula el cargo.', 'yo', true);
+    var espera = burbuja('Consultando tu pago con el banco…', 'yo', true), intentos = 0;
+    var guardar = function (pago, mensaje) {
+      return enviar(FORMS.analisis, Object.assign({}, g.datos, { pago: pago })).then(function () {
+        guardarEstado(null); limpiar(); enviado = true; burbuja(mensaje, 'yo', true);
+      }, function () {
+        burbuja('No pude guardar tus respuestas. Recarga esta página para intentarlo de nuevo, o escríbeme por ' + LINKEDIN + ' con tu referencia, ' + esc(tx) + '.', 'yo', true, true);
       });
+    };
+    (function revisarPago() {
+      consultar('/estado', { requestId: g.requestId, referencia: tx }).then(function (r) {
+        if (r.estado === 'pendiente' && ++intentos < 8) {
+          if (intentos === 1) espera.textContent = 'El banco todavía está verificando tu pago. Espera un momento…';
+          return setTimeout(revisarPago, 15000);
+        }
+        espera.remove();
+        if (r.estado === 'aprobado') {
+          return guardar(r.pago, 'Pago aprobado, autorización ' + r.autorizacion + '. Recibí tu solicitud con la referencia ' + ref + ' y te envío el informe a ' + resp.datos.email + ' en un máximo de tres días hábiles.');
+        }
+        if (r.estado === 'pendiente') {
+          return guardar('Pago pendiente de verificación en el banco (sesión ' + g.requestId + ', referencia ' + tx + ')',
+            'El banco sigue verificando tu pago. Ya guardé tus respuestas con la referencia ' + ref + '; empiezo tu análisis cuando el pago se apruebe y, si no se aprueba, no se te cobra.');
+        }
+        guardarEstado(null); limpiar();
+        burbuja((r.motivo || 'El pago no se completó.') + ' Tus respuestas siguen aquí: revisa el resumen e inténtalo de nuevo.', 'yo', true);
+        setTimeout(mostrarResumen, sinMov ? 0 : 1400);
+      }).catch(function () {
+        espera.remove();
+        burbuja('No pude consultar tu pago todavía. Recarga esta página en un momento para intentarlo de nuevo.', 'yo', true);
+      });
+    })();
   }
   chipsEl.addEventListener('click', function (e) {
     var c = e.target.closest('.chip'); if (!c || !actual) return;
