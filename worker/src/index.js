@@ -1,6 +1,8 @@
-// Asistente con IA del análisis exprés de carlogalarza-pagani.com.
-// Recibe una pregunta del cuestionario y la respuesta del cliente, y decide si seguir,
-// repreguntar o explicar. La clave de Anthropic vive solo aquí, como secreto del Worker.
+// Servicios del análisis exprés de carlogalarza-pagani.com.
+// /guia: asistente con IA; recibe una pregunta y la respuesta del cliente, y decide si seguir,
+//        repreguntar o explicar. La clave de Anthropic vive solo aquí, como secreto del Worker.
+// /pago: datos de la Cajita de Pagos de Payphone (GET) y confirmación del cobro (POST /pago/confirmar);
+//        la web guarda las respuestas en Jotform solo cuando esta confirmación dice que el pago está aprobado.
 import Anthropic from "@anthropic-ai/sdk";
 
 const ORIGENES = [
@@ -9,6 +11,8 @@ const ORIGENES = [
   "https://carlo-pagani.github.io",
 ];
 const MODELO = "claude-opus-5-5";
+// Cobro: $35 + IVA 15 % = $40.25, en centavos como los pide Payphone
+const COBRO = { amount: 4025, amountWithTax: 3500, tax: 525, amountWithoutTax: 0 };
 const SEGUIR = { accion: "seguir", mensaje: "" };
 
 const SISTEMA = `Eres el asistente que acompaña el cuestionario del «análisis exprés» en la web de Carlo Pagani, consultor financiero y CFO fraccional en Ecuador. El cliente responde un cuestionario como el de una primera reunión de asesoría; con sus respuestas, Carlo prepara después un informe con un diagnóstico y tres recomendaciones. Tu único trabajo es ayudar a que las respuestas queden claras y completas.
@@ -46,7 +50,7 @@ const FORMATO = {
 function cors(origen) {
   return {
     "Access-Control-Allow-Origin": origen,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
@@ -81,12 +85,60 @@ function mensajeUsuario(d) {
     .join("\n");
 }
 
+// La Cajita necesita el token en el navegador (así la diseñó Payphone, que lo limita al dominio registrado)
+function datosCajita(env, origen) {
+  if (!env.PAYPHONE_TOKEN || !env.PAYPHONE_STORE_ID) return json({ error: "Cobro no configurado" }, 503, origen);
+  return json({ token: env.PAYPHONE_TOKEN, storeId: env.PAYPHONE_STORE_ID, ...COBRO }, 200, origen);
+}
+
+// Confirma con Payphone que el pago está aprobado por el monto exacto.
+// Sin confirmación en cinco minutos, Payphone anula el cobro por su cuenta.
+async function confirmarPago(request, env, origen) {
+  if (!env.PAYPHONE_TOKEN) return json({ error: "Cobro no configurado" }, 503, origen);
+  const cuerpo = await request.text();
+  if (cuerpo.length > 2000) return json({ error: "Demasiado largo" }, 413, origen);
+  let d;
+  try {
+    d = JSON.parse(cuerpo);
+  } catch {
+    return json({ error: "JSON no válido" }, 400, origen);
+  }
+  const id = parseInt(d.id, 10), tx = corto(d.clientTxId, 50);
+  if (!id || !tx) return json({ error: "Faltan datos" }, 400, origen);
+
+  let r;
+  try {
+    const res = await fetch(`${env.PAYPHONE_URL || "https://paymentbox.payphonetodoesposible.com"}/api/confirm`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.PAYPHONE_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ id, clientTxId: tx }),
+    });
+    r = await res.json();
+  } catch (e) {
+    console.error("Payphone no respondió:", e && e.message);
+    return json({ aprobado: false, motivo: "No pude comprobar el pago con Payphone." }, 502, origen);
+  }
+  const aprobado = r && r.statusCode === 3 && r.transactionStatus === "Approved" &&
+    r.amount === COBRO.amount && r.clientTransactionId === tx;
+  if (!aprobado) {
+    const motivo = r && r.statusCode === 2 ? "El pago fue cancelado." : (r && r.message) || "El pago no fue aprobado.";
+    return json({ aprobado: false, motivo: corto(motivo, 200) }, 200, origen);
+  }
+
+  const pago = `Pagado con Payphone: $${(r.amount / 100).toFixed(2)} · autorización ${r.authorizationCode} · transacción ${r.transactionId}` +
+    (r.cardBrand ? ` · ${r.cardBrand} ${r.lastDigits || ""}`.trimEnd() : "") + ` · ${r.date || new Date().toISOString()}`;
+  return json({ aprobado: true, autorizacion: r.authorizationCode, transaccion: r.transactionId, pago }, 200, origen);
+}
+
 export default {
   async fetch(request, env) {
     const origen = request.headers.get("Origin") || "";
     if (!ORIGENES.includes(origen)) return new Response("No autorizado", { status: 403 });
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origen) });
-    if (request.method !== "POST" || new URL(request.url).pathname !== "/guia") {
+    const ruta = new URL(request.url).pathname;
+    if (ruta === "/pago" && request.method === "GET") return datosCajita(env, origen);
+    if (ruta === "/pago/confirmar" && request.method === "POST") return confirmarPago(request, env, origen);
+    if (request.method !== "POST" || ruta !== "/guia") {
       return json({ error: "Ruta no válida" }, 404, origen);
     }
     const cuerpo = await request.text();

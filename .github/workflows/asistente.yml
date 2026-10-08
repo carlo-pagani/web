@@ -1,7 +1,9 @@
-name: Desplegar asistente con IA
+name: Desplegar asistente con IA y cobro
 
-# Publica worker/ en Cloudflare y deja su dirección en data/asistente.json, que la web lee al abrir el análisis exprés.
-# Necesita tres secretos del repositorio: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID y ANTHROPIC_API_KEY.
+# Publica worker/ en Cloudflare y deja sus direcciones en data/asistente.json, que la web lee al abrir el análisis exprés.
+# Necesita los secretos CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID, y además los de cada servicio que se active:
+#   asistente con IA: ANTHROPIC_API_KEY
+#   cobro con Payphone: PAYPHONE_TOKEN y PAYPHONE_STORE_ID
 
 on:
   push:
@@ -30,12 +32,20 @@ jobs:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_CUENTA: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
+          PP_TOKEN: ${{ secrets.PAYPHONE_TOKEN }}
+          PP_TIENDA: ${{ secrets.PAYPHONE_STORE_ID }}
         run: |
-          if [ -n "$CF_TOKEN" ] && [ -n "$CF_CUENTA" ] && [ -n "$ANTHROPIC" ]; then
+          IA=no; PAGO=no
+          [ -n "$ANTHROPIC" ] && IA=si
+          [ -n "$PP_TOKEN" ] && [ -n "$PP_TIENDA" ] && PAGO=si
+          echo "ia=$IA" >> "$GITHUB_OUTPUT"
+          echo "pago=$PAGO" >> "$GITHUB_OUTPUT"
+          if [ -n "$CF_TOKEN" ] && [ -n "$CF_CUENTA" ] && { [ "$IA" = si ] || [ "$PAGO" = si ]; }; then
             echo "listas=si" >> "$GITHUB_OUTPUT"
+            echo "Asistente con IA: $IA · Cobro con Payphone: $PAGO"
           else
             echo "listas=no" >> "$GITHUB_OUTPUT"
-            echo "Faltan secretos del repositorio; el asistente no se despliega todavía."
+            echo "Faltan secretos del repositorio; no se despliega todavía."
           fi
 
       - uses: actions/setup-node@v4
@@ -55,22 +65,32 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PAYPHONE_TOKEN: ${{ secrets.PAYPHONE_TOKEN }}
+          PAYPHONE_STORE_ID: ${{ secrets.PAYPHONE_STORE_ID }}
         run: |
           npx wrangler deploy | tee despliegue.txt
-          printf '%s' "$ANTHROPIC_API_KEY" | npx wrangler secret put ANTHROPIC_API_KEY
+          if [ -n "$ANTHROPIC_API_KEY" ]; then printf '%s' "$ANTHROPIC_API_KEY" | npx wrangler secret put ANTHROPIC_API_KEY; fi
+          if [ -n "$PAYPHONE_TOKEN" ]; then printf '%s' "$PAYPHONE_TOKEN" | npx wrangler secret put PAYPHONE_TOKEN; fi
+          if [ -n "$PAYPHONE_STORE_ID" ]; then printf '%s' "$PAYPHONE_STORE_ID" | npx wrangler secret put PAYPHONE_STORE_ID; fi
 
-      - name: Guardar la dirección para la web
+      - name: Guardar las direcciones para la web
         if: steps.claves.outputs.listas == 'si'
+        env:
+          IA: ${{ steps.claves.outputs.ia }}
+          PAGO: ${{ steps.claves.outputs.pago }}
         run: |
           DIRECCION=$(grep -o 'https://[A-Za-z0-9.-]*\.workers\.dev' worker/despliegue.txt | head -1)
-          if [ -z "$DIRECCION" ]; then echo "Cloudflare no devolvió la dirección del asistente"; exit 1; fi
-          printf '{\n "url": "%s/guia"\n}\n' "$DIRECCION" > data/asistente.json
+          if [ -z "$DIRECCION" ]; then echo "Cloudflare no devolvió la dirección del servicio"; exit 1; fi
+          GUIA=""; COBRO=""
+          [ "$IA" = si ] && GUIA="$DIRECCION/guia"
+          [ "$PAGO" = si ] && COBRO="$DIRECCION/pago"
+          printf '{\n "url": "%s",\n "pago": "%s"\n}\n' "$GUIA" "$COBRO" > data/asistente.json
           cat data/asistente.json
           if [ -n "$(git status --porcelain data/asistente.json)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/asistente.json
-            git commit -m "Activa el asistente con IA del análisis exprés"
+            git commit -m "Activa los servicios del análisis exprés"
             git pull --rebase origin main
             git push
           fi

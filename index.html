@@ -441,6 +441,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .res-pagar .btn[disabled] { opacity: .45; cursor: not-allowed; }
 .res-nota { margin: 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
 .res-nota:empty { display: none; }
+.pp-caja { min-height: 7rem; padding: .75rem; border-radius: 8px; background: #fff; color: #10151C; }
+.pp-msg { margin-top: .8rem; }
 @keyframes resIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) { .ae-res.entra { animation: resIn .45s cubic-bezier(.2,.7,.2,1); } }
 .msg.ficha { align-self: stretch; max-width: none; white-space: normal; display: grid; gap: .8rem; background: var(--navy-2); border: 1px solid rgba(238,242,247,.14); padding: .9rem 1rem 1rem; }
@@ -1061,6 +1063,16 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       <span class="ae-err" id="ae-res-err" role="status"></span>
     </div>
   </section>
+  <section class="ae-res" id="ae-pp" hidden aria-label="Pago">
+    <div class="ae-res-body">
+      <p class="res-intro">Pagas con tarjeta en el formulario seguro de Payphone. Cuando el pago se aprueba, Payphone te devuelve a esta página y en ese momento me llegan tus respuestas.</p>
+      <div class="pp-caja"><div id="pp-button"></div></div>
+      <p class="res-nota pp-msg" id="ae-pp-msg"></p>
+    </div>
+    <div class="res-pie">
+      <button type="button" class="back" id="ae-pp-volver">↶ Volver al resumen</button>
+    </div>
+  </section>
 </dialog>
 
 <script>
@@ -1558,10 +1570,16 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var errEl = document.getElementById('ae-err'), inForm = document.getElementById('ae-in'), dudaBtn = document.getElementById('ae-duda');
   // Asistente con IA (opcional): la dirección llega en data/asistente.json cuando el servicio está desplegado
   var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
-  fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
-    .then(function (j) { if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url; }).catch(function () {});
+  // Cobro con la Cajita de Pagos de Payphone (opcional): el servicio confirma el pago y solo entonces guarda las respuestas
+  var COBRO = { url: '' }, ESTADO = 'ae-cobro', CAJITA = 'https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box', cajita = null;
+  var servicios = fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
+    .then(function (j) {
+      if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url;
+      if (j && /^https:\/\//.test(j.pago || '')) COBRO.url = j.pago;
+    }).catch(function () {});
   var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {}, editando = null, respaldo = null;
   var resEl = document.getElementById('ae-res'), resLista = document.getElementById('ae-res-list'), acepto = document.getElementById('ae-acepto');
+  var ppEl = document.getElementById('ae-pp'), ppMsg = document.getElementById('ae-pp-msg');
   var pagarBtn = document.getElementById('ae-pagar'), resErr = document.getElementById('ae-res-err'), tituloAE = document.getElementById('ae-t');
   var sinMov = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function aePaso(id) { return AE.filter(function (x) { return x.id === id; })[0]; }
@@ -1867,8 +1885,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         '<button type="button" class="back res-edit" data-id="' + id + '">Corregir</button></li>';
     }).join('');
     acepto.checked = false; pagarBtn.disabled = true; resErr.textContent = '';
-    pagarBtn.textContent = PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
-    document.getElementById('ae-res-nota').textContent = PAGO.url ? 'Se abre la página segura de Payphone para pagar con tarjeta.' :
+    pagarBtn.textContent = COBRO.url || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
+    document.getElementById('ae-res-nota').textContent = COBRO.url ? 'Pagas con tarjeta en el formulario seguro de Payphone; tus respuestas me llegan cuando el pago se aprueba.' :
+      PAGO.url ? 'Se abre la página segura de Payphone para pagar con tarjeta.' :
       'Te escribiré a ' + resp.datos.email + ' con el enlace de pago; en cuanto se acredite, empiezo tu análisis.';
     tituloAE.textContent = 'Revisa tus respuestas';
     log.hidden = true; inForm.hidden = true; resEl.hidden = false;
@@ -1877,7 +1896,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     if (dlg.open) document.getElementById('ae-res-body').focus({ preventScroll: true });
   }
   function cerrarResumen() {
-    resEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
+    resEl.hidden = true; ppEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
   }
   function corregir(id) {
     cerrarResumen();
@@ -1903,9 +1922,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   resLista.addEventListener('click', function (e) { var b = e.target.closest('.res-edit'); if (b) corregir(b.dataset.id); });
   acepto.addEventListener('change', function () { pagarBtn.disabled = !acepto.checked; if (acepto.checked) resErr.textContent = ''; });
   pagarBtn.addEventListener('click', pagar);
-  function pagar() {
-    if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
-    var btn = pagarBtn; btn.disabled = true; resErr.textContent = '';
+  // Lo que se guarda en Jotform: la transcripción completa y los datos de contacto
+  function paquete() {
     camino = enOrden();
     var lineas = camino.filter(function (id) { return ['datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
       .map(function (id) {
@@ -1917,8 +1935,14 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       (dudas.length ? '\n\nDudas que planteó\n' + dudas.map(function (d) { return '· ' + d.duda + ' (en «' + d.pregunta + '»)\n  Asistente: ' + d.respuesta; }).join('\n') : '') +
       '\n\nRevisó el resumen y aceptó las condiciones (' + CONDICIONES + ') el ' +
       new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'long', timeStyle: 'short' }) + ', hora de Ecuador.';
-    var datos = { referencia: ref, tema: resp.tema, respuestas: lineas, nombre: resp.datos.nombre, email: resp.datos.email,
+    return { referencia: ref, tema: resp.tema, respuestas: lineas, nombre: resp.datos.nombre, email: resp.datos.email,
       whatsapp: resp.datos.whatsapp, factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: PAGO.url ? 'Enviado a la página de pago' : 'Pendiente: enviar enlace de pago' };
+  }
+  function pagar() {
+    if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
+    var datos = paquete();
+    if (COBRO.url) return iniciarCobro(datos);
+    var btn = pagarBtn; btn.disabled = true; resErr.textContent = '';
     var u = PAGO.url;
     var pestana = u ? window.open('', '_blank') : null;   // se abre en el clic para que el navegador no la bloquee
     enviar(FORMS.analisis, datos).then(function () {
@@ -1934,6 +1958,96 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       if (pestana) pestana.close();
       btn.disabled = false; resErr.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
     });
+  }
+  function guardarEstado(v) { try { if (v) localStorage.setItem(ESTADO, JSON.stringify(v)); else localStorage.removeItem(ESTADO); return true; } catch (e) { return false; } }
+  function cargarCajita() {
+    if (cajita) return cajita;
+    cajita = new Promise(function (ok, mal) {
+      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = CAJITA + '.css'; document.head.appendChild(l);
+      var sc = document.createElement('script'); sc.type = 'module'; sc.src = CAJITA + '.js';
+      sc.onload = function () {
+        var n = 0;
+        (function esperar() { if (window.PPaymentButtonBox) return ok(); if (++n > 50) return mal(); setTimeout(esperar, 100); })();
+      };
+      sc.onerror = mal; document.head.appendChild(sc);
+    });
+    cajita.catch(function () { cajita = null; });
+    return cajita;
+  }
+  // Paso 1 del cobro: guarda las respuestas en este navegador y muestra la Cajita de Payphone.
+  // Payphone vuelve a esta página con ?id=…&clientTransactionId=… y ahí se confirma (retornoPago).
+  function iniciarCobro(datos) {
+    var tx = ref + '-' + Date.now().toString(36).toUpperCase().slice(-5);
+    resErr.textContent = '';
+    if (!guardarEstado({ tx: tx, datos: datos, estado: { resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref }, t: Date.now() })) {
+      resErr.textContent = 'Tu navegador no deja guardar tus respuestas mientras pagas. Prueba sin navegación privada o con otro navegador.'; return;
+    }
+    pagarBtn.disabled = true; pagarBtn.textContent = 'Abriendo el pago…';
+    Promise.all([fetch(COBRO.url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }), cargarCajita()])
+      .then(function (x) {
+        var c = x[0];
+        resEl.hidden = true; ppEl.hidden = false; tituloAE.textContent = 'Pago seguro';
+        document.getElementById('pp-button').innerHTML = '';
+        ppMsg.textContent = 'El formulario de pago vence a los diez minutos; si se vence, vuelve al resumen y pulsa de nuevo «Confirmar y pagar».';
+        new window.PPaymentButtonBox({
+          token: c.token, storeId: c.storeId, clientTransactionId: tx, reference: 'Análisis exprés ' + ref,
+          amount: c.amount, amountWithTax: c.amountWithTax, tax: c.tax, amountWithoutTax: c.amountWithoutTax, service: 0, tip: 0,
+          currency: 'USD', email: resp.datos.email, lang: 'es', defaultMethod: 'card', timeZone: -5
+        }).render('pp-button');
+      })
+      .catch(function () {
+        guardarEstado(null);
+        resErr.textContent = 'No pude abrir el pago en este momento. Inténtalo de nuevo en unos minutos.';
+      })
+      .then(function () { pagarBtn.disabled = !acepto.checked; pagarBtn.textContent = 'Confirmar y pagar'; });
+  }
+  document.getElementById('ae-pp-volver').addEventListener('click', function () {
+    guardarEstado(null);
+    ppEl.hidden = true; resEl.hidden = false; tituloAE.textContent = 'Revisa tus respuestas';
+  });
+  // Paso 2: de vuelta de Payphone, el servicio confirma el pago y solo entonces se guardan las respuestas
+  function retornoPago() {
+    var q = new URLSearchParams(location.search), id = q.get('id'), tx = q.get('clientTransactionId');
+    if (!id || !tx || typeof dlg.showModal !== 'function') return;
+    var limpiar = function () { history.replaceState(null, '', location.pathname + location.hash); };
+    var g = null; try { g = JSON.parse(localStorage.getItem(ESTADO)); } catch (e) {}
+    var mio = g && g.tx === tx && g.estado && g.datos;
+    if (mio) {
+      resp = g.estado.resp || {}; aclar = g.estado.aclar || {}; dudas = g.estado.dudas || []; revisada = g.estado.revisada || {};
+      ref = g.estado.ref || ''; previo = {}; camino = enOrden();
+    }
+    if (!dlg.open) dlg.showModal();
+    document.documentElement.style.overflow = 'hidden';
+    cerrarResumen(); log.innerHTML = '';
+    chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; backBtn.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
+    if (!mio || !COBRO.url) {
+      limpiar(); enviado = true;   // al reabrir, el cuestionario empieza de cero
+      burbuja('Volviste del pago, pero no encontré tus respuestas en este navegador. Si se llegó a cobrar, Payphone anula el cargo en unos minutos. Puedes llenar el cuestionario de nuevo o escribirme por ' + LINKEDIN + '.', 'yo', true, true);
+      return;
+    }
+    pintar();
+    document.getElementById('ae-bar').style.width = '100%';
+    var espera = burbuja('Confirmando tu pago con Payphone…', 'yo', true);
+    fetch(COBRO.url + '/confirmar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, clientTxId: tx }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        espera.remove(); limpiar(); guardarEstado(null);
+        if (!r.aprobado) {
+          burbuja((r.motivo || 'El pago no se completó.') + ' Tus respuestas siguen aquí: revisa el resumen e inténtalo de nuevo.', 'yo', true);
+          return setTimeout(mostrarResumen, sinMov ? 0 : 1400);
+        }
+        enviado = true;
+        var gracias = function () {
+          burbuja('Pago aprobado, autorización ' + r.autorizacion + '. Recibí tu solicitud con la referencia ' + ref + ' y te envío el informe a ' + resp.datos.email + ' en un máximo de tres días hábiles.', 'yo', true);
+        };
+        return enviar(FORMS.analisis, Object.assign({}, g.datos, { pago: r.pago })).then(gracias, function () {
+          burbuja('Tu pago está aprobado (autorización ' + r.autorizacion + '), pero no pude guardar tus respuestas. Escríbeme por ' + LINKEDIN + ' con tu referencia, ' + ref + ', y lo resolvemos.', 'yo', true, true);
+        });
+      })
+      .catch(function () {
+        espera.remove();
+        burbuja('No pude confirmar tu pago todavía. Recarga esta página en un momento para intentarlo de nuevo; si no se confirma en unos minutos, Payphone anula el cargo.', 'yo', true);
+      });
   }
   chipsEl.addEventListener('click', function (e) {
     var c = e.target.closest('.chip'); if (!c || !actual) return;
@@ -1996,6 +2110,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   document.getElementById('ae-x').addEventListener('click', function () { dlg.close(); });
   document.querySelectorAll('[data-ae]').forEach(function (b) { b.addEventListener('click', abrir); });
   if (location.hash === '#analisis-expres') abrir();
+  servicios.then(retornoPago);
 
   /* ---------- Aparición progresiva al desplazarse ---------- */
   if ('IntersectionObserver' in window && window.matchMedia && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
