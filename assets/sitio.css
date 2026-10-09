@@ -592,3 +592,5 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .pp-btns { background: #fff; border-radius: 6px; padding: .9rem .9rem .3rem; min-height: 3.2rem; }
 .pp-btns:empty { display: none; }
 .pp-cargando { margin: 0 0 .6rem; color: #536176; font-size: var(--t-s); text-align: center; }
+
+.pp-ayuda.pp-nota { font-size: var(--t-xs); opacity: .85; margin-top: -.25rem; }

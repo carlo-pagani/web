@@ -464,6 +464,7 @@
     mf.innerHTML = '<p class="q">Último paso, ' + nombre + ': paga tu cupo</p>' +
       '<div class="dp-qr pp-total"><span>Valor de la masterclass, IVA incluido</span><strong>' + MC.precio + ' USD</strong></div>' +
       '<p class="pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. Tu cupo queda confirmado en cuanto se aprueba el pago.</p>' +
+      '<p class="pp-ayuda pp-nota">Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso. Si tu banco la rechaza, activa en su app las compras por internet y en el exterior.</p>' +
       '<div class="pp-btns" id="m-pp"></div><p class="cstatus" id="m-status2" role="status"></p>';
     var st = document.getElementById('m-status2');
     botonesPayPal(document.getElementById('m-pp'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, function (r) {
