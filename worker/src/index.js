@@ -13,7 +13,7 @@ const ORIGENES = [
   "https://www.carlogalarza-pagani.com",
   "https://carlo-pagani.github.io",
 ];
-const MODELO = "claude-opus-5-5";
+const MODELO = "claude-sonnet-5-5";
 // Cobro: $35 + IVA 15 % = $40.25
 const COBRO = { currency: "USD", total: 40.25, taxes: [{ kind: "valueAddedTax", amount: 5.25, base: 35 }] };
 const SEGUIR = { accion: "seguir", mensaje: "" };
