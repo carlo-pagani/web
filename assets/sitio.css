@@ -577,3 +577,11 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .ae-band.portafolio .ae-precio .btn { white-space: normal; text-align: center; }
 .news .meta .region { font-weight: 600; color: var(--accent); margin-right: .55em; }
 .news .meta .region::after { content: "·"; margin-left: .55em; color: var(--ink-soft); font-weight: 400; }
+
+/* Docencia: carrete de temas que lleva a la página Aprende finanzas */
+.vcar { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: calc((100% - 3rem) / 3); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: .25rem; }
+.vcar::-webkit-scrollbar { display: none; }
+.vcar .video { scroll-snap-align: start; }
+.vcar-pie { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.75rem; }
+.vcar-flechas { display: flex; gap: .5rem; }
+@media (max-width: 52rem) { .vcar { grid-auto-columns: min(78%, 20rem); } .vcar-flechas { display: none; } }

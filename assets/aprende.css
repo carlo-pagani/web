@@ -1,0 +1,123 @@
+/* Página «Aprende finanzas»: una columna de lectura con herramientas y, a la derecha, la Consulta Express fija. */
+.ap { --ok: #2E7D5B; --warn: #B07A1E; --bad: #A3352B; }
+
+.ap-hero .wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem) clamp(2rem, 5vw, 3.5rem); }
+.ap-hero .eyebrow { color: var(--brass); }
+.ap-hero h1 { font-size: clamp(2.1rem, 5vw, 3.4rem); letter-spacing: -.01em; max-width: 20ch; }
+.ap-hero h1 em { font-style: italic; font-weight: 500; color: var(--brass); }
+.ap-hero .lede { font-size: var(--t-l); color: var(--on-navy-soft); max-width: 40rem; margin: 1.2rem 0 2rem; line-height: 1.5; }
+.ap-indice { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem 2rem; border-top: 1px solid rgba(238,242,247,.14); padding-top: 1.5rem; }
+.ap-indice div { display: grid; gap: .35rem; align-content: start; }
+.ap-indice span { font-family: var(--mono); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--brass); margin-bottom: .2rem; }
+.ap-indice a { color: var(--on-navy); text-decoration: none; font-size: var(--t-s); line-height: 1.35; }
+.ap-indice a:hover { color: var(--brass); }
+
+.ap-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; gap: 3.5rem; align-items: start; padding-block: 1rem 4rem; }
+.ap-main { min-width: 0; max-width: 46rem; }
+.ap-grupo { font-size: clamp(1.9rem, 4vw, 2.6rem); margin: 3.5rem 0 0; padding-top: 1.5rem; border-top: 3px solid var(--brass); scroll-margin-top: 1rem; }
+.tema { padding-block: 2.5rem 1rem; border-top: 1px solid var(--rule); scroll-margin-top: 1rem; }
+.ap-grupo + .tema { border-top: 0; padding-top: 1.5rem; }
+.tema h2 { font-size: var(--t-xl); margin: .25rem 0 1.25rem; }
+.tema h3 { font-size: var(--t-l); margin: 2rem 0 .9rem; }
+.tema p { margin: 0 0 1rem; }
+.tema .fuentes, .ap .fuentes { font-size: var(--t-xs); color: var(--ink-soft); margin-top: 1rem; }
+
+/* Video: miniatura que se cambia por el reproductor al tocarla */
+.yt { display: block; width: 100%; aspect-ratio: 16 / 9; position: relative; padding: 0; border: 0; border-radius: 4px; overflow: hidden; background: var(--navy-2); cursor: pointer; margin: 0 0 1.5rem; }
+.yt img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease, filter .3s ease; }
+.yt:hover img { transform: scale(1.02); filter: brightness(.92); }
+.yt span { position: absolute; left: 1rem; bottom: 1rem; background: var(--brass); color: #10151C; font-family: var(--mono); font-size: var(--t-s); padding: .45rem .75rem; border-radius: 3px; }
+.yt iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* Herramientas */
+.herr { margin: 0 0 1.5rem; }
+.herr .ledger { padding: 1.1rem 1.25rem; }
+.campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.5rem; }
+.campos .row { grid-template-columns: minmax(0, 1fr) 7.5rem; }
+.campos .row:nth-child(2) { border-top: 0; }
+.campos .row.full { grid-column: 1 / -1; }
+.herr .seg { margin-bottom: .75rem; }
+.row.ruta-sel { grid-template-columns: minmax(0, .8fr) minmax(0, 1.6fr); }
+.herr-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; margin: 1rem 0; }
+.herr-res > div { background: var(--surface); padding: .9rem 1rem; display: grid; gap: .15rem; align-content: start; }
+.herr-res .k { font-size: var(--t-xs); color: var(--ink-soft); line-height: 1.3; }
+.herr-res .v { font-family: var(--display); font-size: clamp(1.35rem, 3vw, 1.75rem); line-height: 1.15; }
+.herr-res .v.neg { color: var(--bad); }
+.herr-res .v.pos { color: var(--ok); }
+.herr-res .s { font-size: var(--t-xs); color: var(--ink-soft); }
+.veredicto { border-left: 3px solid var(--brass); padding: .2rem 0 .2rem 1rem; margin: 0 0 1rem; font-size: var(--t-m); }
+.veredicto.ok { border-color: var(--ok); }
+.veredicto.bad { border-color: var(--bad); }
+.herr .chart-box { margin-top: .5rem; }
+.herr .chart-box svg text { font-family: var(--mono); font-size: 11px; fill: var(--ink-soft); }
+.herr input[type="range"] { width: 100%; accent-color: var(--accent); }
+.rango { padding: .6rem 0; border-top: 1px solid var(--rule); }
+.rango label { display: flex; justify-content: space-between; font-size: var(--t-s); gap: 1rem; }
+.rango output { font-family: var(--mono); font-weight: 500; }
+
+/* Barras apiladas del costo del auto */
+.pila { display: flex; height: 2.2rem; border-radius: 3px; overflow: hidden; margin: .5rem 0 .6rem; }
+.pila i { display: block; height: 100%; min-width: 2px; }
+.pila-ley { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: var(--t-xs); color: var(--ink-soft); list-style: none; padding: 0; margin: 0 0 .75rem; }
+.pila-ley i { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; margin-right: .35rem; vertical-align: -1px; }
+.pila-ley b { color: var(--ink); font-family: var(--mono); font-weight: 500; }
+
+/* Eléctricos */
+.usos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.uso { border: 1px solid var(--rule); border-top: 4px solid; border-radius: 4px; padding: 1rem; background: var(--surface); }
+.uso b { display: block; font-family: var(--display); font-size: 1.2rem; margin-bottom: .4rem; }
+.uso p { margin: 0; font-size: var(--t-s); color: var(--ink-soft); }
+.uso.si { border-top-color: var(--ok); } .uso.si b { color: var(--ok); }
+.uso.quizas { border-top-color: var(--warn); } .uso.quizas b { color: var(--warn); }
+.uso.no { border-top-color: var(--bad); } .uso.no b { color: var(--bad); }
+.ruta-bat { height: 1.6rem; background: var(--bg); border: 1px solid var(--rule); border-radius: 3px; position: relative; overflow: hidden; margin: .4rem 0 .2rem; }
+.ruta-bat i { position: absolute; inset: 0 auto 0 0; transition: width .5s ease, background-color .5s ease; }
+.casos { list-style: none; padding: 0; margin: 0; counter-reset: caso; display: grid; gap: 0; }
+.casos li { position: relative; padding: 1rem 0 1rem 2.6rem; border-top: 1px solid var(--rule); font-size: var(--t-s); counter-increment: caso; }
+.casos li::before { content: counter(caso, decimal-leading-zero); position: absolute; left: 0; top: 1.05rem; font-family: var(--mono); font-size: var(--t-xs); color: var(--brass); }
+.casos .pais { display: block; font-family: var(--mono); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-bottom: .2rem; }
+.casos b { display: block; font-size: var(--t-m); margin-bottom: .2rem; }
+.casos a { font-size: var(--t-xs); white-space: nowrap; }
+
+.ap-cierre { margin-top: 3rem; padding: 2rem; background: var(--navy); color: var(--on-navy); border-radius: 4px; }
+.ap-cierre h2 { font-size: var(--t-xl); margin: 0 0 .75rem; }
+.ap-cierre p { color: var(--on-navy-soft); margin: 0 0 1.25rem; }
+
+/* Consulta Express fija a la derecha */
+.ap-lateral { position: sticky; top: 1.5rem; padding-top: 2.5rem; }
+.ce-caja { background: var(--navy); color: var(--on-navy); border-radius: 4px; padding: 1.4rem 1.3rem 1.2rem; box-shadow: 0 10px 30px -18px rgba(14,27,44,.6); border-top: 3px solid var(--brass); position: relative; }
+.ce-caja .eyebrow { color: var(--brass); margin: 0 0 .5rem; }
+.ce-t { margin: 0 0 .9rem; line-height: 1.45; transition: opacity .25s ease; }
+.ce-t.cambia { opacity: 0; }
+.ce-p { font-size: var(--t-s); color: var(--on-navy-soft); margin: 0 0 1rem; }
+.ce-p strong { color: var(--on-navy); font-family: var(--display); font-size: 1.25rem; }
+.ce-caja .btn { width: 100%; text-align: center; }
+.ce-mas { display: block; margin-top: .7rem; font-size: var(--t-s); color: var(--on-navy-soft); text-align: center; }
+.ce-x { display: none; position: absolute; top: .35rem; right: .45rem; background: none; border: 0; color: var(--on-navy-soft); font-size: 1.4rem; line-height: 1; cursor: pointer; padding: .3rem; }
+
+@media (max-width: 60rem) {
+  .ap-cuerpo { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .ap-main { max-width: none; }
+  .ap-indice { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* En el celular, la Consulta Express pasa a una barra abajo que se puede cerrar */
+  .ap-lateral { position: fixed; left: 0; right: 0; bottom: 0; top: auto; padding: 0; z-index: 20; }
+  .ce-caja { border-radius: 0; padding: .7rem 2.4rem .7rem 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .2rem 1rem; box-shadow: 0 -8px 24px -12px rgba(14,27,44,.5); padding-bottom: calc(.7rem + env(safe-area-inset-bottom)); }
+  .ce-caja .eyebrow, .ce-mas { display: none; }
+  .ce-t { grid-column: 1; margin: 0; font-size: var(--t-xs); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .ce-p { grid-column: 1; margin: 0; font-size: var(--t-xs); }
+  .ce-p strong { font-size: 1rem; }
+  .ce-caja .btn { grid-column: 2; grid-row: 1 / span 2; width: auto; padding: .6rem .9rem; font-size: var(--t-s); }
+  .ce-x { display: block; }
+  body.ap { padding-bottom: 6rem; }
+  body.ap.sin-barra { padding-bottom: 0; }
+  body.ap.sin-barra .ap-lateral { display: none; }
+}
+@media (max-width: 40rem) {
+  .campos { grid-template-columns: minmax(0, 1fr); }
+  .campos .row:nth-child(2) { border-top: 1px solid var(--rule); }
+  .herr-res { grid-template-columns: minmax(0, 1fr); }
+  .usos { grid-template-columns: minmax(0, 1fr); }
+  .ap-indice { grid-template-columns: minmax(0, 1fr); }
+  .casos li { padding-left: 2.1rem; }
+}
+@media (prefers-reduced-motion: reduce) { .yt img, .ruta-bat i, .ce-t { transition: none; } }

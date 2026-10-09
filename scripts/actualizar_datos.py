@@ -1,4 +1,4 @@
-"""Actualiza data/noticias.json (economía: EE. UU., América Latina y Ecuador) data/videos.json (canal de YouTube) y data/btc.json (precio de bitcoin).
+"""Actualiza data/noticias.json (economía: EE. UU., América Latina y Ecuador), data/videos.json (canal de YouTube) y data/btc.json (precio de bitcoin).
 
 Lo ejecuta la acción programada de GitHub; solo usa la biblioteca estándar.
 """
