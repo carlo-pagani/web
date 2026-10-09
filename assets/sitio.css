@@ -569,3 +569,6 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 }
 .res-porque { margin: .55rem 0 0; font-size: var(--t-xs); line-height: 1.5; color: var(--on-navy-soft); }
 .res-porque a { color: var(--brass); }
+.topbar nav a.nav-ce { color: #10151C; background: var(--brass); padding: .3rem .75rem; border-radius: 3px; font-weight: 600; }
+.topbar nav a.nav-ce:hover { color: #10151C; filter: brightness(1.06); }
+.topbar nav a.nav-ce::after { display: none; }

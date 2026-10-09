@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/assets/sitio.css?v=5">
+<link rel="stylesheet" href="/assets/sitio.css?v=6">
 </head>
 <body>
 
@@ -21,13 +21,11 @@
         <ul>
           <li><a href="/consulta-express/" class="nav-ce">Consulta Express</a></li>
           <li><a href="#metas">Metas</a></li>
-          <li><a href="#masterclass">Masterclass</a></li>
-          <li><a href="#servicios">Servicios</a></li>
-          <li><a href="#metodo">Método</a></li>
           <li><a href="#inversion">Inversión</a></li>
+          <li><a href="#masterclass">Masterclass</a></li>
           <li><a href="#tasas">Tasas</a></li>
-          <li><a href="#videos">Videos</a></li>
           <li><a href="#docencia">Docencia</a></li>
+          <li><a href="#servicios">Servicios</a></li>
           <li><a href="#contacto">Contacto</a></li>
         </ul>
       </nav>
@@ -37,13 +35,13 @@
   <section class="hero" id="inicio">
     <div class="wrap">
       <div class="copy">
-        <a class="aviso" href="#masterclass"><b>Masterclass</b> Finanzas personales · sábado 14 de noviembre · $15 <span aria-hidden="true">→</span></a>
+        <a class="aviso" href="#masterclass"><b>Masterclass</b> Finanzas personales · sábado 14 de noviembre <span aria-hidden="true">→</span></a>
         <p class="eyebrow">CFO fraccional · Consultor financiero · Profesor universitario</p>
-        <h1><span class="m">La dirección financiera que tu empresa necesita, <em>sin cargarla a tu planilla.</em></span></h1>
-        <p class="lede">Hoy dirijo las finanzas de más de diez empresas a la vez. Esa cartera me permite ver patrones antes que nadie y llevar a tu empresa soluciones que ya funcionaron en otras.</p>
+        <h1><span class="m">Finanzas claras para decidir <em>con tranquilidad.</em></span></h1>
+        <p class="lede">Soy Carlo Pagani. Hoy dirijo las finanzas de más de diez empresas, administro fondos de inversión y enseño finanzas en varias universidades. Lo que más disfruto es explicar el dinero de manera que se entienda, para que tú, tu familia o tu empresa decidan con criterio.</p>
         <div class="ctas">
-          <a class="btn btn-brass" href="#contacto">Agenda una primera conversación</a>
-          <a class="btn btn-line" href="/consulta-express/">Consulta Express · desde $35 USD</a>
+          <a class="btn btn-brass" href="#contacto">Conversemos</a>
+          <a class="btn btn-line" href="#metas">Calcula tu meta financiera</a>
         </div>
       </div>
       <figure class="portrait" style="margin:0">
@@ -133,7 +131,76 @@
       </div>
     </div>
   </section>
-
+  <section class="block alt" id="inversion">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Inversión</p>
+          <h2>Dos ideas que ordenan cualquier portafolio</h2>
+        </div>
+        <p>Diversificar bien y darle tiempo a la inversión. Las dos se pueden medir, y estas gráficas lo muestran con números.</p>
+      </div>
+      <div class="charts2">
+        <div class="chart-card">
+          <h3>El «santo grial» de Ray Dalio</h3>
+          <p>En <em>Principios</em>, Dalio sostiene que con 15 a 20 fuentes de rendimiento buenas y no correlacionadas entre sí se reduce el riesgo cerca de un 80 %, sin sacrificar rendimiento esperado. La clave no es tener muchas inversiones, sino que no se muevan juntas.</p>
+          <div class="chart-box" id="dalio-box">
+            <ul class="legend">
+              <li><i class="line" style="background:var(--s0)"></i>Correlación 0</li>
+              <li><i class="line" style="background:var(--s1)"></i>0,2</li>
+              <li><i class="line" style="background:var(--s2)"></i>0,4</li>
+              <li><i class="line" style="background:var(--s3)"></i>0,6</li>
+            </ul>
+            <svg id="dalio-chart" role="img" aria-label="Riesgo del portafolio según el número de activos y su correlación"></svg>
+          </div>
+          <p class="small-note">Riesgo (volatilidad anual) de un portafolio con pesos iguales, si cada activo tiene una volatilidad de 10 %. Cálculo propio con la fórmula estándar de varianza de portafolio.</p>
+        </div>
+        <div class="chart-card">
+          <h3>20 años en el S&amp;P 500</h3>
+          <p>Cuánto se habrían convertido 10.000 dólares invertidos a inicios de 2004 en cada activo, al cierre de 2023. Incluso atravesando la crisis de 2008, cuando cayó 37 % en un año, el S&amp;P 500 terminó primero.</p>
+          <div class="chart-box">
+            <div class="hbars" id="sp-chart"></div>
+          </div>
+          <details class="data"><summary>Ver los datos</summary>
+            <table id="sp-table"><thead><tr><th>Activo</th><th>Valor final</th><th>Rendimiento anual</th></tr></thead><tbody></tbody></table>
+          </details>
+          <p class="small-note">Fuente: rendimientos anuales recopilados por Aswath Damodaran (NYU Stern). En dólares nominales, S&amp;P 500 con dividendos reinvertidos, sin comisiones ni impuestos. Vivienda: índice de precios de vivienda de EE. UU.</p>
+        </div>
+      </div>
+      <div class="custody">
+        <div>
+          <p class="eyebrow">Fondos de inversión</p>
+          <h3>Tu dinero siempre a tu nombre</h3>
+        </div>
+        <p>Para la administración de fondos de inversión trabajo con brókers de primer nivel. Cada cuenta de inversión está a nombre de su titular, que mantiene el control total y puede ver cada movimiento. Yo gestiono la estrategia; tú sigues siendo el dueño.</p>
+      </div>
+    </div>
+  </section>
+  <section class="block" id="consulta-express">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Nuevo · Consulta Express</p>
+          <h2>¿Tienes una duda concreta de dinero?</h2>
+        </div>
+        <p>Sobre tu empresa, tus finanzas personales, una inversión o una decisión que no te deja dormir. No hace falta agendar una reunión.</p>
+      </div>
+      <div class="ae-band">
+        <div>
+          <h3>Tu duda de dinero, resuelta por escrito en tres días.</h3>
+          <ul class="ae-pasos">
+            <li><b>Respondes</b> un cuestionario guiado de diez minutos, desde el celular.</li>
+            <li><b>Pagas</b> solo lo que necesitas analizar: desde $35, nunca más de $60.</li>
+            <li><b>Recibes</b> mi diagnóstico y tres recomendaciones concretas en tu correo.</li>
+          </ul>
+        </div>
+        <div class="ae-precio">
+          <p><span>desde</span> <strong>$35 USD</strong> <span>+ IVA</span></p>
+          <a class="btn btn-brass" href="/consulta-express/">Ver cómo funciona</a>
+        </div>
+      </div>
+    </div>
+  </section>
   <section class="mclass navy" id="masterclass" aria-labelledby="mc-t">
     <div class="wrap">
       <div class="mc-copy">
@@ -174,7 +241,90 @@
       </form>
     </div>
   </section>
-
+  <section class="block" id="tasas">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Tasas de interés</p>
+          <h2>Lo último sobre tasas, y cómo leerlo</h2>
+        </div>
+        <p>Las decisiones de los bancos centrales mueven el costo de tu deuda, el rendimiento de tus ahorros y el precio de tus inversiones. Estos son los titulares más recientes.</p>
+      </div>
+      <div class="split">
+        <div>
+          <ul class="news" id="news-list"><li class="news-empty">Cargando titulares…</li></ul>
+          <p class="small-note" id="news-updated">Se actualiza automáticamente cada seis horas con titulares de medios. Las noticias pertenecen a sus fuentes.</p>
+        </div>
+        <div class="guide">
+          <h3>Cómo leer una decisión de tasas</h3>
+          <dl>
+            <dt>Si el banco central sube la tasa</dt>
+            <dd>El crédito se encarece: conviene revisar la deuda a tasa variable y no apurar nuevos préstamos. Los depósitos y la renta fija nueva pagan más.</dd>
+            <dt>Si la baja</dt>
+            <dd>Financiarse cuesta menos y suele ser buen momento para refinanciar. Los bonos que ya tienes tienden a subir de precio, y el ahorro en depósitos rinde menos.</dd>
+            <dt>Si la mantiene</dt>
+            <dd>Lo importante es el mensaje: qué dice sobre la inflación y los próximos meses. Ahí está la pista de lo que viene.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="block alt" id="videos">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Videos</p>
+          <h2>Explicar para que se entienda</h2>
+        </div>
+        <p>Lo que más me apasiona es explicar las finanzas de una manera comprensible, sin jerga innecesaria. En mi canal de YouTube comparto esas explicaciones.</p>
+      </div>
+      <p class="desliza" aria-hidden="true">Desliza para ver más →</p>
+      <div class="videos" id="video-grid"></div>
+      <p style="margin:1.75rem 0 0"><a href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener">Ver todos los videos en YouTube →</a></p>
+    </div>
+  </section>
+  <section class="block" id="docencia">
+    <div class="wrap split">
+      <div>
+        <p class="eyebrow">Docencia</p>
+        <h2>Del aula a la empresa, y de vuelta</h2>
+        <p style="margin-top:1.25rem">Enseño finanzas en varias universidades e institutos. El aula me obliga a explicar con claridad lo que en la empresa se da por sabido, y la empresa me devuelve al aula con casos reales.</p>
+        <p>Por eso cada recomendación llega con su porqué: para que tu equipo la entienda y la sostenga sin depender de mí.</p>
+        <blockquote>No es que tengamos poco tiempo, es que perdemos mucho.<cite>Séneca, Sobre la brevedad de la vida</cite></blockquote>
+      </div>
+      <div>
+        <p class="eyebrow">Lo que no prometo</p>
+        <ul class="nopromise">
+          <li><strong>Milagros en un mes.</strong><span>Ordenar las finanzas toma un ciclo completo de planificación y control.</span></li>
+          <li><strong>Números maquillados.</strong><span>Si una cifra es mala, la verás tal cual y con un plan para corregirla.</span></li>
+          <li><strong>Decidir por ti.</strong><span>Te doy el análisis y una recomendación clara. La decisión sigue siendo tuya.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <section class="block alt" id="diferencia">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">La diferencia</p>
+          <h2>Tu contador te dice qué pasó. Un CFO te ayuda a decidir qué sigue.</h2>
+        </div>
+        <p>Ambos son necesarios y se complementan. Esta es la frontera entre los dos.</p>
+      </div>
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead><tr><th scope="col">Tema</th><th scope="col">Contabilidad</th><th scope="col">Dirección financiera</th></tr></thead>
+          <tbody>
+            <tr><td>Mirada</td><td>Registra el pasado</td><td>Proyecta los próximos meses</td></tr>
+            <tr><td>Caja</td><td>Concilia lo que entró y salió</td><td>Anticipa faltantes y decide cómo cubrirlos</td></tr>
+            <tr><td>Rentabilidad</td><td>Calcula la utilidad del periodo</td><td>Identifica qué productos, clientes y canales la generan</td></tr>
+            <tr><td>Bancos</td><td>Entrega los estados financieros</td><td>Negocia condiciones con un plan que las sustenta</td></tr>
+            <tr><td>Decisiones</td><td>Informa</td><td>Propone, mide y responde por el resultado</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
   <section class="block" id="sintomas">
     <div class="wrap">
       <div class="head">
@@ -194,7 +344,6 @@
       </ul>
     </div>
   </section>
-
   <section class="block alt" id="servicios">
     <div class="wrap">
       <div class="head">
@@ -251,48 +400,8 @@
           </ul>
         </article>
       </div>
-      <div class="ae-band">
-        <div>
-          <p class="eyebrow">Nuevo · Consulta Express</p>
-          <h3>Tu duda de dinero, resuelta por escrito en tres días.</h3>
-          <ul class="ae-pasos">
-            <li><b>Respondes</b> un cuestionario guiado de diez minutos, desde el celular.</li>
-            <li><b>Pagas</b> solo lo que necesitas analizar: desde $35, nunca más de $60.</li>
-            <li><b>Recibes</b> mi diagnóstico y tres recomendaciones concretas en tu correo.</li>
-          </ul>
-        </div>
-        <div class="ae-precio">
-          <p><span>desde</span> <strong>$35 USD</strong> <span>+ IVA</span></p>
-          <a class="btn btn-brass" href="/consulta-express/">Ver cómo funciona</a>
-        </div>
-      </div>
     </div>
   </section>
-
-  <section class="block" id="diferencia">
-    <div class="wrap">
-      <div class="head">
-        <div>
-          <p class="eyebrow">La diferencia</p>
-          <h2>Tu contador te dice qué pasó. Un CFO te ayuda a decidir qué sigue.</h2>
-        </div>
-        <p>Ambos son necesarios y se complementan. Esta es la frontera entre los dos.</p>
-      </div>
-      <div class="compare-wrap">
-        <table class="compare">
-          <thead><tr><th scope="col">Tema</th><th scope="col">Contabilidad</th><th scope="col">Dirección financiera</th></tr></thead>
-          <tbody>
-            <tr><td>Mirada</td><td>Registra el pasado</td><td>Proyecta los próximos meses</td></tr>
-            <tr><td>Caja</td><td>Concilia lo que entró y salió</td><td>Anticipa faltantes y decide cómo cubrirlos</td></tr>
-            <tr><td>Rentabilidad</td><td>Calcula la utilidad del periodo</td><td>Identifica qué productos, clientes y canales la generan</td></tr>
-            <tr><td>Bancos</td><td>Entrega los estados financieros</td><td>Negocia condiciones con un plan que las sustenta</td></tr>
-            <tr><td>Decisiones</td><td>Informa</td><td>Propone, mide y responde por el resultado</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
   <section class="block alt" id="metodo">
     <div class="wrap">
       <div class="head">
@@ -312,117 +421,6 @@
       <p class="pmi-note">Dirigir las finanzas de más de diez empresas al mismo tiempo me da un portafolio amplio de casos resueltos. Cuando aparece un problema en tu empresa, es probable que ya lo haya visto en otra y sepa qué funciona.</p>
     </div>
   </section>
-
-
-  <section class="block" id="inversion">
-    <div class="wrap">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Inversión</p>
-          <h2>Dos ideas que ordenan cualquier portafolio</h2>
-        </div>
-        <p>Diversificar bien y darle tiempo a la inversión. Las dos se pueden medir, y estas gráficas lo muestran con números.</p>
-      </div>
-      <div class="charts2">
-        <div class="chart-card">
-          <h3>El «santo grial» de Ray Dalio</h3>
-          <p>En <em>Principios</em>, Dalio sostiene que con 15 a 20 fuentes de rendimiento buenas y no correlacionadas entre sí se reduce el riesgo cerca de un 80 %, sin sacrificar rendimiento esperado. La clave no es tener muchas inversiones, sino que no se muevan juntas.</p>
-          <div class="chart-box" id="dalio-box">
-            <ul class="legend">
-              <li><i class="line" style="background:var(--s0)"></i>Correlación 0</li>
-              <li><i class="line" style="background:var(--s1)"></i>0,2</li>
-              <li><i class="line" style="background:var(--s2)"></i>0,4</li>
-              <li><i class="line" style="background:var(--s3)"></i>0,6</li>
-            </ul>
-            <svg id="dalio-chart" role="img" aria-label="Riesgo del portafolio según el número de activos y su correlación"></svg>
-          </div>
-          <p class="small-note">Riesgo (volatilidad anual) de un portafolio con pesos iguales, si cada activo tiene una volatilidad de 10 %. Cálculo propio con la fórmula estándar de varianza de portafolio.</p>
-        </div>
-        <div class="chart-card">
-          <h3>20 años en el S&amp;P 500</h3>
-          <p>Cuánto se habrían convertido 10.000 dólares invertidos a inicios de 2004 en cada activo, al cierre de 2023. Incluso atravesando la crisis de 2008, cuando cayó 37 % en un año, el S&amp;P 500 terminó primero.</p>
-          <div class="chart-box">
-            <div class="hbars" id="sp-chart"></div>
-          </div>
-          <details class="data"><summary>Ver los datos</summary>
-            <table id="sp-table"><thead><tr><th>Activo</th><th>Valor final</th><th>Rendimiento anual</th></tr></thead><tbody></tbody></table>
-          </details>
-          <p class="small-note">Fuente: rendimientos anuales recopilados por Aswath Damodaran (NYU Stern). En dólares nominales, S&amp;P 500 con dividendos reinvertidos, sin comisiones ni impuestos. Vivienda: índice de precios de vivienda de EE. UU.</p>
-        </div>
-      </div>
-      <div class="custody">
-        <div>
-          <p class="eyebrow">Fondos de inversión</p>
-          <h3>Tu dinero siempre a tu nombre</h3>
-        </div>
-        <p>Para la administración de fondos de inversión trabajo con brókers de primer nivel. Cada cuenta de inversión está a nombre de su titular, que mantiene el control total y puede ver cada movimiento. Yo gestiono la estrategia; tú sigues siendo el dueño.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="block alt" id="tasas">
-    <div class="wrap">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Tasas de interés</p>
-          <h2>Lo último sobre tasas, y cómo leerlo</h2>
-        </div>
-        <p>Las decisiones de los bancos centrales mueven el costo de tu deuda, el rendimiento de tus ahorros y el precio de tus inversiones. Estos son los titulares más recientes.</p>
-      </div>
-      <div class="split">
-        <div>
-          <ul class="news" id="news-list"><li class="news-empty">Cargando titulares…</li></ul>
-          <p class="small-note" id="news-updated">Se actualiza automáticamente cada seis horas con titulares de medios. Las noticias pertenecen a sus fuentes.</p>
-        </div>
-        <div class="guide">
-          <h3>Cómo leer una decisión de tasas</h3>
-          <dl>
-            <dt>Si el banco central sube la tasa</dt>
-            <dd>El crédito se encarece: conviene revisar la deuda a tasa variable y no apurar nuevos préstamos. Los depósitos y la renta fija nueva pagan más.</dd>
-            <dt>Si la baja</dt>
-            <dd>Financiarse cuesta menos y suele ser buen momento para refinanciar. Los bonos que ya tienes tienden a subir de precio, y el ahorro en depósitos rinde menos.</dd>
-            <dt>Si la mantiene</dt>
-            <dd>Lo importante es el mensaje: qué dice sobre la inflación y los próximos meses. Ahí está la pista de lo que viene.</dd>
-          </dl>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block" id="docencia">
-    <div class="wrap split">
-      <div>
-        <p class="eyebrow">Docencia</p>
-        <h2>Del aula a la empresa, y de vuelta</h2>
-        <p style="margin-top:1.25rem">Enseño finanzas en varias universidades e institutos. El aula me obliga a explicar con claridad lo que en la empresa se da por sabido, y la empresa me devuelve al aula con casos reales.</p>
-        <p>Por eso cada recomendación llega con su porqué: para que tu equipo la entienda y la sostenga sin depender de mí.</p>
-        <blockquote>No es que tengamos poco tiempo, es que perdemos mucho.<cite>Séneca, Sobre la brevedad de la vida</cite></blockquote>
-      </div>
-      <div>
-        <p class="eyebrow">Lo que no prometo</p>
-        <ul class="nopromise">
-          <li><strong>Milagros en un mes.</strong><span>Ordenar las finanzas toma un ciclo completo de planificación y control.</span></li>
-          <li><strong>Números maquillados.</strong><span>Si una cifra es mala, la verás tal cual y con un plan para corregirla.</span></li>
-          <li><strong>Decidir por ti.</strong><span>Te doy el análisis y una recomendación clara. La decisión sigue siendo tuya.</span></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-  <section class="block alt" id="videos">
-    <div class="wrap">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Videos</p>
-          <h2>Explicar para que se entienda</h2>
-        </div>
-        <p>Lo que más me apasiona es explicar las finanzas de una manera comprensible, sin jerga innecesaria. En mi canal de YouTube comparto esas explicaciones.</p>
-      </div>
-      <p class="desliza" aria-hidden="true">Desliza para ver más →</p>
-      <div class="videos" id="video-grid"></div>
-      <p style="margin:1.75rem 0 0"><a href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener">Ver todos los videos en YouTube →</a></p>
-    </div>
-  </section>
-
   <section class="block" id="preguntas">
     <div class="wrap">
       <div class="head">
@@ -506,6 +504,6 @@
 </div>
 
 
-<script src="/assets/sitio.js?v=5"></script>
+<script src="/assets/sitio.js?v=6"></script>
 </body>
 </html>
