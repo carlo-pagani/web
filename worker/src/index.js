@@ -129,7 +129,7 @@ async function crearSesion(request, env, origen) {
   }
   const referencia = corto(d.referencia, 32);
   if (!/^AE-[A-Z0-9-]+$/.test(referencia)) return json({ error: "Referencia no válida" }, 400, origen);
-  const vuelta = `${origen}/?pago=${encodeURIComponent(referencia)}`;
+  const vuelta = `${origen}/consulta-express/?pago=${encodeURIComponent(referencia)}`;
   const buyer = d.email ? { name: corto(d.nombre, 60), email: corto(d.email, 80) } : undefined;
   try {
     const r = await placetopay(env, "/api/session", {
