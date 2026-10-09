@@ -230,12 +230,12 @@
 
   fetch('/data/videos.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
     var grid = document.getElementById('video-grid');
-    if (!data || !data.items || !data.items.length) { document.getElementById('videos').hidden = true; return; }
+    if (!data || !data.items || !data.items.length) { if (grid) document.getElementById('videos').hidden = true; return; }
     var largos = data.items.filter(function (v) { return v.titulo.indexOf('#') === -1; });
     var DESTACADOS = ['C9m2NIsvO3U', 'ArzyE5pdRbY', 'yR5flMvfkpc', 'GZSyeOmEfJ8', '5hoIyxtzJGQ', 'DJEkMKGF4AA'];
     var lista = DESTACADOS.map(function (id) { return largos.filter(function (v) { return v.id === id; })[0]; }).filter(Boolean);
     largos.forEach(function (v) { if (lista.length < 6 && lista.indexOf(v) === -1) lista.push(v); });
-    grid.innerHTML = lista.slice(0, 6).map(function (v) {
+    if (grid) grid.innerHTML = lista.slice(0, 6).map(function (v) {
       var f = v.fecha ? fmtFechaLarga.format(new Date(v.fecha)) : '';
       return '<a class="video" href="https://www.youtube.com/watch?v=' + encodeURIComponent(v.id) + '" target="_blank" rel="noopener"><span class="thumb"><img loading="lazy" src="https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg" alt=""><span class="play">▶ Ver</span></span><strong>' + esc(v.titulo) + '</strong><span class="d">' + esc(f) + '</span></a>';
     }).join('');
@@ -1373,6 +1373,14 @@
   document.querySelectorAll('[data-ae]').forEach(function (b) { b.addEventListener('click', abrir); });
   if (location.hash === '#empezar' || location.hash === '#analisis-expres') abrir();
   servicios.then(function () { retornoPago(); retomarDeuna(); });
+  })();
+
+  /* ---------- Carrete de temas en Docencia: flechas ---------- */
+  (function () {
+    var car = document.getElementById('vcar'); if (!car) return;
+    function mover(dir) { car.scrollBy({ left: dir * Math.max(car.clientWidth * 0.8, 240), behavior: 'smooth' }); }
+    document.getElementById('vcar-ant').addEventListener('click', function () { mover(-1); });
+    document.getElementById('vcar-sig').addEventListener('click', function () { mover(1); });
   })();
 
   /* ---------- Aparición progresiva al desplazarse ---------- */

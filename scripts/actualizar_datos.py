@@ -1,4 +1,4 @@
-"""Actualiza data/noticias.json (economía: EE. UU., América Latina y Ecuador) y data/videos.json (canal de YouTube).
+"""Actualiza data/noticias.json (economía: EE. UU., América Latina y Ecuador), data/videos.json (canal de YouTube) y data/btc.json (precio de bitcoin).
 
 Lo ejecuta la acción programada de GitHub; solo usa la biblioteca estándar.
 """
@@ -98,6 +98,22 @@ def videos():
     return out
 
 
+def btc():
+    """Precio de bitcoin en dólares: cierre semanal desde 2013 (Kraken) y el último precio como punto final."""
+    datos = json.loads(leer("https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=10080"))
+    if datos.get("error"):
+        raise RuntimeError(datos["error"])
+    velas = next(v for k, v in datos["result"].items() if k != "last")
+    out = [[datetime.fromtimestamp(int(v[0]), timezone.utc).strftime("%Y-%m-%d"), round(float(v[4]), 2)] for v in velas]
+    try:
+        tic = json.loads(leer("https://api.kraken.com/0/public/Ticker?pair=XBTUSD"))["result"]
+        ultimo = round(float(next(iter(tic.values()))["c"][0]), 2)
+        out.append([datetime.now(timezone.utc).strftime("%Y-%m-%d"), ultimo])
+    except Exception as exc:
+        print(f"btc: sin precio actual {exc!r}")
+    return out if len(out) > 100 else []
+
+
 def guardar(nombre, items):
     if not items:  # si la fuente falla, se conserva el archivo anterior
         print(f"{nombre}: sin datos nuevos, se conserva el anterior")
@@ -113,7 +129,7 @@ def guardar(nombre, items):
     print(f"{nombre}: {len(items)} elementos")
 
 
-for nombre, fuente in (("noticias.json", noticias), ("videos.json", videos)):
+for nombre, fuente in (("noticias.json", noticias), ("videos.json", videos), ("btc.json", btc)):
     try:
         guardar(nombre, fuente())
     except Exception as exc:
