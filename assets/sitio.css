@@ -599,7 +599,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .pest { display: none; }
 @media (min-width: 60.01rem) {
   .pest { display: block; position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 40; }
-  .pest-tab { display: block; writing-mode: vertical-rl; transform: rotate(180deg); background: var(--brass); color: #10151C; border: 0; border-radius: 0 6px 6px 0; padding: 1.1rem .6rem; font: 600 var(--t-s)/1 var(--body); letter-spacing: .02em; cursor: pointer; box-shadow: 4px 0 18px -8px rgba(14,27,44,.55); }
+  /* Texto girado con transform y no con writing-mode: Safari no respeta writing-mode en los botones y lo recorta. */
+  .pest-tab { position: absolute; right: 0; bottom: 0; transform-origin: 100% 100%; transform: rotate(-90deg) translateX(50%); white-space: nowrap; background: var(--brass); color: #10151C; border: 0; border-radius: 6px 6px 0 0; padding: .65rem 1.1rem; font: 600 var(--t-s)/1 var(--body); letter-spacing: .02em; cursor: pointer; box-shadow: 0 -4px 18px -8px rgba(14,27,44,.55); }
   .pest-tab:hover { filter: brightness(1.05); }
   .pest.abierta .pest-tab { display: none; }
   .pest-caja { display: none; position: relative; width: 16.5rem; background: var(--navy); color: var(--on-navy); border-top: 3px solid var(--brass); border-radius: 6px 0 0 6px; padding: 1.1rem 1.1rem 1rem; box-shadow: -10px 10px 30px -16px rgba(14,27,44,.65); }
