@@ -1486,13 +1486,6 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var O = 'Otra decisión de dinero';
   var OT = { deuda: 'Refinanciar o pagar antes una deuda', compra: 'Comprar o arrendar vivienda, local o vehículo', credito: 'Comprar al contado o a crédito',
     trabajo: 'Cambiar de trabajo o emprender', venta: 'Vender un bien o un negocio', otra: 'Otra decisión' };
-  var OPH = {};
-  OPH[OT.deuda] = ['Por ejemplo: tengo un crédito de consumo al que le faltan dos años y otro banco me ofrece pasarlo a una cuota más baja, pero a más plazo.', 'Por ejemplo: A) seguir pagando como hasta ahora; B) refinanciar a 48 meses con otro banco.'];
-  OPH[OT.compra] = ['Por ejemplo: arriendo un local para mi negocio y el dueño me lo ofrece en venta con crédito bancario.', 'Por ejemplo: A) seguir arrendando; B) comprar con una entrada del 30 % y crédito a 15 años.'];
-  OPH[OT.credito] = ['Por ejemplo: quiero cambiar el carro; tengo el dinero ahorrado, pero el concesionario me ofrece crédito directo.', 'Por ejemplo: A) pagar al contado con mis ahorros; B) dar una entrada y financiar el resto a 36 meses.'];
-  OPH[OT.trabajo] = ['Por ejemplo: me ofrecen un empleo mejor pagado en otra ciudad, o estoy pensando en dejar mi trabajo para emprender.', 'Por ejemplo: A) quedarme donde estoy; B) aceptar la oferta.'];
-  OPH[OT.venta] = ['Por ejemplo: tengo un departamento arrendado y me ofrecen comprarlo; no sé si me conviene vender.', 'Por ejemplo: A) conservarlo y seguir arrendando; B) venderlo y pagar mis deudas.'];
-  OPH[OT.otra] = ['Por ejemplo: pagar la universidad de mi hijo en una sola cuota o en mensualidades.', 'Por ejemplo: A) pagar todo ahora con descuento; B) pagar en cuotas.'];
   var DIAS = ['De contado', 'Hasta 30 días', 'De 31 a 60 días', 'De 61 a 90 días', 'Más de 90 días'];
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
@@ -1584,8 +1577,12 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 
     { id: 'o1', si: O, q: '¿Qué tipo de decisión es?', op: [OT.deuda, OT.compra, OT.credito, OT.trabajo, OT.venta, OT.otra] },
     { id: 'o2', si: O, q: '¿Es una decisión personal o de tu empresa?', op: ['Personal o familiar', 'De mi empresa'] },
-    { id: 'o3', si: O, para: 'La situación concreta y lo que genera la duda.', q: 'Cuéntame la situación en dos o tres frases: qué está pasando y qué te hace dudar.', ph: function () { return (OPH[resp.o1] || OPH[OT.otra])[0]; } },
-    { id: 'o4', si: O, para: 'Las opciones concretas entre las que duda.', q: '¿Entre qué opciones dudas? Escríbelas como opción A y opción B.', ph: function () { return (OPH[resp.o1] || OPH[OT.otra])[1]; } },
+    { id: 'o3a', si: O, cond: function () { return resp.o1 === OT.deuda; }, q: '¿Entre qué opciones estás?', op: ['Seguir pagando igual o refinanciar', 'Pagar antes con un dinero que tengo', 'Unir varias deudas en una sola', 'Decidir qué deuda pagar primero'] },
+    { id: 'o3b', si: O, cond: function () { return resp.o1 === OT.compra; }, q: '¿Entre qué opciones estás?', op: ['Comprar o seguir arrendando', 'Comprar ahora o esperar', 'Comprar nuevo o usado', 'Arrendar ahora y comprar después'] },
+    { id: 'o3c', si: O, cond: function () { return resp.o1 === OT.credito; }, q: '¿Entre qué opciones estás?', op: ['Pagar al contado o a crédito', 'Dar una entrada y financiar el resto', 'Crédito del banco o del vendedor', 'Plazo corto o plazo largo'] },
+    { id: 'o3d', si: O, cond: function () { return resp.o1 === OT.trabajo; }, q: '¿Entre qué opciones estás?', op: ['Quedarme o aceptar otra oferta', 'Dejar el empleo y emprender', 'Emprender sin dejar el empleo', 'Independizarme como profesional'] },
+    { id: 'o3e', si: O, cond: function () { return resp.o1 === OT.venta; }, q: '¿Entre qué opciones estás?', op: ['Vender o conservar', 'Vender ahora o esperar', 'Vender para pagar deudas', 'Vender para invertir en otra cosa'] },
+    { id: 'o3f', si: O, cond: function () { return resp.o1 === OT.otra; }, para: 'La decisión concreta, en una frase.', q: 'Resume tu decisión en una frase, como una pregunta de sí o no.', ph: 'Por ejemplo: ¿pago la universidad de mi hijo al contado con descuento?' },
     { id: 'o5a', si: O, cond: function () { return resp.o1 === OT.deuda; }, para: 'Condiciones de la deuda actual y de la propuesta, para comparar su costo real.', q: 'Las cifras de tu deuda y de la propuesta. Llena lo que sepas; la tasa y el costo real los calculo yo.', opcional: true, ficha: [
       { k: 'saldo', l: 'Saldo que debes hoy' },
       { k: 'cuota', l: 'Cuota actual al mes' },
@@ -1624,8 +1621,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       { k: 'cuota', l: 'Pago mensual que implicaría' },
       { k: 'ingreso', l: 'Tu ingreso mensual neto', d: 'o el de la empresa' },
       { k: 'ahorro', l: 'Ahorro o caja disponible' }] },
-    { id: 'o6', si: O, q: '¿Qué pesa más para ti al decidir? Puedes marcar varias.', op: ['El costo total', 'La cuota mensual', 'El riesgo', 'Tener liquidez', 'El tiempo', 'La tranquilidad'], multi: true },
-    { id: 'o7', si: O, q: '¿Para cuándo necesitas decidir?', op: ['Esta semana', 'Este mes', 'Sin prisa'] },
+    { id: 'o6', si: O, q: 'Si solo pudieras cuidar una cosa en esta decisión, ¿cuál sería?', op: ['Pagar menos en total', 'Una cuota mensual cómoda', 'Correr poco riesgo', 'Tener dinero disponible', 'Resolverlo rápido'] },
+    { id: 'o7', si: O, q: 'Hoy, ¿hacia dónde te inclinas?', op: ['Hacia hacer el cambio', 'Hacia dejar las cosas como están', 'Estoy en el medio'] },
+    { id: 'o8', si: O, q: '¿Para cuándo necesitas decidir?', op: ['Esta semana', 'Este mes', 'Antes de tres meses'] },
 
     { id: 'mas', para: 'Cambios, ingresos o gastos previstos que modifiquen el análisis.', q: '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?', opcional: true },
     { id: 'datos', q: 'Perfecto. ¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
@@ -1644,9 +1642,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     i1: 'Inversión que evalúas', i2: 'Condiciones de la inversión', i3: 'Objetivo del dinero', i4: 'Origen del dinero', i5: 'Peso en tu patrimonio',
     i6: 'Necesidad del dinero antes del plazo', i7: 'Si cayera 20 % en un año', i8: 'Inversiones anteriores', i9: 'Costos y condiciones de retiro',
     i10: 'Control de una superintendencia', i11: 'Tu situación general', i12: 'Alternativas que comparas',
-    o1: 'Tipo de decisión', o2: 'Ámbito de la decisión', o3: 'La situación', o4: 'Opciones que consideras', o5a: 'Cifras principales',
+    o1: 'Tipo de decisión', o2: 'Ámbito de la decisión', o3a: 'Opciones', o3b: 'Opciones', o3c: 'Opciones', o3d: 'Opciones', o3e: 'Opciones', o3f: 'La decisión', o5a: 'Cifras principales',
     o5b: 'Cifras principales', o5c: 'Cifras principales', o5d: 'Cifras principales', o5e: 'Cifras principales', o5f: 'Cifras principales',
-    o6: 'Lo que más pesa', o7: 'Plazo para decidir'
+    o6: 'Lo que más cuida', o7: 'Hacia dónde se inclina', o8: 'Plazo para decidir'
   };
   var CONDICIONES = 'versión del 8 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará unos diez minutos; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Uso tus datos solo para preparar tu análisis.';
@@ -1991,9 +1989,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       if (cifras('i11')) m.push({ k: 'encaje', l: 'Cómo encaja en tu situación financiera general', p: 5 });
       if (resp.i12) m.push({ k: 'comparar', l: 'Comparación con las alternativas que mencionas', p: 10 });
     } else {
-      m.push({ k: 'base', l: 'Análisis de tu decisión, con una recomendación razonada', p: BASE });
+      m.push({ k: 'base', l: 'Análisis de tu decisión, con una recomendación clara de qué hacer', p: BASE });
       var f = AE.filter(function (x) { return /^o5/.test(x.id) && x.id in resp; })[0];
       if (f && cifras(f.id) >= 2) m.push({ k: 'numeros', l: 'Comparación numérica de las opciones: costo total y efecto en tu flujo mensual', p: 10 });
+      if (f && cifras(f.id) >= 4) m.push({ k: 'escenarios', l: 'Escenarios: qué pasa si cambian la tasa, tus ingresos o los plazos', p: 5 });
     }
     return m;
   }
