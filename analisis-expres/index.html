@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>Análisis exprés · Un CFO revisa tu caso por $35 · Carlo Pagani</title>
+<meta name="description" content="Responde un cuestionario de diez minutos y recibe en tu correo un informe con un diagnóstico y tres recomendaciones sobre tu empresa, tus finanzas personales o una inversión. $35 + IVA, en un máximo de tres días hábiles.">
+<link rel="canonical" href="https://carlogalarza-pagani.com/analisis-expres/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_EC">
+<meta property="og:site_name" content="Carlo Pagani">
+<meta property="og:url" content="https://carlogalarza-pagani.com/analisis-expres/">
+<meta property="og:title" content="Análisis exprés: un CFO revisa tu caso por $35">
+<meta property="og:description" content="Un cuestionario de diez minutos, un informe con diagnóstico y tres recomendaciones, en tu correo en un máximo de tres días hábiles.">
+<meta property="og:image" content="https://carlogalarza-pagani.com/assets/og-analisis-expres.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Página de aterrizaje para la pauta del análisis exprés: un solo público, una sola oferta y un solo botón.
+   Hereda la identidad de la página principal (azul marino, dorado, Bodoni). El botón lleva al cuestionario,
+   que vive en la página principal y se abre solo con #analisis-expres. */
+:root {
+  --navy: #0E1B2C; --navy-2: #16273D; --on-navy: #EEF2F7; --on-navy-soft: #A9B6C8; --brass: #C9A15B;
+  --bg: #F6F7F9; --surface: #FFFFFF; --ink: #0F1B2A; --ink-soft: #536176; --rule: #DCE1E8; --accent: #2F5D9E;
+  --display: "Libre Bodoni", "Didot", "Bodoni 72", Georgia, serif;
+  --body: "Figtree", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --t-xs: .78rem; --t-s: .9rem; --t-m: 1.05rem; --t-l: 1.3rem; --t-xl: clamp(1.7rem, 3.2vw, 2.3rem); --t-hero: clamp(2.2rem, 5vw, 3.6rem);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: var(--t-m); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+.wrap { max-width: 68rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.12; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--t-xl); }
+h3 { font-size: var(--t-l); }
+p { margin: 0 0 1rem; }
+.eyebrow { font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 .6rem; }
+.btn { display: inline-block; font: inherit; font-weight: 600; text-decoration: none; padding: .9rem 1.4rem; border-radius: 3px; border: 1px solid transparent; cursor: pointer; text-align: center; }
+.btn-brass { background: var(--brass); color: #10151C; }
+.btn-brass:hover { filter: brightness(1.06); }
+.navy { background: var(--navy); color: var(--on-navy); }
+
+/* Barra superior mínima: marca y un solo botón */
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; border-bottom: 1px solid rgba(238,242,247,.12); }
+.brand { font-family: var(--display); font-size: 1.3rem; font-weight: 600; color: var(--on-navy); text-decoration: none; }
+.topbar .btn { padding: .55rem 1rem; font-size: var(--t-s); }
+
+/* Portada */
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: end; padding-top: clamp(2.5rem, 6vw, 4.5rem); }
+.hero .copy { padding-bottom: clamp(2.5rem, 6vw, 4.5rem); }
+.hero .eyebrow { color: var(--brass); }
+.hero h1 { font-size: var(--t-hero); letter-spacing: -.01em; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--brass); }
+.lede { font-size: var(--t-l); color: var(--on-navy-soft); max-width: 34rem; margin: 1.4rem 0 1.8rem; line-height: 1.5; }
+.oferta { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+.precio { display: flex; flex-direction: column; line-height: 1.2; }
+.precio strong { font-family: var(--display); font-size: 2.2rem; font-weight: 600; }
+.precio span { font-size: var(--t-s); color: var(--on-navy-soft); }
+.garantias { list-style: none; padding: 0; margin: 1.6rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; font-size: var(--t-s); color: var(--on-navy-soft); }
+.garantias li::before { content: "✓"; color: var(--brass); margin-right: .45rem; }
+.portrait { margin: 0; justify-self: center; width: min(100%, 22rem); }
+.portrait img { width: 100%; height: auto; }
+
+/* Secciones */
+.block { padding-block: clamp(3.5rem, 8vw, 6rem); }
+.block.alt { background: var(--surface); border-block: 1px solid var(--rule); }
+.head { max-width: 40rem; margin-bottom: 2.5rem; }
+.head p:last-child { color: var(--ink-soft); margin-top: 1rem; }
+
+.temas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.tema { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 1.5rem 1.6rem; }
+.block.alt .tema { background: var(--bg); }
+.tema h3 { margin-bottom: .9rem; }
+.tema ul { margin: 0; padding: 0; list-style: none; }
+.tema li { font-family: var(--display); font-style: italic; font-size: 1.08rem; line-height: 1.4; padding: .55rem 0; border-top: 1px solid var(--rule); }
+
+.pasos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; counter-reset: paso; }
+.pasos li { border-top: 2px solid var(--accent); padding-top: 1.1rem; counter-increment: paso; }
+.pasos li::before { content: counter(paso); font-family: var(--mono); font-size: var(--t-s); color: var(--accent); display: block; margin-bottom: .3rem; }
+.pasos h3 { margin-bottom: .5rem; }
+.pasos p { color: var(--ink-soft); font-size: var(--t-s); margin: 0; }
+
+.recibes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+.lista { list-style: none; margin: 0; padding: 0; }
+.lista li { padding: 1rem 0; border-top: 1px solid var(--rule); }
+.lista li:last-child { border-bottom: 1px solid var(--rule); }
+.lista strong { display: block; }
+.lista span { color: var(--ink-soft); font-size: var(--t-s); }
+
+/* Comparación de costos: el ancla de precio */
+.escala { list-style: none; margin: 0; padding: 0; display: grid; gap: .9rem; }
+.escala li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: baseline; padding: 1rem 1.2rem; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+.escala b { font-weight: 600; }
+.escala small { grid-column: 1 / -1; color: var(--ink-soft); font-size: var(--t-s); }
+.escala .cifra { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.escala li.este { border-color: var(--brass); box-shadow: inset 4px 0 0 var(--brass); }
+.escala li.este .cifra { font-weight: 500; }
+
+.autor { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
+.autor img { width: clamp(8rem, 18vw, 12rem); height: auto; }
+.cifras { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.cifras b { display: block; font-family: var(--display); font-size: 1.6rem; }
+.cifras span { font-size: var(--t-s); color: var(--ink-soft); }
+
+details { border-top: 1px solid var(--rule); padding: 1rem 0; }
+details:last-of-type { border-bottom: 1px solid var(--rule); }
+summary { cursor: pointer; font-weight: 600; }
+details p { color: var(--ink-soft); margin: .75rem 0 0; max-width: 46rem; }
+
+.cierre { text-align: center; }
+.cierre h2 { max-width: 36rem; margin: 0 auto 1rem; }
+.cierre p { color: var(--on-navy-soft); max-width: 34rem; margin: 0 auto 1.8rem; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-block: 1.5rem 2rem; border-top: 1px solid rgba(238,242,247,.12); font-size: var(--t-s); color: var(--on-navy-soft); }
+footer a { color: var(--on-navy); }
+footer .legal { flex-basis: 100%; font-size: var(--t-xs); }
+
+/* Barra fija en el celular: el botón siempre a mano */
+.fija { display: none; }
+@media (max-width: 760px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+  .hero .copy { padding-bottom: 0; }
+  .portrait { width: min(70%, 16rem); }
+  .temas, .pasos, .recibes { grid-template-columns: minmax(0, 1fr); }
+  .pasos { gap: 1.5rem; }
+  .autor { grid-template-columns: minmax(0, 1fr); }
+  .cifras { grid-template-columns: minmax(0, 1fr); }
+  .topbar .btn { display: none; }
+  .fija { display: flex; position: fixed; inset: auto 0 0 0; z-index: 10; gap: .75rem; align-items: center; justify-content: space-between; padding: .7rem 16px calc(.7rem + env(safe-area-inset-bottom)); background: var(--navy); color: var(--on-navy); border-top: 1px solid rgba(201,161,91,.45); transform: translateY(110%); transition: transform .3s ease; }
+  .fija.ver { transform: none; }
+  .fija span { font-size: var(--t-s); line-height: 1.3; }
+  .fija .btn { padding: .7rem 1rem; white-space: nowrap; }
+  body { padding-bottom: 4.5rem; }
+}
+@media (prefers-reduced-motion: reduce) { .fija { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="navy">
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="/">Carlo Pagani</a>
+      <a class="btn btn-brass" href="/#analisis-expres">Empezar mi análisis</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="copy">
+        <p class="eyebrow">Análisis exprés</p>
+        <h1>Tu decisión de dinero, <em>revisada por un CFO.</em></h1>
+        <p class="lede">Respondes un cuestionario de diez minutos y, en un máximo de tres días hábiles, recibes en tu correo un informe con un diagnóstico y tres recomendaciones concretas para tu caso.</p>
+        <div class="oferta">
+          <a class="btn btn-brass" href="/#analisis-expres" id="cta-portada">Empezar mi análisis</a>
+          <p class="precio" style="margin:0"><strong>$35 USD</strong><span>+ IVA · pago único y por adelantado</span></p>
+        </div>
+        <ul class="garantias">
+          <li>Diez minutos, desde el celular</li>
+          <li>Informe hecho por mí, no automático</li>
+          <li>Tus datos solo para tu informe</li>
+        </ul>
+      </div>
+      <figure class="portrait">
+        <img src="/assets/carlo-pagani.webp" width="960" height="1194" alt="Carlo Pagani, CFO fraccional y profesor universitario de finanzas">
+      </figure>
+    </div>
+  </section>
+</div>
+
+<main>
+  <section class="block">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Para qué sirve</p>
+        <h2>Para esa duda que ya te quita el sueño</h2>
+        <p>Eliges sobre qué quieres el análisis y el cuestionario se adapta: las preguntas son las mismas que te haría en una primera reunión de asesoría.</p>
+      </div>
+      <div class="temas">
+        <article class="tema">
+          <h3>Tu empresa</h3>
+          <ul>
+            <li>«Vendo más que el año pasado, pero la caja no me alcanza.»</li>
+            <li>«¿Me conviene este préstamo o me va a ahogar?»</li>
+            <li>«¿Cuánto tengo que vender para no perder?»</li>
+          </ul>
+        </article>
+        <article class="tema">
+          <h3>Tus finanzas personales</h3>
+          <ul>
+            <li>«Gano bien, pero no sé en qué se me va el dinero.»</li>
+            <li>«¿Por cuál deuda empiezo a pagar?»</li>
+            <li>«¿Cuánto debería ahorrar cada mes?»</li>
+          </ul>
+        </article>
+        <article class="tema">
+          <h3>Una inversión</h3>
+          <ul>
+            <li>«Me ofrecen un rendimiento que parece demasiado bueno.»</li>
+            <li>«¿Póliza, fondo o acciones? ¿Qué me conviene a mí?»</li>
+            <li>«¿Es prudente poner ahí esta parte de mis ahorros?»</li>
+          </ul>
+        </article>
+        <article class="tema">
+          <h3>Otra decisión de dinero</h3>
+          <ul>
+            <li>«¿Compro casa ahora o sigo arrendando?»</li>
+            <li>«¿Auto nuevo, usado o mejor ninguno?»</li>
+            <li>«Recibí una liquidación y no quiero desperdiciarla.»</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Cómo funciona</p>
+        <h2>Tres pasos, sin reuniones ni esperas</h2>
+      </div>
+      <ol class="pasos">
+        <li><h3>Respondes</h3><p>Un cuestionario guiado de unos diez minutos. Las cifras pueden ser aproximadas, y si una pregunta no se entiende, un asistente te la aclara con un ejemplo.</p></li>
+        <li><h3>Revisas y pagas</h3><p>Ves un resumen de tus respuestas para corregir lo que haga falta y pagas $40.25 (con IVA) con Deuna o con la app de tu banco.</p></li>
+        <li><h3>Recibes tu informe</h3><p>En un máximo de tres días hábiles llega a tu correo, con el diagnóstico y tres recomendaciones que puedes aplicar.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap recibes">
+      <div>
+        <p class="eyebrow">Qué recibes</p>
+        <h2>Criterio profesional, en lugar de consejos genéricos</h2>
+        <p style="margin-top:1.25rem;color:var(--ink-soft)">Lo que encuentras en internet está pensado para todos. Este informe está pensado para tus números.</p>
+      </div>
+      <ul class="lista">
+        <li><strong>Un primer vistazo inmediato</strong><span>Al terminar el cuestionario ves una lectura rápida de tus cifras: margen, punto de equilibrio, capacidad de ahorro o carga de deuda, según tu caso.</span></li>
+        <li><strong>Un diagnóstico claro</strong><span>Qué está pasando y por qué, explicado sin jerga, como lo explico en clase.</span></li>
+        <li><strong>Tres recomendaciones concretas</strong><span>Priorizadas, con su porqué, para que sepas qué hacer primero.</span></li>
+        <li><strong>Un punto de partida</strong><span>Si después decides trabajar conmigo en algo más, partimos de este análisis.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block alt">
+    <div class="wrap recibes">
+      <div>
+        <p class="eyebrow">Lo que cuesta</p>
+        <h2>El mismo criterio, al tamaño de tu duda</h2>
+        <p style="margin-top:1.25rem;color:var(--ink-soft)">No siempre necesitas un director financiero. A veces basta con que alguien con experiencia mire tus números una vez y te diga por dónde ir.</p>
+      </div>
+      <ul class="escala">
+        <li><b>Gerente financiero a tiempo completo</b><span class="cifra">~$3.000 / mes</span><small>Referencia para una empresa mediana en Ecuador, antes de cargas sociales.</small></li>
+        <li><b>CFO fraccional</b><span class="cifra">$500 / mes</span><small>Dirección financiera continua, seis horas por semana.</small></li>
+        <li class="este"><b>Análisis exprés</b><span class="cifra">$35 + IVA</span><small>Una revisión de tu caso, una sola vez, sin compromiso posterior.</small></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap autor">
+      <img src="/assets/carlo-pagani.webp" width="960" height="1194" alt="" loading="lazy">
+      <div>
+        <p class="eyebrow">Quién revisa tu caso</p>
+        <h2>Carlo Pagani</h2>
+        <p style="margin-top:1rem">Dirijo las finanzas de más de diez empresas a la vez como CFO fraccional y enseño finanzas en varias universidades e institutos. Cada informe lo leo y lo escribo yo, con el mismo criterio que aplico en esas empresas.</p>
+        <ul class="cifras">
+          <li><b>+10</b><span>empresas que dirijo hoy como CFO</span></li>
+          <li><b>Millones</b><span>de dólares de facturación anual en las empresas que dirijo</span></li>
+          <li><b>Docencia</b><span>universitaria en finanzas</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Preguntas frecuentes</p>
+        <h2>Antes de empezar</h2>
+      </div>
+      <details><summary>¿Y si no sé alguna cifra?</summary><p>Pon un aproximado o déjala en blanco. El cuestionario está pensado para responderse sin abrir la contabilidad; con cifras razonables el diagnóstico ya es útil.</p></details>
+      <details><summary>¿Es seguro compartir mis números?</summary><p>Uso tu información solo para preparar el informe, emitir la factura y comunicarme contigo, conforme a la Ley Orgánica de Protección de Datos Personales. Nunca te pediré números de cuenta, de tarjeta ni contraseñas.</p></details>
+      <details><summary>¿Cómo pago?</summary><p>Al final del cuestionario, escaneando un código QR con Deuna o con la app de tu banco. Antes de pagar ves un resumen de tus respuestas para corregir lo que haga falta.</p></details>
+      <details><summary>¿Cuándo recibo el informe?</summary><p>En un máximo de tres días hábiles desde que se acredita el pago, en el correo que indiques.</p></details>
+      <details><summary>¿Qué no incluye?</summary><p>No es una auditoría ni un peritaje, no reemplaza la asesoría legal, tributaria o contable y no recomienda comprar o vender valores específicos. Es una opinión profesional para que decidas con más claridad.</p></details>
+      <details><summary>¿Puedo hablar contigo después?</summary><p>Sí. Si el informe te deja con ganas de profundizar, lo conversamos y, si contratas otro servicio, partimos de ese análisis.</p></details>
+    </div>
+  </section>
+</main>
+
+<div class="navy">
+  <section class="block cierre">
+    <div class="wrap">
+      <h2>Diez minutos hoy pueden ahorrarte un error caro mañana</h2>
+      <p>Cuéntame tu caso y en tres días hábiles tendrás un diagnóstico y un plan.</p>
+      <a class="btn btn-brass" href="/#analisis-expres">Empezar mi análisis · $35 + IVA</a>
+    </div>
+  </section>
+  <footer>
+    <div class="wrap">
+      <span>Carlo Pagani · Dirección financiera para pymes · <a href="/">Página principal</a></span>
+      <span><a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener">LinkedIn</a></span>
+      <p class="legal">El contenido de esta página es informativo; el informe del análisis exprés es una opinión profesional de carácter orientativo y no constituye una recomendación de inversión.</p>
+    </div>
+  </footer>
+</div>
+
+<div class="fija" id="fija">
+  <span>Análisis exprés<br><b>$35 + IVA</b></span>
+  <a class="btn btn-brass" href="/#analisis-expres">Empezar</a>
+</div>
+
+<script>
+  // Muestra la barra fija del celular cuando el botón de la portada sale de la vista
+  (function () {
+    var fija = document.getElementById('fija'), cta = document.getElementById('cta-portada');
+    if (!('IntersectionObserver' in window)) { fija.classList.add('ver'); return; }
+    new IntersectionObserver(function (e) { fija.classList.toggle('ver', !e[0].isIntersecting); }).observe(cta);
+  })();
+</script>
+</body>
+</html>
