@@ -341,8 +341,11 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .chip { text-align: left; font: inherit; cursor: pointer; background: var(--navy); color: var(--on-navy); border: 1px solid rgba(238,242,247,.2); border-radius: 4px; padding: .85rem .95rem; display: grid; gap: .2rem; align-content: start; transition: border-color .15s, background .15s; }
 .chip b { font-weight: 600; font-size: var(--t-s); }
 .chip small { color: var(--on-navy-soft); font-size: var(--t-xs); }
-.chip:hover { border-color: var(--brass); }
+@media (hover: hover) { .chip:hover { border-color: var(--brass); } }
 .chip[aria-pressed="true"] { border-color: var(--brass); background: rgba(201,161,91,.12); }
+.ae-chips.multi .chip:not([data-listo]) { grid-template-columns: auto minmax(0, 1fr); column-gap: .6rem; align-items: start; }
+.ae-chips.multi .chip:not([data-listo])::before { content: ""; width: 1rem; height: 1rem; margin-top: .1rem; border: 1.5px solid rgba(238,242,247,.5); border-radius: 3px; }
+.ae-chips.multi .chip[aria-pressed="true"]::before { border-color: var(--brass); background: var(--brass) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%2310151C' stroke-width='2.2'/%3E%3C/svg%3E") center / 85% no-repeat; }
 .chip:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 .resumen { font-size: var(--t-xs); font-family: var(--mono); color: var(--brass); margin: -.4rem 0 1rem; max-width: none; }
 .wiz .cgrid { margin-bottom: 1.1rem; }
@@ -447,15 +450,25 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .dp-qr strong { font-family: var(--display); font-size: 1.45rem; font-weight: 600; }
 .dp-pasos { margin: 0 0 .9rem; padding-left: 1.25rem; display: grid; gap: .4rem; font-size: var(--t-s); line-height: 1.55; }
 .dp-pasos b { font-weight: 600; color: var(--brass); }
+.dp-nota { margin: 0 0 .9rem; font-size: var(--t-xs); line-height: 1.5; color: var(--on-navy-soft); }
 .dp-movil { display: grid; gap: .55rem; font-size: var(--t-xs); line-height: 1.5; color: var(--on-navy-soft); }
 .dp-movil p { margin: 0; }
 .dp-movil p a { color: var(--brass); }
-.dp-movil .btn { justify-self: stretch; text-align: center; font-size: var(--t-s); padding: .7rem 1.1rem; }
+
 @media (hover: hover) and (pointer: fine) { .dp-movil { display: none; } }
-@media (hover: none), (pointer: coarse) { .dp-qr img { width: min(10.5rem, 48vw); } .dp-movil { margin: 0 0 1.1rem; padding: .85rem .9rem; border: 1px solid rgba(238,242,247,.12); border-radius: 4px; background: var(--navy-2); } }
+@media (hover: none), (pointer: coarse) { .dp-qr img { width: min(10.5rem, 48vw); } .dp-movil { margin: 0 0 1.1rem; } }
 .dp-comp { display: grid; gap: .3rem; font-size: var(--t-xs); color: var(--on-navy-soft); }
 .dp-comp input { width: 100%; font: inherit; font-size: 1rem; color: var(--on-navy); background: var(--navy-2); border: 1px solid rgba(238,242,247,.22); border-radius: 4px; padding: .6rem .7rem; color-scheme: dark; }
 .dp-comp input[aria-invalid="true"] { border-color: #E8857A; }
+.res-mods { margin: 1.2rem 0 0; }
+.res-mods ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.res-mods label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .65rem; align-items: start; padding: .65rem .8rem; border: 1px solid rgba(238,242,247,.14); border-radius: 4px; font-size: var(--t-s); line-height: 1.45; cursor: pointer; }
+.res-mods input { width: 1.1rem; height: 1.1rem; margin: .12rem 0 0; accent-color: var(--brass); }
+.res-mods input:disabled { opacity: .7; }
+.res-mods b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.res-mods label:has(input:not(:checked)) { color: var(--on-navy-soft); }
+.res-mods label:has(input:not(:checked)) b { text-decoration: line-through; }
+.res-mods .tope { margin: .5rem 0 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
 @keyframes resIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) { .ae-res.entra { animation: resIn .45s cubic-bezier(.2,.7,.2,1); } }
 .msg.ficha { align-self: stretch; max-width: none; white-space: normal; display: grid; gap: .8rem; background: var(--navy-2); border: 1px solid rgba(238,242,247,.14); padding: .9rem 1rem 1rem; }
@@ -568,7 +581,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         <p class="lede">Hoy dirijo las finanzas de más de diez empresas a la vez. Esa cartera me permite ver patrones antes que nadie y llevar a tu empresa soluciones que ya funcionaron en otras.</p>
         <div class="ctas">
           <a class="btn btn-brass" href="#contacto">Agenda una primera conversación</a>
-          <button type="button" class="btn btn-line" data-ae>Análisis exprés · $35 USD</button>
+          <button type="button" class="btn btn-line" data-ae>Análisis exprés · desde $35 USD</button>
         </div>
       </div>
       <figure class="portrait" style="margin:0">
@@ -780,7 +793,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
           <p>Un diagnóstico y tres recomendaciones sobre tu empresa, tus finanzas personales, una inversión o una decisión de dinero, en tu correo en un máximo de tres días hábiles.</p>
         </div>
         <div class="ae-precio">
-          <p><strong>$35 USD</strong> <span>+ IVA</span></p>
+          <p><span>desde</span> <strong>$35 USD</strong> <span>+ IVA</span></p>
           <button type="button" class="btn btn-brass" data-ae>Empezar ahora</button>
         </div>
       </div>
@@ -953,7 +966,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       <details><summary>¿Cuánto cuesta?</summary><p>El precio referencial del CFO fraccional es de $500 USD al mes por seis horas semanales de reuniones, visitas o acompañamiento en sitio. Si tu empresa necesita más horas o más frentes, el costo se ajusta a esa dedicación y te lo propongo por escrito antes de empezar.</p></details>
       <details><summary>¿Para qué tamaño de empresa es?</summary><p>Para pymes que ya facturan de forma constante y en las que las decisiones financieras pesan, pero que todavía no justifican un gerente de finanzas a tiempo completo.</p></details>
       <details><summary>¿Reemplaza a mi contador?</summary><p>No. Trabajo con tu contador: él registra y cumple con lo tributario; yo uso esa información para proyectar, controlar y decidir.</p></details>
-      <details><summary>¿Qué es el análisis exprés?</summary><p>Una revisión breve de un caso concreto. Respondes un cuestionario de unos diez minutos, como el de una primera reunión de asesoría, pagas $35 USD + IVA y en un máximo de tres días hábiles recibes en tu correo un informe con un diagnóstico y tres recomendaciones. Si después contratas otro servicio, partimos de ahí.</p></details>
+      <details><summary>¿Qué es el análisis exprés?</summary><p>Una revisión breve de un caso concreto. Respondes un cuestionario de unos diez minutos, como el de una primera reunión de asesoría, pagas desde $35 USD + IVA, según lo que quieras que analice (nunca más de $60 + IVA), y en un máximo de tres días hábiles recibes en tu correo un informe con un diagnóstico y tres recomendaciones. Si después contratas otro servicio, partimos de ahí.</p></details>
       <details><summary>¿Cómo empezamos?</summary><p>Con una conversación para entender tu empresa y lo que necesitas. Si tiene sentido trabajar juntos, te propongo un alcance, un plazo y un costo por escrito.</p></details>
     </div>
   </section>
@@ -1026,7 +1039,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 <dialog class="ae" id="ae" aria-labelledby="ae-t">
   <div class="ae-top">
     <div>
-      <p class="ae-k">Análisis exprés · $35 USD + IVA</p>
+      <p class="ae-k">Análisis exprés · desde $35 USD + IVA</p>
       <h2 id="ae-t">Cuéntame tu caso</h2>
     </div>
     <button type="button" class="ae-x" id="ae-x" aria-label="Cerrar">×</button>
@@ -1055,6 +1068,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     <div class="ae-res-body" id="ae-res-body" tabindex="-1">
       <p class="res-intro">Este es el resumen de lo que ingresaste. Si algo no está bien, pulsa «Corregir» junto a ese dato.</p>
       <ol class="res-list" id="ae-res-list"></ol>
+      <div class="res-mods">
+        <p class="res-intro">Tu análisis incluye lo siguiente. Si alguna parte no te hace falta, desmárcala y el precio baja.</p>
+        <ul id="ae-mods"></ul>
+      </div>
       <p class="res-aviso">Con esta información hago los cálculos y el informe, así que revísala con cuidado: un dato mal ingresado cambia el resultado.</p>
       <div class="res-legal">
         <p><b>Condiciones del análisis exprés.</b></p>
@@ -1062,14 +1079,14 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
         <p><b>2. Errores de ingreso.</b> No asumo responsabilidad por errores, omisiones o inexactitudes en los datos que ingresaste, ni por los cálculos, conclusiones o recomendaciones que se deriven de ellos. Si después de pagar notas un error, escríbeme antes de recibir el informe.</p>
         <p><b>3. Alcance.</b> El informe es una opinión profesional de carácter orientativo, basada en una revisión breve. No es una auditoría ni un peritaje, no sustituye la asesoría legal, tributaria o contable, no constituye una recomendación de comprar o vender valores específicos y no garantiza resultados. Las decisiones que tomes con base en él son de tu exclusiva responsabilidad.</p>
         <p><b>4. Datos personales.</b> Autorizas el tratamiento de tus datos personales y financieros con la única finalidad de preparar este análisis, emitir la factura y comunicarme contigo, conforme a la Ley Orgánica de Protección de Datos Personales. Se almacenan en proveedores tecnológicos que pueden estar fuera del Ecuador. Puedes pedir el acceso, la rectificación o la eliminación de tus datos por los canales de contacto de esta web.</p>
-        <p><b>5. Entrega.</b> Envío el informe al correo que indicaste en un máximo de tres días hábiles desde que se acredite el pago.</p>
+        <p><b>5. Entrega.</b> Envío el informe al correo que indicaste en un máximo de tres días hábiles desde que se acredite el pago completo.</p>
         <p><b>6. Ley aplicable.</b> Estas condiciones se rigen por la ley ecuatoriana y se aplican en la medida en que esta lo permita; nada de lo aquí dicho limita los derechos que la Ley Orgánica de Defensa del Consumidor te reconoce.</p>
       </div>
     </div>
     <div class="res-pie">
       <label class="res-ok"><input type="checkbox" id="ae-acepto"><span>Revisé mis respuestas, confirmo que son correctas y acepto las condiciones.</span></label>
       <div class="res-pagar">
-        <div><span>Total con IVA (15 %)</span><strong>$40.25 USD</strong></div>
+        <div><span id="ae-sub">Total con IVA (15 %)</span><strong id="ae-total">$40.25 USD</strong></div>
         <button type="button" class="btn btn-brass" id="ae-pagar" disabled>Confirmar y pagar</button>
       </div>
       <p class="res-nota" id="ae-res-nota"></p>
@@ -1080,18 +1097,17 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     <div class="ae-res-body" id="ae-dp-body" tabindex="-1">
       <div class="dp-qr">
         <img id="ae-dp-qr" alt="Código QR de Deuna para pagar el análisis exprés a Carlo Pagani">
-        <span>Total con IVA (15 %)</span><strong>$40.25 USD</strong>
+        <span>Total con IVA (15 %)</span><strong id="ae-dp-total">$40.25 USD</strong>
       </div>
       <div class="dp-movil">
-        <p>¿Estás en el celular y tienes Deuna? Ábrela directamente, sin escanear:</p>
-        <a class="btn btn-line" id="ae-dp-abrir">Abrir Deuna y pagar</a>
-        <p>Si pagas desde la app de otro banco, <a id="ae-dp-baja" download="deuna-carlo-pagani.png">guarda el código</a> y elígelo desde la galería en su lector de QR.</p>
+        <p>¿Estás en el celular? No puedes escanear tu propia pantalla: <a id="ae-dp-baja" download="deuna-carlo-pagani.png">guarda el código</a> y elígelo desde la galería en el lector de QR de tu app, o abre esta página en una computadora y escanéalo desde el celular.</p>
       </div>
       <ol class="dp-pasos">
         <li>Abre <b>Deuna</b>, o la app de tu banco en su opción para pagar con Deuna, y escanea este código.</li>
-        <li>Paga <b>$40.25</b>. Si la app te pide un motivo, escribe tu referencia: <b id="ae-dp-ref"></b>.</li>
+        <li>Escribe el monto exacto, <b id="ae-dp-monto">$40.25</b>, y si la app te pide un motivo, tu referencia: <b id="ae-dp-ref"></b>.</li>
         <li>Escribe aquí abajo el número de comprobante que te muestra la app al terminar.</li>
       </ol>
+      <p class="dp-nota">Empiezo tu análisis cuando verifico que el pago llegó completo. Si el monto no coincide, te escribo para completarlo.</p>
     </div>
     <div class="res-pie">
       <label class="dp-comp"><span>Número de comprobante</span><input id="ae-dp-num" autocomplete="off" maxlength="40" spellcheck="false"></label>
@@ -1467,9 +1483,19 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var P = 'Mis finanzas personales';
   var DEUDAS_P = ['Tarjeta de crédito', 'Préstamo de consumo', 'Hipotecario', 'Préstamo vehicular', 'Cooperativa', 'Préstamo de familiares o amigos', 'Otra'];
   var DEUDAS_E = ['Préstamo bancario', 'Línea de crédito o sobregiro', 'Tarjeta de crédito corporativa', 'Leasing', 'Cooperativa', 'Socios o familiares', 'Otra'];
+  var O = 'Otra decisión de dinero';
+  var OT = { deuda: 'Refinanciar o pagar antes una deuda', compra: 'Comprar o arrendar vivienda, local o vehículo', credito: 'Comprar al contado o a crédito',
+    trabajo: 'Cambiar de trabajo o emprender', venta: 'Vender un bien o un negocio', otra: 'Otra decisión' };
+  var OPH = {};
+  OPH[OT.deuda] = ['Por ejemplo: tengo un crédito de consumo al que le faltan dos años y otro banco me ofrece pasarlo a una cuota más baja, pero a más plazo.', 'Por ejemplo: A) seguir pagando como hasta ahora; B) refinanciar a 48 meses con otro banco.'];
+  OPH[OT.compra] = ['Por ejemplo: arriendo un local para mi negocio y el dueño me lo ofrece en venta con crédito bancario.', 'Por ejemplo: A) seguir arrendando; B) comprar con una entrada del 30 % y crédito a 15 años.'];
+  OPH[OT.credito] = ['Por ejemplo: quiero cambiar el carro; tengo el dinero ahorrado, pero el concesionario me ofrece crédito directo.', 'Por ejemplo: A) pagar al contado con mis ahorros; B) dar una entrada y financiar el resto a 36 meses.'];
+  OPH[OT.trabajo] = ['Por ejemplo: me ofrecen un empleo mejor pagado en otra ciudad, o estoy pensando en dejar mi trabajo para emprender.', 'Por ejemplo: A) quedarme donde estoy; B) aceptar la oferta.'];
+  OPH[OT.venta] = ['Por ejemplo: tengo un departamento arrendado y me ofrecen comprarlo; no sé si me conviene vender.', 'Por ejemplo: A) conservarlo y seguir arrendando; B) venderlo y pagar mis deudas.'];
+  OPH[OT.otra] = ['Por ejemplo: pagar la universidad de mi hijo en una sola cuota o en mensualidades.', 'Por ejemplo: A) pagar todo ahora con descuento; B) pagar en cuotas.'];
   var DIAS = ['De contado', 'Hasta 30 días', 'De 31 a 60 días', 'De 61 a 90 días', 'Más de 90 días'];
   var AE = [
-    { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', 'Otra decisión de dinero'] },
+    { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
 
     { id: 'e1', si: 'Mi empresa', para: 'Giro del negocio, tipo de clientes y antigüedad.', q: '¿A qué se dedica tu empresa? Cuéntame qué vende, a quién y desde cuándo opera.', ph: 'Por ejemplo: distribuidora de alimentos para tiendas y restaurantes, desde 2018' },
     { id: 'e2', si: 'Mi empresa', q: '¿Cuántas personas trabajan en ella?', op: ['De 1 a 5', 'De 6 a 20', 'De 21 a 50', 'De 51 a 200', 'Más de 200'] },
@@ -1489,10 +1515,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       { k: 'cxp', l: 'Cuentas por pagar a proveedores' }] },
     { id: 'e6', si: 'Mi empresa', q: '¿En cuánto tiempo te pagan tus clientes, en promedio?', op: DIAS },
     { id: 'e7', si: 'Mi empresa', q: '¿Y en cuánto tiempo les pagas a tus proveedores?', op: DIAS },
-    { id: 'e8', si: 'Mi empresa', para: 'Detalle de las deudas de la empresa para medir su carga financiera.', q: 'Anota las deudas de la empresa con su saldo, la cuota mensual y, si la conoces, la tasa.', deudas: DEUDAS_E },
+    { id: 'e8', si: 'Mi empresa', para: 'Detalle de las deudas de la empresa para medir su carga financiera.', q: 'Anota las deudas de la empresa con su saldo y su cuota mensual. La tasa y el plazo son opcionales: si no los sabes, déjalos en blanco y los calculo yo.', deudas: DEUDAS_E },
     { id: 'e9', si: 'Mi empresa', q: 'En los últimos tres meses, ¿cómo estuvo la caja?', op: ['Hubo excedentes', 'Alcanzó justo', 'Faltó y usamos crédito o sobregiro', 'Tuvimos que atrasar pagos'] },
-    { id: 'e10', si: 'Mi empresa', q: '¿Están al día con sus obligaciones? Marca lo que corresponda.', op: ['Todo al día', 'Atrasos con el SRI', 'Atrasos con el IESS', 'Atrasos con bancos', 'Atrasos con proveedores'], multi: true },
-    { id: 'e11', si: 'Mi empresa', q: '¿Qué información financiera llevan? Puedes marcar varias.', op: ['Contabilidad al día', 'Estados financieros mensuales', 'Flujo de caja proyectado', 'Presupuesto anual', 'Costos por producto', 'Nada formal todavía'], multi: true },
+    { id: 'e10', si: 'Mi empresa', q: '¿Están al día con sus obligaciones? Marca lo que corresponda.', op: ['Todo al día', 'Atrasos con el SRI', 'Atrasos con el IESS', 'Atrasos con bancos', 'Atrasos con proveedores'], multi: true, solo: ['Todo al día'] },
+    { id: 'e11', si: 'Mi empresa', q: '¿Qué información financiera llevan? Puedes marcar varias.', op: ['Contabilidad al día', 'Estados financieros mensuales', 'Flujo de caja proyectado', 'Presupuesto anual', 'Costos por producto', 'Nada formal todavía'], multi: true, solo: ['Nada formal todavía'] },
     { id: 'e12', si: 'Mi empresa', para: 'El problema financiero concreto que el informe debe atender.', q: '¿Cuál es el problema o la decisión principal que quieres resolver con este análisis?', ph: 'Por ejemplo: vendemos más que el año pasado, pero no alcanza la caja' },
     { id: 'e13', si: 'Mi empresa', para: 'Acciones ya intentadas, para no repetir recomendaciones.', q: '¿Qué han intentado hasta ahora para resolverlo?', opcional: true },
     { id: 'e14', si: 'Mi empresa', nota: lecturaEmpresa },
@@ -1523,15 +1549,15 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       { k: 'ropa', l: 'Ropa y cuidado personal' },
       { k: 'mascotas', l: 'Mascotas' },
       { k: 'otros', l: 'Otros' }] },
-    { id: 'p8', si: P, para: 'Cada deuda con saldo, cuota, tasa y plazo, para medir el endeudamiento.', q: 'Hablemos de deudas: tarjetas, préstamos, hipoteca, vehículo o cooperativas. Anota cada una con su saldo, la cuota mensual y, si la conoces, la tasa.', deudas: DEUDAS_P },
+    { id: 'p8', si: P, para: 'Cada deuda con saldo, cuota, tasa y plazo, para medir el endeudamiento.', q: 'Hablemos de deudas: tarjetas, préstamos, hipoteca, vehículo o cooperativas. Anota cada una con su saldo y su cuota mensual. La tasa y el plazo son opcionales: casi nadie los sabe, y calcular cuánto te cuesta de verdad cada deuda es parte de tu informe.', deudas: DEUDAS_P },
     { id: 'p9', si: P, cond: function () { return (resp.p8 || []).some(function (d) { return d.tipo === 'Tarjeta de crédito'; }); }, q: 'Con tus tarjetas de crédito, ¿qué sueles pagar cada mes?', op: ['El total del estado de cuenta', 'Más del mínimo, sin llegar al total', 'Solo el mínimo', 'Difiero la mayoría de las compras'] },
     { id: 'p10', si: P, q: '¿Has tenido atrasos en algún pago en los últimos doce meses?', op: ['Ninguno', 'Alguna vez', 'Sí, tengo pagos atrasados ahora'] },
     { id: 'p11', si: P, para: 'Ahorros e inversiones disponibles, para medir el colchón de emergencia.', q: '¿Qué ahorros e inversiones tienes hoy?', opcional: true, total: 'Ahorro e inversiones', ficha: [
       { k: 'ahorro', l: 'Ahorro disponible', d: 'cuentas de ahorro y efectivo' },
       { k: 'polizas', l: 'Pólizas y depósitos a plazo' },
       { k: 'inversiones', l: 'Fondos, acciones u otras inversiones' }] },
-    { id: 'p12', si: P, q: '¿Qué bienes tienes? Puedes marcar varios.', op: ['Vivienda propia', 'Terreno', 'Vehículo', 'Ninguno'], multi: true },
-    { id: 'p13', si: P, q: '¿Con qué protección cuentas? Puedes marcar varias.', op: ['Afiliación al IESS', 'Seguro médico privado', 'Seguro de vida', 'Ninguna'], multi: true },
+    { id: 'p12', si: P, q: '¿Qué bienes tienes? Puedes marcar varios.', op: ['Vivienda propia', 'Terreno', 'Vehículo', 'Ninguno'], multi: true, solo: ['Ninguno'] },
+    { id: 'p13', si: P, q: '¿Con qué protección cuentas? Puedes marcar varias.', op: ['Afiliación al IESS', 'Seguro médico privado', 'Seguro de vida', 'Ninguna'], multi: true, solo: ['Ninguna'] },
     { id: 'p14', si: P, q: '¿Llevas un registro de tus gastos?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
     { id: 'p15', si: P, para: 'Una meta medible, con monto y plazo.', q: 'Si tuvieras que fijar una meta concreta para los próximos doce meses, ¿cuál sería? Ponle monto y fecha si puedes.', ph: 'Por ejemplo: pagar la tarjeta de 2,400 antes de junio' },
     { id: 'p16', si: P, nota: lecturaPersonal },
@@ -1546,7 +1572,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     { id: 'i5', si: 'Una inversión', q: '¿Qué parte de tu patrimonio representa?', op: ['Menos del 10 %', 'Del 10 al 25 %', 'Del 25 al 50 %', 'Más de la mitad'] },
     { id: 'i6', si: 'Una inversión', q: '¿Podrías necesitar ese dinero antes de que termine el plazo?', op: ['No', 'Tal vez', 'Es probable'] },
     { id: 'i7', si: 'Una inversión', q: 'Si en un año esa inversión valiera 20 % menos, ¿qué harías?', op: ['Vendería para no perder más', 'Esperaría a que se recupere', 'Aprovecharía para invertir más'] },
-    { id: 'i8', si: 'Una inversión', q: '¿En qué has invertido antes? Puedes marcar varias.', op: ['Pólizas o depósitos a plazo', 'Fondos de inversión', 'Acciones o ETF', 'Bienes raíces', 'Criptomonedas', 'Nunca he invertido'], multi: true },
+    { id: 'i8', si: 'Una inversión', q: '¿En qué has invertido antes? Puedes marcar varias.', op: ['Pólizas o depósitos a plazo', 'Fondos de inversión', 'Acciones o ETF', 'Bienes raíces', 'Criptomonedas', 'Nunca he invertido'], multi: true, solo: ['Nunca he invertido'] },
     { id: 'i9', si: 'Una inversión', q: '¿Conoces sus costos, sus comisiones y las condiciones para retirar el dinero?', op: ['Sí, los tengo claros', 'Más o menos', 'No'] },
     { id: 'i10', si: 'Una inversión', q: '¿La entidad que la ofrece está controlada por alguna superintendencia (de Bancos, de Compañías o de Economía Popular y Solidaria)?', op: ['Sí', 'No', 'No lo sé'] },
     { id: 'i11', si: 'Una inversión', para: 'Situación financiera general de quien invierte.', q: 'Para ubicar la inversión en tu situación general:', opcional: true, ficha: [
@@ -1556,17 +1582,50 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       { k: 'deuda', l: 'Deudas totales', d: 'saldo pendiente' }] },
     { id: 'i12', si: 'Una inversión', para: 'Alternativas con las que compara la inversión.', q: '¿La estás comparando con otras opciones? ¿Con cuáles?', opcional: true },
 
-    { id: 'o1', si: 'Otra decisión de dinero', para: 'La decisión concreta que hay que tomar.', q: 'Cuéntame la decisión que tienes que tomar.', ph: 'Por ejemplo: comprar o arrendar local, cambiar de trabajo, refinanciar un crédito…' },
-    { id: 'o2', si: 'Otra decisión de dinero', para: 'Las opciones en juego y por cuál se inclina.', q: '¿Qué opciones estás considerando? Si ya te inclinas por alguna, dime cuál y por qué.' },
-    { id: 'o3', si: 'Otra decisión de dinero', q: '¿La decisión es personal o de tu empresa?', op: ['Personal o familiar', 'De mi empresa'] },
-    { id: 'o4', si: 'Otra decisión de dinero', para: 'Cifras clave de la decisión.', q: 'Las cifras principales, en lo que aplique:', opcional: true, ficha: [
+    { id: 'o1', si: O, q: '¿Qué tipo de decisión es?', op: [OT.deuda, OT.compra, OT.credito, OT.trabajo, OT.venta, OT.otra] },
+    { id: 'o2', si: O, q: '¿Es una decisión personal o de tu empresa?', op: ['Personal o familiar', 'De mi empresa'] },
+    { id: 'o3', si: O, para: 'La situación concreta y lo que genera la duda.', q: 'Cuéntame la situación en dos o tres frases: qué está pasando y qué te hace dudar.', ph: function () { return (OPH[resp.o1] || OPH[OT.otra])[0]; } },
+    { id: 'o4', si: O, para: 'Las opciones concretas entre las que duda.', q: '¿Entre qué opciones dudas? Escríbelas como opción A y opción B.', ph: function () { return (OPH[resp.o1] || OPH[OT.otra])[1]; } },
+    { id: 'o5a', si: O, cond: function () { return resp.o1 === OT.deuda; }, para: 'Condiciones de la deuda actual y de la propuesta, para comparar su costo real.', q: 'Las cifras de tu deuda y de la propuesta. Llena lo que sepas; la tasa y el costo real los calculo yo.', opcional: true, ficha: [
+      { k: 'saldo', l: 'Saldo que debes hoy' },
+      { k: 'cuota', l: 'Cuota actual al mes' },
+      { k: 'meses', l: 'Meses que te faltan', t: 'meses' },
+      { k: 'ncuota', l: 'Cuota con la propuesta', d: 'refinanciamiento o crédito nuevo' },
+      { k: 'nmeses', l: 'Plazo de la propuesta', t: 'meses' },
+      { k: 'costos', l: 'Costos del cambio', d: 'comisiones, seguros, gastos legales' },
+      { k: 'ingreso', l: 'Tu ingreso mensual neto', d: 'o el de la empresa' }] },
+    { id: 'o5b', si: O, cond: function () { return resp.o1 === OT.compra; }, para: 'Costo de comprar frente a arrendar.', q: 'Las cifras de comprar y de arrendar. Llena lo que sepas:', opcional: true, ficha: [
+      { k: 'precio', l: 'Precio de compra' },
+      { k: 'entrada', l: 'Entrada que tienes disponible' },
+      { k: 'cuota', l: 'Cuota del crédito que te ofrecen', d: 'al mes' },
+      { k: 'plazo', l: 'Plazo del crédito', t: 'meses' },
+      { k: 'arriendo', l: 'Arriendo mensual', d: 'del bien o de uno parecido' },
+      { k: 'tiempo', l: 'Tiempo que piensas usarlo', t: 'meses' },
+      { k: 'ingreso', l: 'Tu ingreso mensual neto', d: 'o el de la empresa' }] },
+    { id: 'o5c', si: O, cond: function () { return resp.o1 === OT.credito; }, para: 'Costo de pagar al contado frente a crédito.', q: 'Las cifras de la compra. Llena lo que sepas:', opcional: true, ficha: [
+      { k: 'contado', l: 'Precio al contado' },
+      { k: 'cuota', l: 'Cuota a crédito', d: 'al mes' },
+      { k: 'cuotas', l: 'Número de cuotas', t: 'meses' },
+      { k: 'ahorro', l: 'Ahorro disponible' },
+      { k: 'ingreso', l: 'Tu ingreso mensual neto', d: 'o el de la empresa' }] },
+    { id: 'o5d', si: O, cond: function () { return resp.o1 === OT.trabajo; }, para: 'Ingresos actuales y esperados, inversión y colchón.', q: 'Las cifras del cambio. Llena lo que sepas:', opcional: true, ficha: [
+      { k: 'actual', l: 'Ingreso mensual neto actual' },
+      { k: 'nuevo', l: 'Ingreso mensual que esperas', d: 'en el nuevo trabajo o negocio' },
+      { k: 'inversion', l: 'Inversión inicial', d: 'si vas a emprender' },
+      { k: 'gastos', l: 'Tus gastos mensuales', d: 'incluidas las cuotas de deudas' },
+      { k: 'ahorro', l: 'Ahorro disponible' }] },
+    { id: 'o5e', si: O, cond: function () { return resp.o1 === OT.venta; }, para: 'Valor de venta, deuda asociada y lo que el bien rinde o cuesta hoy.', q: 'Las cifras de la venta. Llena lo que sepas:', opcional: true, ficha: [
+      { k: 'valor', l: 'Valor de venta que esperas' },
+      { k: 'deuda', l: 'Deuda pendiente sobre el bien' },
+      { k: 'renta', l: 'Lo que te deja al mes', d: 'arriendo, utilidad o ahorro' },
+      { k: 'costo', l: 'Lo que te cuesta mantenerlo al mes', d: 'impuestos, mantenimiento, alícuota' }] },
+    { id: 'o5f', si: O, cond: function () { return resp.o1 === OT.otra; }, para: 'Cifras clave de la decisión.', q: 'Las cifras principales. Llena lo que sepas:', opcional: true, ficha: [
       { k: 'monto', l: 'Monto involucrado' },
-      { k: 'cuota', l: 'Cuota o pago mensual que implicaría' },
-      { k: 'ingreso', l: 'Ingreso mensual neto', d: 'tuyo o de la empresa' },
+      { k: 'cuota', l: 'Pago mensual que implicaría' },
+      { k: 'ingreso', l: 'Tu ingreso mensual neto', d: 'o el de la empresa' },
       { k: 'ahorro', l: 'Ahorro o caja disponible' }] },
-    { id: 'o5', si: 'Otra decisión de dinero', q: '¿Qué pesa más para ti al decidir? Puedes marcar varias.', op: ['El costo total', 'La cuota mensual', 'El riesgo', 'Tener liquidez', 'El tiempo', 'La tranquilidad'], multi: true },
-    { id: 'o6', si: 'Otra decisión de dinero', para: 'Consecuencias de no decidir.', q: '¿Qué pasa si no decides nada?', opcional: true },
-    { id: 'o7', si: 'Otra decisión de dinero', q: '¿Para cuándo necesitas decidir?', op: ['Esta semana', 'Este mes', 'Sin prisa'] },
+    { id: 'o6', si: O, q: '¿Qué pesa más para ti al decidir? Puedes marcar varias.', op: ['El costo total', 'La cuota mensual', 'El riesgo', 'Tener liquidez', 'El tiempo', 'La tranquilidad'], multi: true },
+    { id: 'o7', si: O, q: '¿Para cuándo necesitas decidir?', op: ['Esta semana', 'Este mes', 'Sin prisa'] },
 
     { id: 'mas', para: 'Cambios, ingresos o gastos previstos que modifiquen el análisis.', q: '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?', opcional: true },
     { id: 'datos', q: 'Perfecto. ¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
@@ -1585,13 +1644,14 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     i1: 'Inversión que evalúas', i2: 'Condiciones de la inversión', i3: 'Objetivo del dinero', i4: 'Origen del dinero', i5: 'Peso en tu patrimonio',
     i6: 'Necesidad del dinero antes del plazo', i7: 'Si cayera 20 % en un año', i8: 'Inversiones anteriores', i9: 'Costos y condiciones de retiro',
     i10: 'Control de una superintendencia', i11: 'Tu situación general', i12: 'Alternativas que comparas',
-    o1: 'La decisión', o2: 'Opciones que consideras', o3: 'Ámbito de la decisión', o4: 'Cifras principales', o5: 'Lo que más pesa',
-    o6: 'Si no decides nada', o7: 'Plazo para decidir'
+    o1: 'Tipo de decisión', o2: 'Ámbito de la decisión', o3: 'La situación', o4: 'Opciones que consideras', o5a: 'Cifras principales',
+    o5b: 'Cifras principales', o5c: 'Cifras principales', o5d: 'Cifras principales', o5e: 'Cifras principales', o5f: 'Cifras principales',
+    o6: 'Lo que más pesa', o7: 'Plazo para decidir'
   };
   var CONDICIONES = 'versión del 8 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará unos diez minutos; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Uso tus datos solo para preparar tu análisis.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
-  var INTRO_PRECIO = 'El análisis cuesta $35 USD + IVA. Antes de pagar verás un resumen de tus respuestas para revisarlas y corregir lo que haga falta.';
+  var INTRO_PRECIO = 'El análisis cuesta desde $35 USD + IVA: el precio sube un poco según lo que me pidas analizar, nunca más de $60 + IVA. Antes de pagar verás un resumen de tus respuestas y de lo que incluye tu análisis, y podrás quitar lo que no necesites.';
   function intro() { return INTRO + '\n\n' + (IA.url ? INTRO_IA + '\n\n' : '') + INTRO_PRECIO; }
   var dlg = document.getElementById('ae'), log = document.getElementById('ae-log'), chipsEl = document.getElementById('ae-chips');
   var row = document.getElementById('ae-row'), txt = document.getElementById('ae-txt'), camposEl = document.getElementById('ae-campos');
@@ -1601,10 +1661,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
   // Cobro con el Botón de Pagos del Banco Pichincha (opcional): el servicio consulta el pago y solo entonces se guardan las respuestas
   var COBRO = { url: '' }, ESTADO = 'ae-cobro';
-  // Cobro con Deuna (Banco Pichincha): imagen del código QR de la app Deuna Negocios y el enlace que lleva dentro
-  // (en el celular abre la app de Deuna). qr vacío: apagado.
+  // Cobro con Deuna (Banco Pichincha): imagen del código QR de la app Deuna Negocios. qr vacío: apagado.
+  // El QR no lleva monto: el cliente lo escribe y Carlo verifica en Deuna Negocios que el pago sea completo.
   // El cliente paga escaneando el código, escribe el número de comprobante y entonces se guardan sus respuestas; Carlo confirma el pago en la app.
-  var DEUNA = { qr: 'assets/deuna-qr.png', enlace: 'https://pagar.deuna.app/H92p/merchant?id=483ec645f2079389f720c415b239291097384309' }, DEUNA_ESTADO = 'ae-deuna';
+  var DEUNA = { qr: 'assets/deuna-qr.png' }, DEUNA_ESTADO = 'ae-deuna';
   var servicios = fetch('data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
     .then(function (j) {
       if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url;
@@ -1731,7 +1791,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     return '<div class="d-row"><div class="d-top"><select aria-label="Tipo de deuda">' +
       tipos.map(function (t) { return '<option' + (d.tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') +
       '</select><button type="button" class="d-x" aria-label="Quitar esta deuda">×</button></div><div class="d-cols">' +
-      [['saldo', 'Saldo pendiente', 'usd'], ['cuota', 'Cuota al mes', 'usd'], ['tasa', 'Tasa anual', 'pct'], ['plazo', 'Meses que faltan', 'num']].map(function (x) {
+      [['saldo', 'Saldo pendiente', 'usd'], ['cuota', 'Cuota al mes', 'usd'], ['tasa', 'Tasa anual, si la sabes', 'pct'], ['plazo', 'Meses que faltan, si lo sabes', 'num']].map(function (x) {
         return '<label><span>' + x[1] + '</span>' + campo(x[0], d[x[0]], x[2], x[1]) + '</label>';
       }).join('') + '</div></div>';
   }
@@ -1805,13 +1865,14 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
           var marcado = Array.isArray(antes) ? antes.indexOf(o) > -1 : antes === o;
           return '<button type="button" class="chip" aria-pressed="' + marcado + '" data-v="' + esc(o) + '"><b>' + esc(o) + '</b></button>'; }).join('') +
           (p.multi ? '<button type="button" class="chip listo" data-listo><b>Listo</b></button>' : '');
+        chipsEl.classList.toggle('multi', !!p.multi);
         if (dlg.open) chipsEl.querySelector('.chip').focus();
       } else {
         row.hidden = false; row.classList.toggle('solo', !!p.campos);
         txt.hidden = !!p.campos; camposEl.hidden = !p.campos;
         okBtn.textContent = p.campos ? 'Continuar' : 'Enviar';
         if (p.campos) document.getElementById('ae-nombre').focus();
-        else { txt.value = typeof previo[p.id] === 'string' ? previo[p.id] : ''; txt.placeholder = p.ph || 'Escribe tu respuesta…'; autoAlto(); txt.focus(); skipBtn.hidden = !p.opcional; }
+        else { txt.value = typeof previo[p.id] === 'string' ? previo[p.id] : ''; txt.placeholder = (typeof p.ph === 'function' ? p.ph() : p.ph) || 'Escribe tu respuesta…'; autoAlto(); txt.focus(); skipBtn.hidden = !p.opcional; }
       }
       log.scrollTop = log.scrollHeight;
     };
@@ -1908,6 +1969,52 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     camino = camino.filter(function (id) { return id in resp; });
   }
   function enOrden() { return AE.map(function (p) { return p.id; }).filter(function (id) { return id in resp; }); }
+  // Precio según lo que se analiza: $35 de base más partes adicionales que el cliente puede quitar, con tope de $60 (antes de IVA)
+  var BASE = 35, TOPE = 60, IVA = 0.15, quitados = {};
+  function tiene(id, v) { return Array.isArray(resp[id]) && resp[id].indexOf(v) > -1; }
+  function cifras(id) { return resp[id] && typeof resp[id] === 'object' && !Array.isArray(resp[id]) ? Object.keys(resp[id]).length : 0; }
+  function modulos() {
+    var t = resp.tema, m = [];
+    if (t === 'Mi empresa') {
+      m.push({ k: 'base', l: 'Diagnóstico de rentabilidad y punto de equilibrio, con tres recomendaciones', p: BASE });
+      if (cifras('e5')) m.push({ k: 'capital', l: 'Capital de trabajo y ciclo de caja: cuánto dinero inmoviliza tu operación', p: 10 });
+      if ((resp.e8 || []).length) m.push({ k: 'deudas', l: 'Carga de las deudas de la empresa y cómo ordenarlas', p: 10 });
+      if ((resp.e10 || []).some(function (x) { return /^Atrasos/.test(x); })) m.push({ k: 'atrasos', l: 'Plan para ponerse al día con las obligaciones atrasadas', p: 5 });
+    } else if (t === P) {
+      m.push({ k: 'base', l: 'Diagnóstico de tu presupuesto, con tres recomendaciones', p: BASE });
+      if ((resp.p8 || []).length) m.push({ k: 'deudas', l: 'Plan de deudas: cuánto te cuesta de verdad cada una, con su tasa, y en qué orden pagarlas', p: 10 });
+      if (tiene('p1', 'Empezar a invertir') || tiene('p1', 'Planear mi jubilación')) m.push({ k: 'invertir', l: 'Primeros pasos para invertir o planear tu jubilación', p: 10 });
+      if (tiene('p1', 'Comprar vivienda o vehículo')) m.push({ k: 'compra', l: 'Plan para comprar vivienda o vehículo', p: 5 });
+      if (tiene('p1', 'Tener un fondo de emergencia') || tiene('p13', 'Ninguna')) m.push({ k: 'colchon', l: 'Fondo de emergencia y protección', p: 5 });
+    } else if (t === 'Una inversión') {
+      m.push({ k: 'base', l: 'Evaluación de la inversión: riesgo, rendimiento real y costos', p: BASE });
+      if (cifras('i11')) m.push({ k: 'encaje', l: 'Cómo encaja en tu situación financiera general', p: 5 });
+      if (resp.i12) m.push({ k: 'comparar', l: 'Comparación con las alternativas que mencionas', p: 10 });
+    } else {
+      m.push({ k: 'base', l: 'Análisis de tu decisión, con una recomendación razonada', p: BASE });
+      var f = AE.filter(function (x) { return /^o5/.test(x.id) && x.id in resp; })[0];
+      if (f && cifras(f.id) >= 2) m.push({ k: 'numeros', l: 'Comparación numérica de las opciones: costo total y efecto en tu flujo mensual', p: 10 });
+    }
+    return m;
+  }
+  function precio() {
+    var m = modulos(), sub = m.reduce(function (t, x) { return t + (x.k === 'base' || !quitados[x.k] ? x.p : 0); }, 0), neto = Math.min(sub, TOPE);
+    return { m: m, sub: sub, neto: neto, total: Math.round(neto * (1 + IVA) * 100) / 100 };
+  }
+  function dolares(n) { return '$' + n.toFixed(2); }
+  function pintarPrecio() {
+    var pr = precio();
+    document.getElementById('ae-mods').innerHTML = pr.m.map(function (x) {
+      var base = x.k === 'base';
+      return '<li><label><input type="checkbox" data-mod="' + x.k + '"' + (base || !quitados[x.k] ? ' checked' : '') + (base ? ' disabled' : '') + '><span>' + esc(x.l) + '</span><b>' + (base ? '$' : '+ $') + x.p + '</b></label></li>';
+    }).join('') + (pr.sub > TOPE ? '<li><p class="tope">Con todo lo marcado sumaría $' + pr.sub + ', pero el análisis nunca pasa de $' + TOPE + ' + IVA.</p></li>' : '');
+    document.getElementById('ae-sub').textContent = '$' + pr.neto + ' + IVA (15 %)';
+    document.getElementById('ae-total').textContent = dolares(pr.total) + ' USD';
+  }
+  document.getElementById('ae-mods').addEventListener('change', function (e) {
+    var i = e.target.closest('[data-mod]'); if (!i || i.disabled) return;
+    quitados[i.dataset.mod] = !i.checked; pintarPrecio();
+  });
   function mostrarResumen() {
     camino = enOrden();
     resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota; }).map(function (id) {
@@ -1917,6 +2024,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       return '<li><span class="res-q">' + esc(RES[id] || p.q) + '</span><span class="res-a">' + esc(textoResp(p, resp[id])) + extra + '</span>' +
         '<button type="button" class="back res-edit" data-id="' + id + '">Corregir</button></li>';
     }).join('');
+    pintarPrecio();
     acepto.checked = false; pagarBtn.disabled = true; resErr.textContent = '';
     pagarBtn.textContent = COBRO.url || DEUNA.qr || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
     document.getElementById('ae-res-nota').textContent = COBRO.url ? 'Te llevo a la página segura del Botón de Pagos del Banco Pichincha para pagar con tarjeta; tus respuestas me llegan cuando el pago se aprueba.' :
@@ -1959,6 +2067,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   // Lo que se guarda en Jotform: la transcripción completa y los datos de contacto
   function paquete() {
     camino = enOrden();
+    var pr = precio();
     var lineas = camino.filter(function (id) { return ['datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
       .map(function (id) {
         var p = aePaso(id);
@@ -1967,10 +2076,13 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
           (aclar[id] || []).map(function (a) { return '\n  Asistente: ' + a.pregunta + '\n  → ' + a.respuesta; }).join('');
       }).join('\n\n') +
       (dudas.length ? '\n\nDudas que planteó\n' + dudas.map(function (d) { return '· ' + d.duda + ' (en «' + d.pregunta + '»)\n  Asistente: ' + d.respuesta; }).join('\n') : '') +
+      '\n\nAlcance del análisis\n' + pr.m.map(function (x) { return (x.k !== 'base' && quitados[x.k] ? '✗ Quitó: ' : '✓ ') + x.l + ' ($' + x.p + ')'; }).join('\n') +
+      '\nPrecio: $' + pr.neto + ' + IVA = ' + dolares(pr.total) + (pr.sub > TOPE ? ' (tope aplicado; sumaba $' + pr.sub + ')' : '') +
       '\n\nRevisó el resumen y aceptó las condiciones (' + CONDICIONES + ') el ' +
       new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'long', timeStyle: 'short' }) + ', hora de Ecuador.';
     return { referencia: ref, tema: resp.tema, respuestas: lineas, nombre: resp.datos.nombre, email: resp.datos.email,
-      whatsapp: resp.datos.whatsapp, factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: PAGO.url ? 'Enviado a la página de pago' : 'Pendiente: enviar enlace de pago' };
+      whatsapp: resp.datos.whatsapp, factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: (PAGO.url ? 'Enviado a la página de pago' : 'Pendiente: enviar enlace de pago') + ' por ' + dolares(pr.total),
+      importe: dolares(pr.total) };
   }
   function pagar() {
     if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
@@ -2027,12 +2139,12 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   function guardarDeuna(v) { try { if (v) localStorage.setItem(DEUNA_ESTADO, JSON.stringify(v)); else localStorage.removeItem(DEUNA_ESTADO); } catch (e) {} }
   function mostrarDeuna(datos) {
     porPagar = datos;
-    guardarDeuna({ datos: datos, estado: { resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref }, t: Date.now() });
+    guardarDeuna({ datos: datos, estado: { resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref, quitados: quitados }, t: Date.now() });
     document.getElementById('ae-dp-qr').src = DEUNA.qr;
     document.getElementById('ae-dp-baja').href = DEUNA.qr;
-    var abrirDeuna = document.getElementById('ae-dp-abrir');
-    abrirDeuna.hidden = !DEUNA.enlace; if (DEUNA.enlace) abrirDeuna.href = DEUNA.enlace;
     document.getElementById('ae-dp-ref').textContent = ref;
+    document.getElementById('ae-dp-total').textContent = datos.importe + ' USD';
+    document.getElementById('ae-dp-monto').textContent = datos.importe;
     dpErr.textContent = ''; dpNum.removeAttribute('aria-invalid'); dpOk.disabled = false; dpOk.textContent = 'Ya pagué, enviar mis respuestas';
     tituloAE.textContent = 'Paga con Deuna';
     log.hidden = true; inForm.hidden = true; resEl.hidden = true; dpEl.hidden = false;
@@ -2049,7 +2161,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
       dpNum.setAttribute('aria-invalid', 'true'); dpErr.textContent = 'Escribe el número de comprobante que te mostró la app al pagar.'; dpNum.focus(); return;
     }
     dpOk.disabled = true; dpOk.textContent = 'Enviando…'; dpErr.textContent = '';
-    enviar(FORMS.analisis, Object.assign({}, porPagar, { pago: 'Deuna: comprobante ' + n + ' por $40.25. Por confirmar en Deuna Negocios.' })).then(function () {
+    enviar(FORMS.analisis, Object.assign({}, porPagar, { pago: 'Deuna: comprobante ' + n + ' por ' + porPagar.importe + '. Por confirmar en Deuna Negocios que el monto esté completo.' })).then(function () {
       guardarDeuna(null); enviado = true; backBtn.hidden = true; cerrarResumen();
       chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
       document.getElementById('ae-bar').style.width = '100%';
@@ -2066,7 +2178,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
     if (!g) return;
     if (!g.datos || !g.estado || !(Date.now() - g.t < 72e5)) return guardarDeuna(null);
     resp = g.estado.resp || {}; aclar = g.estado.aclar || {}; dudas = g.estado.dudas || []; revisada = g.estado.revisada || {};
-    ref = g.estado.ref || ''; previo = {}; camino = enOrden(); enviado = false; editando = null;
+    ref = g.estado.ref || ''; quitados = g.estado.quitados || {}; previo = {}; camino = enOrden(); enviado = false; editando = null;
     if (!dlg.open) dlg.showModal();
     document.documentElement.style.overflow = 'hidden';
     pintar(); document.getElementById('ae-bar').style.width = '100%';
@@ -2129,7 +2241,15 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   chipsEl.addEventListener('click', function (e) {
     var c = e.target.closest('.chip'); if (!c || !actual) return;
     if (!actual.multi) return responder(c.dataset.v);
-    if (!c.hasAttribute('data-listo')) return c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') !== 'true');
+    if (!c.hasAttribute('data-listo')) {
+      var on = c.getAttribute('aria-pressed') !== 'true', solo = actual.solo || [];
+      c.setAttribute('aria-pressed', on);
+      // «Ninguna», «Todo al día» y similares no se combinan con las demás opciones
+      if (on) chipsEl.querySelectorAll('.chip:not([data-listo])').forEach(function (x) {
+        if (x !== c && (solo.indexOf(c.dataset.v) > -1 || solo.indexOf(x.dataset.v) > -1)) x.setAttribute('aria-pressed', 'false');
+      });
+      return;
+    }
     responder(Array.prototype.filter.call(chipsEl.querySelectorAll('.chip[aria-pressed="true"]'), function (x) { return !x.hasAttribute('data-listo'); })
       .map(function (x) { return x.dataset.v; }));
   });
@@ -2178,7 +2298,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   });
   function abrir() {
     if (typeof dlg.showModal !== 'function') { location.hash = '#contacto'; return; }
-    if (enviado) { resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; editando = null; log.innerHTML = ''; cerrarResumen(); }
+    if (enviado) { quitados = {}; resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; editando = null; log.innerHTML = ''; cerrarResumen(); }
     dlg.showModal(); document.documentElement.style.overflow = 'hidden';
     if (!log.children.length) { pintar(); preguntar(true); }
   }
