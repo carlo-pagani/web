@@ -1,4 +1,4 @@
-/* Pestaña fija a la derecha (computadora): se abre y se oculta, y recuerda la elección durante la visita. */
+/* Recuadro fijo arriba a la derecha (computadora): se oculta en pestaña y recuerda la elección durante la visita. */
 (function () {
   var p = document.getElementById('pest'); if (!p) return;
   var tab = document.getElementById('pest-abrir');
@@ -8,8 +8,8 @@
   }
   var cerrada = false;
   try { cerrada = sessionStorage.getItem('pest-cerrada') === '1'; } catch (e) {}
-  // Abierta de entrada solo donde hay margen libre a la derecha (página Aprende en pantallas anchas)
-  abrir(!cerrada && p.hasAttribute('data-abierta') && window.innerWidth >= 1600);
+  // Abierto de entrada en computadora; en pantallas angostas taparía el texto y queda como pestaña
+  abrir(!cerrada && window.innerWidth >= 1400);
   tab.addEventListener('click', function () {
     abrir(true);
     try { sessionStorage.removeItem('pest-cerrada'); } catch (e) {}
