@@ -108,10 +108,10 @@
   (function () {
     var c = $('h-meta'); if (!c) return;
     var F = formulario(c, [
-      { id: 'mt-cap', l: 'Capital que inviertes hoy', s: 'en dólares', v: 10000, step: 1000, min: 0 },
-      { id: 'mt-ap', l: 'Aporte mensual', s: 'lo que sumas cada mes', v: 300, step: 50, min: 0 },
-      { id: 'mt-r', l: 'Rendimiento anual', s: '% esperado', v: 8, step: 0.5 },
-      { id: 'mt-n', l: 'Años', s: 'cuánto mantienes el compromiso', v: 25, min: 1, max: 60 }
+      { id: 'mt-cap', l: 'Capital que inviertes hoy', s: 'en dólares', v: 50000, step: 1000, min: 0 },
+      { id: 'mt-ap', l: 'Aporte mensual', s: 'lo que sumas cada mes', v: 0, step: 50, min: 0 },
+      { id: 'mt-r', l: 'Rendimiento anual', s: '% esperado', v: 18, step: 0.5 },
+      { id: 'mt-n', l: 'Años', s: 'cuánto mantienes el compromiso', v: 10, min: 1, max: 60 }
     ], '');
     F.form.insertAdjacentHTML('beforeend', '<label class="check" for="mt-inf"><input id="mt-inf" type="checkbox"><span>Descontar inflación de 3 % anual<br><small style="color:var(--ink-soft)">El resultado queda en dinero de hoy.</small></span></label>');
     var svg;
@@ -139,14 +139,14 @@
   (function () {
     var c = $('h-esperar'); if (!c) return;
     var F = formulario(c, [
-      { id: 'es-ap', l: 'Aporte mensual', s: 'en dólares', v: 200, step: 50, min: 0 },
-      { id: 'es-r', l: 'Rendimiento anual', s: '%', v: 8, step: 0.5 },
+      { id: 'es-ap', l: 'Aporte mensual', s: 'en dólares', v: 215, step: 5, min: 0 },
+      { id: 'es-r', l: 'Rendimiento anual', s: '%', v: 6, step: 0.5 },
       { id: 'es-e', l: 'Tu edad hoy', v: 25, min: 15, max: 70 },
-      { id: 'es-j', l: 'Edad a la que dejas de aportar', v: 65, min: 30, max: 90 }
+      { id: 'es-j', l: 'Edad a la que dejas de aportar', v: 50, min: 30, max: 90 }
     ]);
     function fv(ap, rm, meses) { return meses <= 0 ? 0 : ap * (Math.pow(1 + rm, meses) - 1) / rm; }
     function calc() {
-      var ap = F.n('es-ap'), r = F.n('es-r') / 100, e = F.n('es-e'), j = F.n('es-j'), rm = Math.pow(1 + r, 1 / 12) - 1 || 1e-9;
+      var ap = F.n('es-ap'), r = F.n('es-r') / 100, e = F.n('es-e'), j = F.n('es-j'), rm = r / 12 || 1e-9;
       var esp = [0, 5, 10, 15].filter(function (w) { return e + w < j; });
       var vals = esp.map(function (w) { return { w: w, v: fv(ap, rm, (j - e - w) * 12) }; });
       if (!vals.length) { F.out.innerHTML = '<p class="veredicto">Revisa las edades: la de retiro debe ser mayor que la actual.</p>'; return; }
@@ -171,26 +171,27 @@
     var c = $('h-jub'); if (!c) return;
     var F = formulario(c, [
       { id: 'jb-e', l: 'Tu edad hoy', v: 35, min: 18, max: 80 },
-      { id: 'jb-j', l: 'Edad de jubilación', v: 65, min: 40, max: 85 },
-      { id: 'jb-a', l: 'Años de jubilación', s: 'cuánto debe durar el dinero', v: 25, min: 5, max: 45 },
-      { id: 'jb-g', l: 'Gasto mensual deseado', s: 'en dinero de hoy', v: 1500, step: 100, min: 0 },
-      { id: 'jb-p', l: 'Pensión mensual esperada', s: 'en dinero de hoy, si la tendrás', v: 0, step: 100, min: 0 },
+      { id: 'jb-j', l: 'Edad de jubilación', v: 67, min: 40, max: 85 },
+      { id: 'jb-a', l: 'Años de jubilación', s: 'hasta tu esperanza de vida', v: 13, min: 5, max: 45 },
+      { id: 'jb-g', l: 'Gasto mensual deseado', s: 'en dinero de hoy', v: 2000, step: 100, min: 0 },
+      { id: 'jb-p', l: 'Pensión mensual esperada', s: 'del IESS u otra, en dinero de hoy', v: 0, step: 100, min: 0 },
+      { id: 'jb-vt', l: 'Valor final', s: 'lo que quieres que quede', v: 10000, step: 1000, min: 0 },
       { id: 'jb-s', l: 'Ahorro que ya tienes', s: 'para la jubilación', v: 10000, step: 1000, min: 0 },
-      { id: 'jb-r', l: 'Rendimiento anual', s: '% de tus inversiones', v: 7, step: 0.5 },
-      { id: 'jb-i', l: 'Inflación anual', s: '%', v: 3, step: 0.5 }
+      { id: 'jb-r', l: 'Rendimiento anual', s: '% de tus inversiones', v: 6, step: 0.5 },
+      { id: 'jb-i', l: 'Inflación anual', s: '%', v: 3, step: 0.5, full: true }
     ]);
     function calc() {
-      var e = F.n('jb-e'), j = F.n('jb-j'), A = F.n('jb-a'), g = F.n('jb-g'), p = F.n('jb-p'), s = F.n('jb-s'), r = F.n('jb-r') / 100, inf = F.n('jb-i') / 100;
+      var e = F.n('jb-e'), j = F.n('jb-j'), A = F.n('jb-a'), g = F.n('jb-g'), p = F.n('jb-p'), s = F.n('jb-s'), r = F.n('jb-r') / 100, inf = F.n('jb-i') / 100, vt = F.n('jb-vt');
       var n = Math.max(0, j - e), rr = (1 + r) / (1 + inf) - 1, rm = Math.pow(1 + rr, 1 / 12) - 1, falta = Math.max(0, g - p);
       var N = A * 12, M = n * 12;
-      var necesita = Math.abs(rm) < 1e-9 ? falta * N : falta * (1 - Math.pow(1 + rm, -N)) / rm * (1 + rm);
+      var necesita = (Math.abs(rm) < 1e-9 ? falta * N : falta * (1 - Math.pow(1 + rm, -N)) / rm * (1 + rm)) + vt / Math.pow(1 + rm, N);
       var sFut = s * Math.pow(1 + rm, M), brecha = Math.max(0, necesita - sFut);
       var aporte = M <= 0 ? brecha : Math.abs(rm) < 1e-9 ? brecha / M : brecha * rm / (Math.pow(1 + rm, M) - 1);
       F.out.innerHTML = tarjetas([
-        { k: 'Capital necesario al jubilarte', v: usd(necesita), s: 'en dinero de hoy; unos ' + usd(necesita * Math.pow(1 + inf, n)) + ' de ese año' },
+        { k: 'Capital necesario al jubilarte', v: usd(necesita), s: 'valor presente detallado, en dinero de hoy; unos ' + usd(necesita * Math.pow(1 + inf, n)) + ' de ese año' },
         { k: 'Lo que tu ahorro actual alcanzará', v: usd(sFut), s: 'en dinero de hoy' },
         { k: 'Ahorro mensual necesario', v: brecha ? usd(aporte) : '$0', c: brecha ? '' : 'pos', s: brecha ? 'en dinero de hoy, subiéndolo con la inflación' : 'tu ahorro actual ya alcanza' }
-      ]) + '<p class="veredicto">' + (brecha ? 'Con ' + usd(aporte) + ' al mes desde hoy, a los ' + j + ' años tendrías lo necesario para retirar ' + usd(falta) + ' al mes (en dinero de hoy) durante ' + A + ' años.' : 'Con lo que ya tienes invertido llegarías a tu meta si mantienes ese rendimiento.') + '</p>';
+      ]) + '<p class="small-note">Con los otros dos métodos del video: multiplicador (12 veces el gasto anual), ' + usd(falta * 12 * 12) + '; regla del 4 %, ' + usd(falta * 12 / 0.04) + '.</p><p class="veredicto">' + (brecha ? 'Con ' + usd(aporte) + ' al mes desde hoy, a los ' + j + ' años tendrías lo necesario para retirar ' + usd(falta) + ' al mes (en dinero de hoy) durante ' + A + ' años.' : 'Con lo que ya tienes invertido llegarías a tu meta si mantienes ese rendimiento.') + '</p>';
       var pts = [], v = s;
       for (var k = 0; k <= M + N; k++) {
         if (k % 12 === 0) pts.push([e + k / 12, Math.max(0, v)]);
@@ -203,33 +204,48 @@
     F.form.addEventListener('input', calc); redibujar.push(calc); calc();
   })();
 
-  /* ---------- 4. Apalancamiento ---------- */
+  /* ---------- 4. Apalancamiento: el caso inmobiliario del video ---------- */
   (function () {
     var c = $('h-apal'); if (!c) return;
     var F = formulario(c, [
-      { id: 'ap-c', l: 'Tu capital', s: 'dinero propio', v: 10000, step: 1000, min: 0 },
-      { id: 'ap-t', l: 'Interés del préstamo', s: '% anual', v: 8, step: 0.5, min: 0 },
-      { id: 'ap-m', l: 'Margen mínimo del bróker', s: '% de la posición', v: 25, step: 5, min: 0, max: 90 }
+      { id: 'ap-cost', l: 'Terreno y construcción', s: 'costo total', v: 265000, step: 5000, min: 1 },
+      { id: 'ap-pr', l: 'Préstamo del banco', s: 'el resto es tu capital', v: 185000, step: 5000, min: 0 },
+      { id: 'ap-t', l: 'Tasa del préstamo', s: '% anual', v: 10, step: 0.5, min: 0 },
+      { id: 'ap-pz', l: 'Plazo del préstamo', s: 'años', v: 10, min: 1, max: 30 },
+      { id: 'ap-v', l: 'Precio de venta esperado', v: 340000, step: 5000, min: 0 },
+      { id: 'ap-m', l: 'Meses hasta vender', s: 'obra, arriendo y venta', v: 24, min: 1, max: 120 },
+      { id: 'ap-ar', l: 'Arriendo mensual', s: 'mientras esperas vender', v: 1000, step: 50, min: 0 },
+      { id: 'ap-am', l: 'Meses arrendada', v: 12, min: 0, max: 120 },
+      { id: 'ap-com', l: 'Comisión inmobiliaria', s: '% de la venta', v: 3, step: 0.5, min: 0 },
+      { id: 'ap-imp', l: 'Imprevistos', s: '% de lo que recibes al vender', v: 4, step: 0.5, min: 0 },
+      { id: 'ap-plu', l: 'Impuesto a la plusvalía', s: '% de la utilidad, aproximado', v: 10, step: 1, min: 0, full: true }
     ], '');
-    F.form.insertAdjacentHTML('beforeend',
-      '<div class="rango"><label for="ap-l">Apalancamiento <output id="ap-lo"></output></label><input type="range" id="ap-l" min="1" max="10" step="0.5" value="3"></div>' +
-      '<div class="rango"><label for="ap-x">Lo que se mueve el activo en un año <output id="ap-xo"></output></label><input type="range" id="ap-x" min="-60" max="60" step="1" value="-15"></div>');
-    function ret(Lv, m, t) { return Math.max(-1, Lv * m - (Lv - 1) * t); }
+    F.form.insertAdjacentHTML('beforeend', '<div class="rango"><label for="ap-x">Si la venta sale distinta a lo esperado <output id="ap-xo"></output></label><input type="range" id="ap-x" min="-30" max="15" step="1" value="0"></div>');
+    function caso(K, P, t, pz, V, m, ar, am, com, imp, plu) {
+      P = Math.min(P, K);
+      var i = t / 12, n = pz * 12, q = P ? (i > 0 ? P * i / (1 - Math.pow(1 + i, -n)) : P / n) : 0, B = P, I = 0;
+      for (var k = 0; k < Math.min(m, n); k++) { var it = B * i; I += it; B -= q - it; }
+      var gastos = V * com + V * (1 - com) * imp, base = V - K - I, imps = Math.max(0, base) * plu;
+      var neta = V - K - gastos - I + ar * am - imps;
+      return { propio: K - P, int: I, saldo: Math.max(0, B), imps: imps, neta: neta, roi: neta / Math.max(1, K - P), cuota: q };
+    }
     function calc() {
-      var C = F.n('ap-c'), t = F.n('ap-t') / 100, mm = Math.min(0.9, F.n('ap-m') / 100), Lv = parseFloat($('ap-l').value), m = parseFloat($('ap-x').value) / 100;
-      $('ap-lo').textContent = f1.format(Lv) + ' a 1'; $('ap-xo').textContent = (m > 0 ? '+' : '') + f0.format(m * 100) + ' %';
-      var r1 = m, rL = ret(Lv, m, t), liq = Lv > 1 ? 1 - (Lv - 1) / ((1 - mm) * Lv) : null;
-      var liquidado = liq !== null && -m >= liq;
+      var K = F.n('ap-cost'), fin = F.n('ap-pr'), t = F.n('ap-t') / 100, pz = Math.max(1, F.n('ap-pz')), V0 = F.n('ap-v'), m = Math.max(1, Math.round(F.n('ap-m'))), ar = F.n('ap-ar'), am = Math.min(m, F.n('ap-am')), com = F.n('ap-com') / 100, imp = F.n('ap-imp') / 100, plu = F.n('ap-plu') / 100, x = parseFloat($('ap-x').value) / 100;
+      $('ap-xo').textContent = x ? (x > 0 ? '+' : '') + f0.format(x * 100) + ' %' : 'como se espera';
+      var V = V0 * (1 + x), A = caso(K, fin, t, pz, V, m, ar, am, com, imp, plu), S = caso(K, 0, t, pz, V, m, ar, am, com, imp, plu), anios = m / 12;
       F.out.innerHTML = tarjetas([
-        { k: 'Sin apalancamiento', v: usd(C * r1), c: r1 < 0 ? 'neg' : 'pos', s: pct(r1 * 100) + ' de tu capital' },
-        { k: 'Con ' + f1.format(Lv) + ' a 1 (posición de ' + usd(C * Lv) + ')', v: liquidado ? 'Liquidado' : usd(C * rL), c: rL < 0 || liquidado ? 'neg' : 'pos', s: liquidado ? 'el bróker vende antes de esa caída' : pct(rL * 100) + ' de tu capital, ya pagado el interés' },
-        { k: 'Caída que activa la liquidación', v: liq !== null ? '−' + pct(liq * 100, true) : 'Ninguna', s: liq !== null ? 'con un margen mínimo de ' + pct(mm * 100) : 'sin préstamo no hay llamada de margen' }
-      ]);
+        { k: 'Con préstamo: pones ' + usd(A.propio), v: usd(A.neta), c: A.neta < 0 ? 'neg' : 'pos', s: pct(A.roi * 100) + ' sobre tu capital; ' + usd(A.int) + ' de intereses' },
+        { k: 'Sin préstamo: pones ' + usd(K), v: usd(S.neta), c: S.neta < 0 ? 'neg' : 'pos', s: pct(S.roi * 100) + ' sobre tu capital' },
+        { k: 'Impuesto a la plusvalía', v: usd(A.imps) + ' / ' + usd(S.imps), s: 'con préstamo / sin préstamo; los intereses se deducen' }
+      ]) + '<p class="veredicto ' + (A.neta < 0 ? 'bad' : 'ok') + '">' +
+        (A.neta < 0 ? 'Con la venta ' + f0.format(-x * 100) + ' % por debajo de lo esperado, el préstamo convierte la operación en una pérdida de ' + usd(-A.neta) + ': el ' + pct(-A.roi * 100) + ' de tu capital. Sin préstamo, el resultado sería ' + usd(S.neta) + '.'
+          : 'En ' + (anios % 1 ? f1 : f0).format(anios) + ' años, el apalancamiento te deja ' + pct(A.roi * 100) + ' sobre tu capital frente a ' + pct(S.roi * 100) + ' sin préstamo, y te quedan ' + usd(K - A.propio) + ' libres para otras oportunidades. Al vender cancelas un saldo de ' + usd(A.saldo) + '.') + '</p>';
       var a = [], b = [];
-      for (var x = -60; x <= 60; x += 1) { a.push([x, ret(1, x / 100, 0) * 100]); b.push([x, ret(Lv, x / 100, t) * 100]); }
-      var top = Math.max(100, Math.ceil(ret(Lv, 0.6, t) * 100 / 100) * 100), yt = [-100, 0]; for (var y = 100; y <= top; y += top > 400 ? 200 : 100) yt.push(y);
-      var svg = grafica(F.out, '<li><i style="background:var(--muted-mark)"></i>Sin apalancamiento</li><li><i style="background:var(--c1)"></i>Con ' + f1.format(Lv) + ' a 1</li><li><i style="background:var(--neg);opacity:.3"></i>Zona de liquidación</li>');
-      lineas(svg, { series: [{ pts: a, color: 'var(--muted-mark)', w: 2 }, { pts: b, color: 'var(--c1)', w: 2.5 }], xmin: -60, xmax: 60, ymin: -100, ymax: top, yt: yt, fy: function (v) { return v + ' %'; }, xt: [-60, -30, 0, 30, 60], fx: function (v) { return (v > 0 ? '+' : '') + v + ' %'; }, zona: liq !== null && liq < 0.6 ? { x0: -60, x1: -liq * 100 } : null, marcas: [{ x: m * 100, y: rL * 100, t: liquidado ? 'liquidado' : pct(rL * 100), color: rL < 0 ? 'var(--neg)' : 'var(--c1)' }], h: 260 });
+      for (var y = -30; y <= 15; y += 1) { a.push([y, caso(K, 0, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); b.push([y, caso(K, fin, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); }
+      var vals = a.concat(b).map(function (q) { return q[1]; }), lo = Math.floor(Math.min.apply(null, vals) / 25) * 25, hi = Math.ceil(Math.max.apply(null, vals) / 25) * 25, yt = [];
+      for (var v = lo; v <= hi; v += (hi - lo > 150 ? 50 : 25)) yt.push(v);
+      var svg = grafica(F.out, '<li><i style="background:var(--muted-mark)"></i>Sin préstamo</li><li><i style="background:var(--c1)"></i>Con ' + f0.format(100 * Math.min(fin, K) / Math.max(1, K)) + ' % financiado</li>');
+      lineas(svg, { series: [{ pts: a, color: 'var(--muted-mark)', w: 2 }, { pts: b, color: 'var(--c1)', w: 2.5 }], xmin: -30, xmax: 15, ymin: lo, ymax: hi, yt: yt, fy: function (v) { return v + ' %'; }, xt: [-30, -20, -10, 0, 10], fx: function (v) { return v ? (v > 0 ? '+' : '') + v + ' %' : 'esperado'; }, marcas: [{ x: x * 100, y: A.roi * 100, t: pct(A.roi * 100), color: A.roi < 0 ? 'var(--neg)' : 'var(--c1)' }], h: 260 });
     }
     F.form.addEventListener('input', calc); redibujar.push(calc); calc();
   })();
@@ -297,11 +313,11 @@
   (function () {
     var c = $('h-casa'); if (!c) return;
     var F = formulario(c, [
-      { id: 'cs-p', l: 'Precio de la vivienda', v: 80000, step: 1000, min: 0 },
+      { id: 'cs-p', l: 'Precio de la vivienda', v: 70000, step: 1000, min: 0 },
       { id: 'cs-e', l: 'Entrada', s: '% que pagas de contado', v: 20, step: 5, min: 0, max: 100 },
-      { id: 'cs-t', l: 'Tasa de interés', s: '% anual; ejemplo, consulta la vigente', v: 9, step: 0.25, min: 0 },
-      { id: 'cs-n', l: 'Plazo', s: 'años', v: 20, min: 1, max: 30 },
-      { id: 'cs-i', l: 'Ingreso familiar', s: 'mensual, neto', v: 2500, step: 100, min: 0 },
+      { id: 'cs-t', l: 'Tasa de interés', s: '% anual, con los cargos del crédito', v: 11, step: 0.25, min: 0 },
+      { id: 'cs-n', l: 'Plazo', s: 'años', v: 15, min: 1, max: 30 },
+      { id: 'cs-i', l: 'Ingreso familiar', s: 'mensual, neto', v: 2000, step: 100, min: 0 },
       { id: 'cs-d', l: 'Otras deudas', s: 'cuotas mensuales que ya pagas', v: 0, step: 50, min: 0 }
     ]);
     function cuota(P, i, n) { return i > 0 ? P * i / (1 - Math.pow(1 + i, -n)) : P / n; }
@@ -312,12 +328,14 @@
       F.out.innerHTML = tarjetas([
         { k: 'Cuota mensual', v: usd(q), s: 'más unos ' + usd(extra) + ' de mantenimiento, predial y seguros' },
         { k: 'Tus cuotas sobre tu ingreso', v: pct(carga * 100), c: carga > 0.4 ? 'neg' : carga <= 0.3 ? 'pos' : '', s: 'lo sano es hasta 30 %' },
-        { k: 'Intereses en todo el plazo', v: usd(q * n - prestamo), s: 'sobre un préstamo de ' + usd(prestamo) }
+        { k: 'La casa te cuesta en total', v: usd(q * n + P * e), s: usd(q * n - prestamo) + ' de intereses sobre un préstamo de ' + usd(prestamo) }
       ]) + '<p class="veredicto ' + (carga <= 0.3 ? 'ok' : carga > 0.4 ? 'bad' : '') + '">' +
         (carga <= 0.3 ? 'La cuota cabe en tu presupuesto. ' : carga > 0.4 ? 'La cuota compromete demasiado tu ingreso: ante cualquier imprevisto quedas sin margen. ' : 'Es posible, pero ajustado: conviene más entrada o más plazo. ') +
         'Con tu ingreso y estas condiciones, una vivienda de hasta <strong>' + usd(pMax) + '</strong> mantiene tus cuotas en el 30 %.</p>';
       var anios = n / 12, saldo = prestamo, intA = [], capA = [];
       for (var a = 1; a <= anios; a++) { var ia = 0, ca = 0; for (var m = 0; m < 12; m++) { var it = saldo * i; ia += it; ca += q - it; saldo -= q - it; } intA.push(ia); capA.push(ca); }
+      var cruce = 0, sb = prestamo; for (var k = 1; k <= n; k++) { if (q - sb * i > sb * i) { cruce = Math.ceil(k / 12); break; } sb -= q - sb * i; }
+      F.out.insertAdjacentHTML('beforeend', '<p class="small-note">' + (cruce > 1 ? 'Con el método francés, recién en el año ' + cruce + ' empiezas a pagar más capital que intereses en cada cuota.' : 'Desde el primer año pagas más capital que intereses.') + '</p>');
       var svg = grafica(F.out, '<li><i style="background:var(--c2)"></i>Intereses pagados cada año</li><li><i style="background:var(--c1)"></i>Capital pagado cada año</li>');
       var W = Math.max(svg.parentNode.clientWidth - 32, 260), H = 200, L = 46, B = 24, T = 8, tope = pasos(q * 12, 3), top = tope[tope.length - 1], bw = (W - L - 10) / anios;
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = '';
@@ -336,23 +354,24 @@
   (function () {
     var c = $('h-auto'); if (!c) return;
     var DEF = {
-      gas: { 'au-cons': [40, 'Rendimiento', 'km por galón'], 'au-en': [3.21, 'Precio del galón', 'Extra, sep. a oct. 2026'], 'au-mant': 400, 'au-mat': 350, 'au-d1': 20, 'au-d2': 12 },
+      gas: { 'au-cons': [45, 'Rendimiento', 'km por galón; 12 km por litro son unos 45'], 'au-en': [3.21, 'Precio del galón', 'Extra, sep. a oct. 2026'], 'au-mant': 640, 'au-mat': 900, 'au-d1': 15, 'au-d2': 12 },
       ev: { 'au-cons': [16, 'Consumo', 'kWh cada 100 km'], 'au-en': [0.10, 'Precio del kWh', 'tarifa residencial aprox.'], 'au-mant': 200, 'au-mat': 40, 'au-d1': 25, 'au-d2': 15 }
     };
     var F = formulario(c, [
-      { id: 'au-p', l: 'Precio del auto', s: 'con impuestos', v: 25000, step: 500, min: 0 },
+      { id: 'au-p', l: 'Precio del auto', s: 'con impuestos', v: 20000, step: 500, min: 0 },
       { id: 'au-n', l: 'Años que lo tendrás', v: 5, min: 1, max: 15 },
-      { id: 'au-km', l: 'Kilómetros al año', v: 15000, step: 1000, min: 0 },
-      { id: 'au-cons', l: 'Rendimiento', s: 'km por galón', v: 40, step: 1, min: 1 },
+      { id: 'au-km', l: 'Kilómetros al año', v: 20000, step: 1000, min: 0 },
+      { id: 'au-cons', l: 'Rendimiento', s: 'km por galón; 12 km por litro son unos 45', v: 45, step: 1, min: 1 },
       { id: 'au-en', l: 'Precio del galón', s: 'Extra, sep. a oct. 2026', v: 3.21, step: 0.01, min: 0 },
       { id: 'au-seg', l: 'Seguro', s: '% del valor del auto al año', v: 4, step: 0.5, min: 0 },
-      { id: 'au-mant', l: 'Mantenimiento', s: 'al año', v: 400, step: 50, min: 0 },
-      { id: 'au-mat', l: 'Matrícula e impuestos', s: 'al año, aproximado', v: 350, step: 10, min: 0 },
-      { id: 'au-d1', l: 'Depreciación el primer año', s: '%', v: 20, step: 1, min: 0, max: 90 },
+      { id: 'au-mant', l: 'Mantenimiento', s: 'al año', v: 640, step: 20, min: 0 },
+      { id: 'au-par', l: 'Parqueadero', s: 'al año', v: 600, step: 50, min: 0 },
+      { id: 'au-mat', l: 'Matrícula y permisos', s: 'al año, aproximado', v: 900, step: 10, min: 0 },
+      { id: 'au-d1', l: 'Depreciación el primer año', s: '%', v: 15, step: 1, min: 0, max: 90 },
       { id: 'au-d2', l: 'Depreciación los años siguientes', s: '% por año', v: 12, step: 1, min: 0, max: 60 },
-      { id: 'au-r', l: 'Rendimiento si lo invirtieras', s: '% anual', v: 6, step: 0.5, full: true }
+      { id: 'au-r', l: 'Rendimiento si lo invirtieras', s: '% anual', v: 6, step: 0.5 }
     ], '<div class="seg" role="radiogroup" aria-label="Tipo de auto"><label><input type="radio" name="au-tipo" value="gas" checked><span>A gasolina</span></label><label><input type="radio" name="au-tipo" value="ev"><span>Eléctrico</span></label></div>');
-    var COL = ['var(--c1)', 'var(--c2)', 'var(--s2)', 'var(--s3)', '#7C8BA1', '#B9A27A'];
+    var COL = ['var(--c1)', 'var(--c2)', 'var(--s2)', 'var(--s3)', '#7C8BA1', '#9AA9BC', '#B9A27A'];
     function tipo() { return F.form.querySelector('input[name="au-tipo"]:checked').value; }
     F.form.addEventListener('change', function (e) {
       if (e.target.name !== 'au-tipo') return;
@@ -364,20 +383,20 @@
       });
       calc();
     });
-    function costo(v0, n, km, seg, mant, mat, d1, d2, r, energiaKm) {
+    function costo(v0, n, km, seg, mant, par, mat, d1, d2, r, energiaKm) {
       var v = v0, s = 0;
       for (var a = 0; a < n; a++) { s += v * seg; v = v * (1 - (a === 0 ? d1 : d2)); }
-      return { dep: v0 - v, energia: energiaKm * km * n, seguro: s, mant: mant * n, mat: mat * n, oport: v0 * (Math.pow(1 + r, n) - 1), final: v };
+      return { dep: v0 - v, energia: energiaKm * km * n, seguro: s, mant: mant * n, par: par * n, mat: mat * n, oport: v0 * (Math.pow(1 + r, n) - 1), final: v };
     }
-    function total(o) { return o.dep + o.energia + o.seguro + o.mant + o.mat + o.oport; }
+    function total(o) { return o.dep + o.energia + o.seguro + o.mant + o.par + o.mat + o.oport; }
     function calc() {
       var ev = tipo() === 'ev', v0 = F.n('au-p'), n = Math.max(1, Math.round(F.n('au-n'))), km = F.n('au-km'), cons = Math.max(0.01, F.n('au-cons')), pe = F.n('au-en');
       var ekm = ev ? cons / 100 * pe : pe / cons;
-      var seg = F.n('au-seg') / 100, mant = F.n('au-mant'), mat = F.n('au-mat'), d1 = F.n('au-d1') / 100, d2 = F.n('au-d2') / 100, r = F.n('au-r') / 100;
-      var o = costo(v0, n, km, seg, mant, mat, d1, d2, r, ekm), T = total(o);
-      var vu = v0 * (1 - d1) * Math.pow(1 - d2, 2), u = costo(vu, n, km, Math.max(0, seg - 0.01), mant * 1.3, mat * 0.85, d2, d2, r, ekm), TU = total(u);
+      var seg = F.n('au-seg') / 100, mant = F.n('au-mant'), par = F.n('au-par'), mat = F.n('au-mat'), d1 = F.n('au-d1') / 100, d2 = F.n('au-d2') / 100, r = F.n('au-r') / 100;
+      var o = costo(v0, n, km, seg, mant, par, mat, d1, d2, r, ekm), T = total(o);
+      var vu = v0 * (1 - d1) * Math.pow(1 - d2, 2), u = costo(vu, n, km, Math.max(0, seg - 0.01), mant * 1.3, par, mat * 0.85, d2, d2, r, ekm), TU = total(u);
       var iva = ev ? 0 : v0 - v0 / 1.15;
-      var partes = [['Depreciación', o.dep], [ev ? 'Electricidad' : 'Gasolina', o.energia], ['Seguro', o.seguro], ['Mantenimiento', o.mant], ['Matrícula e impuestos', o.mat], ['Lo que dejaste de ganar', o.oport]];
+      var partes = [['Depreciación', o.dep], [ev ? 'Electricidad' : 'Gasolina', o.energia], ['Seguro', o.seguro], ['Mantenimiento', o.mant], ['Parqueadero', o.par], ['Matrícula y permisos', o.mat], ['Lo que dejaste de ganar', o.oport]];
       F.out.innerHTML = tarjetas([
         { k: 'Costo total en ' + n + ' años', v: usd(T), s: 'al final el auto vale ' + usd(o.final) },
         { k: 'Por mes', v: usd(T / (n * 12)), s: 'mucho más que la cuota' },
@@ -385,7 +404,7 @@
       ]) + '<div class="pila" role="img" aria-label="Composición del costo">' + partes.map(function (q, i) { return '<i style="width:' + (100 * q[1] / T).toFixed(2) + '%;background:' + COL[i] + '"></i>'; }).join('') + '</div>' +
         '<ul class="pila-ley">' + partes.map(function (q, i) { return '<li><i style="background:' + COL[i] + '"></i>' + q[0] + ' <b>' + usd(q[1]) + '</b></li>'; }).join('') + '</ul>' +
         '<p class="veredicto ok">El mismo auto con tres años de uso, comprado en unos ' + usd(vu) + ', te costaría ' + usd(TU) + ' en el mismo plazo: <strong>' + usd(T - TU) + ' menos</strong>. Ese ahorro, invertido, es parte de tu jubilación.</p>' +
-        (ev ? '<p class="small-note">Los eléctricos pagan IVA 0 % y están exentos del ICE y del impuesto a la propiedad. La depreciación que viene por defecto es mayor que la de un auto a gasolina, como se observó en el mercado de usados de Estados Unidos; cámbiala si tienes un dato mejor.</p>' : '<p class="small-note">De los ' + usd(v0) + ' del precio, unos ' + usd(iva) + ' son IVA del 15 %; los autos de mayor precio pagan además ICE. La depreciación, el seguro y la matrícula son supuestos de referencia: cámbialos por los de tu caso.</p>');
+        (ev ? '<p class="small-note">Los eléctricos pagan IVA 0 % y están exentos del ICE y del impuesto a la propiedad. La depreciación que viene por defecto es mayor que la de un auto a gasolina, como se observó en el mercado de usados de Estados Unidos; cámbiala si tienes un dato mejor.</p>' : '<p class="small-note">De los ' + usd(v0) + ' del precio, unos ' + usd(iva) + ' son IVA del 15 %; si cuesta más de 20.000 dólares, paga además ICE, un 5 % en el ejemplo del video. La depreciación, el seguro y la matrícula son supuestos de referencia: cámbialos por los de tu caso.</p>');
     }
     F.form.addEventListener('input', calc); calc();
   })();
@@ -464,9 +483,9 @@
   (function () {
     var c = $('h-dif'); if (!c) return;
     var F = formulario(c, [
-      { id: 'df-c', l: 'Precio de contado', s: 'con el descuento por pagar en efectivo', v: 900, step: 10, min: 1 },
-      { id: 'df-d', l: 'Precio total diferido', s: 'lo que pagas en cuotas', v: 1000, step: 10, min: 1 },
-      { id: 'df-n', l: 'Número de cuotas', s: 'meses', v: 12, min: 1, max: 60, full: true }
+      { id: 'df-c', l: 'Precio de contado', s: 'lo que pagarías hoy', v: 500, step: 10, min: 1 },
+      { id: 'df-d', l: 'Total de las cuotas', s: 'cuota × número de cuotas', v: 528, step: 1, min: 1 },
+      { id: 'df-n', l: 'Número de cuotas', s: 'meses', v: 6, min: 1, max: 60, full: true }
     ]);
     function tasa(pv, q, n) {
       var lo = 0, hi = 1;
@@ -481,7 +500,7 @@
         { k: 'Cuota mensual', v: usd(q) },
         { k: 'Interés escondido', v: usd(extra), c: 'neg', s: pct(100 * extra / C, true) + ' sobre el precio de contado' },
         { k: 'Tasa efectiva anual equivalente', v: pct(ea * 100, true), c: 'neg', s: pct(r * 100, true) + ' al mes' }
-      ]) + '<p class="veredicto bad">Ese «sin intereses» equivale a un crédito al ' + pct(ea * 100, true) + ' anual. Si puedes pagar de contado, el descuento es tu mejor inversión de este mes.</p>';
+      ]) + '<p class="veredicto bad">Ese «sin intereses» equivale a un crédito al ' + pct(ea * 100, true) + ' anual. Y si pagas menos que la cuota, pierdes el beneficio y la deuda pasa a la tasa normal de la tarjeta.</p>';
     }
     F.form.addEventListener('input', calc); calc();
   })();
