@@ -83,7 +83,7 @@
 .ap-cierre h2 { font-size: var(--t-xl); margin: 0 0 .75rem; }
 .ap-cierre p { color: var(--on-navy-soft); margin: 0 0 1.25rem; }
 
-/* Consulta Express: barra fija abajo, en celular y en computadora, para empezar desde cualquier punto */
+/* Consulta Express en el celular: barra fija abajo (en computadora está la pestaña de la derecha) */
 .ap-lateral { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; }
 .ce-caja { background: var(--navy); color: var(--on-navy); border-top: 3px solid var(--brass); box-shadow: 0 -8px 24px -12px rgba(14,27,44,.5); padding-bottom: env(safe-area-inset-bottom); }
 .ce-in { max-width: 72rem; margin: 0 auto; padding: .8rem clamp(16px, 4vw, 40px); display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; align-items: center; gap: .3rem 1.5rem; position: relative; }
@@ -117,5 +117,9 @@ body.ap.sin-barra .ap-lateral { display: none; }
   .usos { grid-template-columns: minmax(0, 1fr); }
   .ap-indice { grid-template-columns: minmax(0, 1fr); }
   .casos li { padding-left: 2.1rem; }
+}
+@media (min-width: 60.01rem) {
+  .ap-lateral { display: none; }
+  body.ap { padding-bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .yt img, .ruta-bat i, .ce-t { transition: none; } }

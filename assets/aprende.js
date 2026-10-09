@@ -512,7 +512,7 @@
     function poner(s) {
       if (s === actual) return; actual = s;
       t.classList.add('cambia');
-      setTimeout(function () { t.textContent = s; t.classList.remove('cambia'); }, 220);
+      setTimeout(function () { t.textContent = s; t.classList.remove('cambia'); var pt = $('pest-t'); if (pt) pt.textContent = s; }, 220);
     }
     if ('IntersectionObserver' in window) {
       var vis = new Map();
