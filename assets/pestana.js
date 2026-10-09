@@ -8,18 +8,25 @@
   }
   var cerrada = false;
   try { cerrada = sessionStorage.getItem('pest-cerrada') === '1'; } catch (e) {}
-  // Abierto de entrada en computadora; en pantallas angostas taparía el texto y queda como pestaña
-  abrir(!cerrada && window.innerWidth >= 1400);
+  // Abierto en computadora; en pantallas angostas taparía el texto y queda como pestaña.
+  // Donde el encabezado tiene la foto de Carlo, se abre recién cuando la foto sale de la pantalla, para no taparle la cara.
+  var foto = document.querySelector('.hero img');
+  var aMano = false;
+  function auto() {
+    if (cerrada || aMano || window.innerWidth < 1400) return;
+    abrir(!foto || foto.getBoundingClientRect().bottom < 0);
+  }
   // Bajo el menú al inicio; al bajar por la página sube a la esquina
-  function subir() { p.classList.toggle('arriba', window.scrollY > 70); }
+  function subir() { p.classList.toggle('arriba', window.scrollY > 70); auto(); }
   subir();
   window.addEventListener('scroll', subir, { passive: true });
   tab.addEventListener('click', function () {
+    aMano = true; cerrada = false;
     abrir(true);
     try { sessionStorage.removeItem('pest-cerrada'); } catch (e) {}
   });
   document.getElementById('pest-x').addEventListener('click', function () {
-    abrir(false);
+    cerrada = true; abrir(false);
     try { sessionStorage.setItem('pest-cerrada', '1'); } catch (e) {}
   });
 })();
