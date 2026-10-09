@@ -311,17 +311,20 @@
     setTimeout(function () { ir(paso + 1); }, 160);
   });
   atras.addEventListener('click', function () { ir(Math.max(1, paso - 1)); });
-  // «Agenda tu cita» en la tarjeta del CFO fraccional: baja al formulario con ese servicio ya elegido
-  var cfoCard = document.querySelector('.service[data-cfo]');
-  function agendarCFO(e) {
+  // «Agenda tu cita» (CFO) y «Evalúa mi portafolio» (fondos): bajan al formulario con el servicio ya elegido
+  function agendar(servicio, e) {
     if (e) e.preventDefault();
-    var chip = cf.querySelector('.chip[data-v="CFO fraccional"]');
-    document.getElementById('w-servicio').value = 'CFO fraccional'; document.getElementById('w-tamano').value = '';
+    var chip = cf.querySelector('.chip[data-v="' + servicio + '"]');
+    document.getElementById('w-servicio').value = servicio; document.getElementById('w-tamano').value = '';
     cf.querySelectorAll('[data-field="servicio"] .chip').forEach(function (c) { c.setAttribute('aria-pressed', c === chip); });
     ir(2);
     document.getElementById('contacto').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-  if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a:not([data-cita])')) agendarCFO(e); });
+  var cfoCard = document.querySelector('.service[data-cfo]');
+  if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a:not([data-cita])')) agendar('CFO fraccional', e); });
+  document.querySelectorAll('[data-agendar]').forEach(function (a) {
+    a.addEventListener('click', function (e) { agendar(a.dataset.agendar, e); });
+  });
   cf.addEventListener('submit', function (e) {
     e.preventDefault();
     var invalid = Array.prototype.filter.call(cf.querySelectorAll('.step[data-step="4"] [required]'), function (f) {

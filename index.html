@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/assets/sitio.css?v=7">
+<link rel="stylesheet" href="/assets/sitio.css?v=8">
 </head>
 <body>
 
@@ -21,8 +21,8 @@
         <ul>
           <li><a href="/consulta-express/" class="nav-ce">Consulta Express</a></li>
           <li><a href="#metas">Metas</a></li>
-          <li><a href="#inversion">Inversión</a></li>
           <li><a href="#masterclass">Masterclass</a></li>
+          <li><a href="#inversion">Inversión</a></li>
           <li><a href="#tasas">Tasas</a></li>
           <li><a href="#docencia">Docencia</a></li>
           <li><a href="#servicios">Servicios</a></li>
@@ -129,6 +129,81 @@
           <p class="small-note">Ilustración con un rendimiento constante. En la realidad los mercados suben y bajan cada año; lo que se mantiene es el efecto del tiempo.</p>
         </div>
       </div>
+      <div class="ae-band portafolio">
+        <div>
+          <p class="eyebrow">Administración de fondos</p>
+          <h3>¿Quieres que tu meta tenga quien la cuide?</h3>
+          <p>Administro portafolios de inversión con brókers de primer nivel. La cuenta queda siempre a tu nombre y tú mantienes el control total. Cuéntame cuánto quieres invertir y vemos si encajamos.</p>
+        </div>
+        <div class="ae-precio">
+          <a class="btn btn-brass" href="#contacto" data-agendar="Fondos de inversión">Quiero que evalúes mi portafolio</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="mclass navy" id="masterclass" aria-labelledby="mc-t">
+    <div class="wrap">
+      <div class="mc-copy">
+        <p class="eyebrow" style="color:var(--brass)">Masterclass</p>
+        <h2 id="mc-t">Tus finanzas personales, con orden y con criterio</h2>
+        <ul class="mc-datos">
+          <li>Sábado 14 de noviembre</li>
+          <li>En línea</li>
+          <li>$15 · IVA incluido</li>
+          <li>Solo 30 cupos</li>
+          <li class="mc-faltan" data-faltan="2026-11-14"></li>
+        </ul>
+        <p>Una sesión para aprender a ordenar el dinero propio con las mismas herramientas con las que dirijo las finanzas de una empresa, explicadas con claridad y sin tecnicismos.</p>
+        <ul class="mc-temas">
+          <li><strong>Finanzas personales</strong>Ahorro, deuda e inversión: qué va primero y por qué.</li>
+          <li><strong>Presupuesto</strong>Cómo armar uno realista y sostenerlo mes a mes.</li>
+          <li><strong>Ética financiera</strong>Qué significa usar bien el dinero propio y el ajeno.</li>
+        </ul>
+        <p class="mc-nota">El cupo se separa con el pago y se asigna por orden de llegada. Unos días antes te escribo con la hora y el enlace; si la masterclass no llegara a abrirse, te devuelvo el valor completo.</p>
+      </div>
+      <form class="cform mform" id="mform" novalidate>
+        <p class="q">Separa tu cupo</p>
+        <div class="cgrid">
+          <label for="m-nombre"><span>Tu nombre</span><input id="m-nombre" name="nombre" required autocomplete="name"></label>
+          <label for="m-correo"><span>Correo</span><input id="m-correo" name="email" type="email" required autocomplete="email"></label>
+          <label for="m-tel" class="full"><span>WhatsApp <small>(opcional)</small></span><input id="m-tel" name="whatsapp" type="tel" autocomplete="tel"></label>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+        </div>
+        <p class="sub" id="m-q">¿Qué te gustaría resolver? <small>(opcional, puedes elegir varias)</small></p>
+        <div class="chips" role="group" aria-labelledby="m-q" id="m-intereses">
+          <button type="button" class="chip" aria-pressed="false" data-v="Armar un presupuesto que se cumpla"><b>Armar un presupuesto que se cumpla</b></button>
+          <button type="button" class="chip" aria-pressed="false" data-v="Ordenar o salir de deudas"><b>Ordenar o salir de deudas</b></button>
+          <button type="button" class="chip" aria-pressed="false" data-v="Empezar a ahorrar e invertir"><b>Empezar a ahorrar e invertir</b></button>
+          <button type="button" class="chip" aria-pressed="false" data-v="Decidir con criterio ético"><b>Decidir con criterio ético</b></button>
+        </div>
+        <button class="btn btn-brass" type="submit" id="m-enviar">Continuar al pago de $15</button>
+        <p class="cstatus" id="m-status" role="status"></p>
+      </form>
+    </div>
+  </section>
+  <section class="block" id="consulta-express">
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Nuevo · Consulta Express</p>
+          <h2>¿Tienes una duda concreta de dinero?</h2>
+        </div>
+        <p>La Consulta Express es mi análisis por escrito de un caso puntual: tu empresa, tus finanzas personales, una inversión o una decisión que no te deja dormir. Sin reuniones ni agendas.</p>
+      </div>
+      <div class="ae-band">
+        <div>
+          <h3>Tu duda de dinero, resuelta por escrito en tres días.</h3>
+          <ul class="ae-pasos">
+            <li><b>Respondes</b> un cuestionario guiado de diez minutos, desde el celular.</li>
+            <li><b>Pagas</b> solo lo que necesitas analizar: desde $35, nunca más de $60.</li>
+            <li><b>Recibes</b> mi diagnóstico y tres recomendaciones concretas en tu correo.</li>
+          </ul>
+        </div>
+        <div class="ae-precio">
+          <p><span>desde</span> <strong>$35 USD</strong> <span>+ IVA</span></p>
+          <a class="btn btn-brass" href="/consulta-express/">Ver cómo funciona</a>
+        </div>
+      </div>
     </div>
   </section>
   <section class="block alt" id="inversion">
@@ -174,71 +249,6 @@
         </div>
         <p>Para la administración de fondos de inversión trabajo con brókers de primer nivel. Cada cuenta de inversión está a nombre de su titular, que mantiene el control total y puede ver cada movimiento. Yo gestiono la estrategia; tú sigues siendo el dueño.</p>
       </div>
-    </div>
-  </section>
-  <section class="block" id="consulta-express">
-    <div class="wrap">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Nuevo · Consulta Express</p>
-          <h2>¿Tienes una duda concreta de dinero?</h2>
-        </div>
-        <p>Sobre tu empresa, tus finanzas personales, una inversión o una decisión que no te deja dormir. No hace falta agendar una reunión.</p>
-      </div>
-      <div class="ae-band">
-        <div>
-          <h3>Tu duda de dinero, resuelta por escrito en tres días.</h3>
-          <ul class="ae-pasos">
-            <li><b>Respondes</b> un cuestionario guiado de diez minutos, desde el celular.</li>
-            <li><b>Pagas</b> solo lo que necesitas analizar: desde $35, nunca más de $60.</li>
-            <li><b>Recibes</b> mi diagnóstico y tres recomendaciones concretas en tu correo.</li>
-          </ul>
-        </div>
-        <div class="ae-precio">
-          <p><span>desde</span> <strong>$35 USD</strong> <span>+ IVA</span></p>
-          <a class="btn btn-brass" href="/consulta-express/">Ver cómo funciona</a>
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="mclass navy" id="masterclass" aria-labelledby="mc-t">
-    <div class="wrap">
-      <div class="mc-copy">
-        <p class="eyebrow" style="color:var(--brass)">Masterclass</p>
-        <h2 id="mc-t">Tus finanzas personales, con orden y con criterio</h2>
-        <ul class="mc-datos">
-          <li>Sábado 14 de noviembre</li>
-          <li>En línea</li>
-          <li>$15 · IVA incluido</li>
-          <li>Solo 30 cupos</li>
-          <li class="mc-faltan" data-faltan="2026-11-14"></li>
-        </ul>
-        <p>Una sesión para aprender a ordenar el dinero propio con las mismas herramientas con las que dirijo las finanzas de una empresa, explicadas con claridad y sin tecnicismos.</p>
-        <ul class="mc-temas">
-          <li><strong>Finanzas personales</strong>Ahorro, deuda e inversión: qué va primero y por qué.</li>
-          <li><strong>Presupuesto</strong>Cómo armar uno realista y sostenerlo mes a mes.</li>
-          <li><strong>Ética financiera</strong>Qué significa usar bien el dinero propio y el ajeno.</li>
-        </ul>
-        <p class="mc-nota">El cupo se separa con el pago y se asigna por orden de llegada. Unos días antes te escribo con la hora y el enlace; si la masterclass no llegara a abrirse, te devuelvo el valor completo.</p>
-      </div>
-      <form class="cform mform" id="mform" novalidate>
-        <p class="q">Separa tu cupo</p>
-        <div class="cgrid">
-          <label for="m-nombre"><span>Tu nombre</span><input id="m-nombre" name="nombre" required autocomplete="name"></label>
-          <label for="m-correo"><span>Correo</span><input id="m-correo" name="email" type="email" required autocomplete="email"></label>
-          <label for="m-tel" class="full"><span>WhatsApp <small>(opcional)</small></span><input id="m-tel" name="whatsapp" type="tel" autocomplete="tel"></label>
-          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
-        </div>
-        <p class="sub" id="m-q">¿Qué te gustaría resolver? <small>(opcional, puedes elegir varias)</small></p>
-        <div class="chips" role="group" aria-labelledby="m-q" id="m-intereses">
-          <button type="button" class="chip" aria-pressed="false" data-v="Armar un presupuesto que se cumpla"><b>Armar un presupuesto que se cumpla</b></button>
-          <button type="button" class="chip" aria-pressed="false" data-v="Ordenar o salir de deudas"><b>Ordenar o salir de deudas</b></button>
-          <button type="button" class="chip" aria-pressed="false" data-v="Empezar a ahorrar e invertir"><b>Empezar a ahorrar e invertir</b></button>
-          <button type="button" class="chip" aria-pressed="false" data-v="Decidir con criterio ético"><b>Decidir con criterio ético</b></button>
-        </div>
-        <button class="btn btn-brass" type="submit" id="m-enviar">Continuar al pago de $15</button>
-        <p class="cstatus" id="m-status" role="status"></p>
-      </form>
     </div>
   </section>
   <section class="block" id="tasas">
@@ -377,6 +387,7 @@
             <li>Asignación de activos y seguimiento</li>
             <li>Reportes de rendimiento y riesgo</li>
           </ul>
+          <a class="btn btn-brass cita" href="#contacto" data-agendar="Fondos de inversión">Quiero que evalúes mi portafolio</a>
         </article>
         <article class="service">
           <span class="tag">Por proyecto</span>
@@ -508,6 +519,6 @@
 </div>
 
 
-<script src="/assets/sitio.js?v=6"></script>
+<script src="/assets/sitio.js?v=7"></script>
 </body>
 </html>

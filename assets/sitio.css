@@ -574,3 +574,5 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .topbar nav a.nav-ce::after { display: none; }
 .contact .c-ce { margin: 1.5rem 0 0; color: var(--on-navy-soft); max-width: 30rem; }
 .contact .c-btns { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+.ae-band.portafolio { margin-top: 2.5rem; }
+.ae-band.portafolio .ae-precio .btn { white-space: normal; text-align: center; }
