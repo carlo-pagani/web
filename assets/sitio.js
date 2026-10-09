@@ -272,6 +272,58 @@
     return fetch(cfg.url, opaco ? { method: 'POST', mode: 'no-cors', body: fd } : { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
       .then(function (r) { if (!opaco && !r.ok) throw new Error(r.status); });
   }
+  /* ---------- PayPal: cobro con monto exacto y confirmación inmediata ---------- */
+  // clientId es el identificador público de la app «Live» en developer.paypal.com (no es la clave secreta). Vacío: apagado y se usa Deuna.
+  // El navegador crea y captura la orden; el número de orden queda en cada envío para cotejarlo. La verificación en el servidor llega con el Worker.
+  var PAYPAL = { clientId: '' };
+  var ppCarga = null;
+  function cargarPayPal() {
+    if (window.paypal && window.paypal.Buttons) return Promise.resolve(window.paypal);
+    if (ppCarga) return ppCarga;
+    ppCarga = new Promise(function (ok, mal) {
+      var sc = document.createElement('script');
+      sc.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL.clientId) + '&currency=USD&intent=capture&components=buttons&disable-funding=paylater,venmo&locale=es_EC';
+      sc.onload = function () { window.paypal && window.paypal.Buttons ? ok(window.paypal) : mal(new Error('sin PayPal')); };
+      sc.onerror = function () { ppCarga = null; mal(new Error('sin PayPal')); };
+      document.head.appendChild(sc);
+    });
+    return ppCarga;
+  }
+  // Pinta los botones de PayPal en `caja` por `monto` (número). alPagar recibe {orden, captura, monto, pagador} solo con el pago completo.
+  function botonesPayPal(caja, monto, descripcion, referencia, alPagar, alError) {
+    var valor = monto.toFixed(2);
+    caja.innerHTML = '<p class="pp-cargando">Cargando el pago seguro…</p>';
+    return cargarPayPal().then(function (pp) {
+      caja.innerHTML = '';
+      return pp.Buttons({
+        style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay', height: 45 },
+        createOrder: function (d, actions) {
+          return actions.order.create({
+            intent: 'CAPTURE',
+            purchase_units: [{ amount: { currency_code: 'USD', value: valor }, description: descripcion, custom_id: referencia, invoice_id: referencia + '-' + Date.now().toString(36).toUpperCase() }],
+            application_context: { brand_name: 'Carlo Pagani', shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' }
+          });
+        },
+        onApprove: function (d, actions) {
+          return actions.order.capture().then(function (o) {
+            var cap = o && o.purchase_units && o.purchase_units[0] && o.purchase_units[0].payments && o.purchase_units[0].payments.captures && o.purchase_units[0].payments.captures[0];
+            if (!o || o.status !== 'COMPLETED' || !cap || cap.status !== 'COMPLETED' || cap.amount.value !== valor || cap.amount.currency_code !== 'USD') {
+              alError('PayPal no confirmó el pago completo. Si se te cobró algo, escríbeme y lo reviso.'); return;
+            }
+            var pagador = o.payer ? [o.payer.name && [o.payer.name.given_name, o.payer.name.surname].filter(Boolean).join(' '), o.payer.email_address].filter(Boolean).join(' · ') : '';
+            alPagar({ orden: o.id, captura: cap.id, monto: '$' + valor, pagador: pagador });
+          });
+        },
+        onCancel: function () { alError('Cancelaste el pago. Puedes intentarlo de nuevo cuando quieras.'); },
+        onError: function () { alError('PayPal no pudo procesar el pago. Revisa los datos de tu tarjeta o inténtalo de nuevo.'); }
+      }).render(caja);
+    }).catch(function () {
+      caja.innerHTML = '';
+      alError('No pude cargar el pago de PayPal. Revisa tu conexión y vuelve a intentarlo.');
+    });
+  }
+  function textoPayPal(r) { return 'PayPal: pagado ' + r.monto + ' USD · orden ' + r.orden + ' · captura ' + r.captura + (r.pagador ? ' · ' + r.pagador : ''); }
+
   if (document.getElementById('cform')) (function () {
   var cf = document.getElementById('cform'), cs = document.getElementById('c-status');
   var paso = 1, atras = document.getElementById('w-atras');
@@ -382,6 +434,7 @@
   });
   function pagoMC(datos, ref, intereses) {
     var nombre = esc(datos.nombre.split(' ')[0]);
+    if (PAYPAL.clientId) return pagoMCPayPal(datos, ref, intereses, nombre);
     mf.innerHTML = '<p class="q">Último paso, ' + nombre + ': paga tu cupo</p>' +
       '<div class="dp-qr"><img src="' + MC.qr + '" alt="Código QR de Deuna para pagar la masterclass a Carlo Pagani"><span>Valor de la masterclass, IVA incluido</span><strong>' + MC.precio + ' USD</strong></div>' +
       '<div class="dp-movil"><p>¿Estás en el celular? <a href="' + MC.qr + '" download="deuna-carlo-pagani.png">Guarda el código</a> y elígelo desde la galería en el lector de QR de tu app.</p></div>' +
@@ -406,6 +459,27 @@
       });
     });
     comp.focus();
+  }
+  function pagoMCPayPal(datos, ref, intereses, nombre) {
+    mf.innerHTML = '<p class="q">Último paso, ' + nombre + ': paga tu cupo</p>' +
+      '<div class="dp-qr pp-total"><span>Valor de la masterclass, IVA incluido</span><strong>' + MC.precio + ' USD</strong></div>' +
+      '<p class="pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. Tu cupo queda confirmado en cuanto se aprueba el pago.</p>' +
+      '<div class="pp-btns" id="m-pp"></div><p class="cstatus" id="m-status2" role="status"></p>';
+    var st = document.getElementById('m-status2');
+    botonesPayPal(document.getElementById('m-pp'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, function (r) {
+      var pago = textoPayPal(r);
+      var d2 = Object.assign({}, datos, { pago: pago, intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' + pago });
+      st.className = 'cstatus'; st.textContent = 'Pago aprobado. Guardando tu cupo…';
+      var guardar = function () {
+        return enviar(FORMS.masterclass, d2).then(function () {
+          mf.innerHTML = '<p class="q">Listo, ' + nombre + '. Tu cupo está confirmado.</p><p style="color:var(--on-navy-soft);margin:0">Recibí tu pago de ' + MC.precio + ' (orden de PayPal ' + esc(r.orden) + '). Te escribo a ' + esc(datos.email) + ' con la hora y el enlace. Si la masterclass no llegara a abrirse, te devuelvo el valor completo.</p>';
+        }).catch(function () {
+          st.innerHTML = 'Tu pago se aprobó (orden ' + esc(r.orden) + '), pero no pude guardar tu cupo. <button type="button" class="back" id="m-reintentar">Reintentar</button>';
+          document.getElementById('m-reintentar').addEventListener('click', guardar);
+        });
+      };
+      guardar();
+    }, function (msg) { st.className = 'cstatus'; st.textContent = msg; });
   }
   // Cuenta regresiva hasta la masterclass
   document.querySelectorAll('[data-faltan]').forEach(function (n) {
@@ -611,6 +685,7 @@
   // El QR no lleva monto: el cliente lo escribe y Carlo verifica en Deuna Negocios que el pago sea completo.
   // El cliente paga escaneando el código, escribe el número de comprobante y entonces se guardan sus respuestas; Carlo confirma el pago en la app.
   var DEUNA = { qr: '/assets/deuna-qr.png' }, DEUNA_ESTADO = 'ae-deuna';
+  if (PAYPAL.clientId) DEUNA.qr = '';   // con PayPal activo, el código QR sin monto deja de ofrecerse
   var servicios = fetch('/data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
     .then(function (j) {
       if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url;
@@ -984,8 +1059,9 @@
     }).join('');
     pintarPrecio();
     acepto.checked = false; pagarBtn.disabled = true; resErr.textContent = '';
-    pagarBtn.textContent = COBRO.url || DEUNA.qr || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
+    pagarBtn.textContent = COBRO.url || PAYPAL.clientId || DEUNA.qr || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
     document.getElementById('ae-res-nota').textContent = COBRO.url ? 'Te llevo a la página segura del Botón de Pagos del Banco Pichincha para pagar con tarjeta; tus respuestas me llegan cuando el pago se aprueba.' :
+      PAYPAL.clientId ? 'Pagas con PayPal o con tarjeta de crédito o débito; tus respuestas me llegan en cuanto se aprueba el pago.' :
       DEUNA.qr ? 'Pagas con Deuna, o con la app de tu banco, escaneando mi código QR; tus respuestas me llegan cuando escribas el número de comprobante.' :
       PAGO.url ? 'Se abre la página de pago en otra pestaña.' :
       'Te escribiré a ' + resp.datos.email + ' con el enlace de pago; en cuanto se acredite, empiezo tu análisis.';
@@ -996,7 +1072,7 @@
     if (dlg.open) document.getElementById('ae-res-body').focus({ preventScroll: true });
   }
   function cerrarResumen() {
-    resEl.hidden = true; dpEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
+    resEl.hidden = true; dpEl.hidden = true; if (ppEl) ppEl.hidden = true; log.hidden = false; inForm.hidden = false; tituloAE.textContent = 'Cuéntame tu caso';
   }
   function corregir(id) {
     cerrarResumen();
@@ -1046,6 +1122,7 @@
     if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
     var datos = paquete();
     if (COBRO.url) return iniciarCobro(datos);
+    if (PAYPAL.clientId) return mostrarPayPal(datos);
     if (DEUNA.qr) return mostrarDeuna(datos);
     var btn = pagarBtn; btn.disabled = true; resErr.textContent = '';
     var u = PAGO.url;
@@ -1091,6 +1168,36 @@
         resErr.textContent = 'No pude abrir el pago en este momento. Inténtalo de nuevo en unos minutos.';
       });
   }
+  // Pago con PayPal: el monto lo fija la web y las respuestas se envían en cuanto PayPal confirma el pago completo
+  var ppEl = document.getElementById('ae-pp'), ppErr = document.getElementById('ae-pp-err');
+  function mostrarPayPal(datos) {
+    if (!ppEl) return;
+    var pr = precio();
+    document.getElementById('ae-pp-total').textContent = dolares(pr.total) + ' USD';
+    ppErr.textContent = '';
+    tituloAE.textContent = 'Paga tu Consulta Express';
+    log.hidden = true; inForm.hidden = true; resEl.hidden = true; dpEl.hidden = true; ppEl.hidden = false;
+    ppEl.classList.remove('entra'); void ppEl.offsetWidth; ppEl.classList.add('entra');
+    document.getElementById('ae-pp-body').scrollTop = 0;
+    botonesPayPal(document.getElementById('ae-pp-btns'), pr.total, 'Consulta Express ' + ref, ref, function (r) {
+      var envio = Object.assign({}, datos, { pago: textoPayPal(r) });
+      ppErr.textContent = 'Pago aprobado. Enviando tus respuestas…';
+      document.getElementById('ae-pp-volver').hidden = true;
+      var guardar = function () {
+        return enviar(FORMS.analisis, envio).then(function () {
+          enviado = true; backBtn.hidden = true; ppEl.hidden = true; cerrarResumen();
+          chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
+          document.getElementById('ae-bar').style.width = '100%';
+          burbuja('Listo: recibí tu pago de ' + r.monto + ' (orden de PayPal ' + esc(r.orden) + ') y tus respuestas con la referencia ' + ref + '. Te envío el informe a ' + esc(resp.datos.email) + ' en un máximo de tres días hábiles.', 'yo', true);
+        }).catch(function () {
+          ppErr.innerHTML = 'Tu pago se aprobó (orden ' + esc(r.orden) + '), pero no pude enviar tus respuestas. <button type="button" class="back" id="ae-pp-re">Reintentar</button>';
+          document.getElementById('ae-pp-re').addEventListener('click', guardar);
+        });
+      };
+      guardar();
+    }, function (msg) { ppErr.textContent = msg; });
+  }
+  if (ppEl) document.getElementById('ae-pp-volver').addEventListener('click', function () { ppEl.hidden = true; mostrarResumen(); });
   // Pago con Deuna: se muestra el código QR; las respuestas quedan guardadas en este navegador por si la página se recarga
   // mientras el cliente paga en la app, y se envían cuando escribe el número de comprobante.
   var porPagar = null;

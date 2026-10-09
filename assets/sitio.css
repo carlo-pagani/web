@@ -585,3 +585,10 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .vcar-pie { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.75rem; }
 .vcar-flechas { display: flex; gap: .5rem; }
 @media (max-width: 52rem) { .vcar { grid-auto-columns: min(78%, 20rem); } .vcar-flechas { display: none; } }
+
+/* Pago con PayPal: los botones van sobre un fondo claro para que se lean bien en las secciones azules */
+.pp-total { margin-bottom: .6rem; }
+.pp-ayuda { margin: 0 0 1rem; font-size: var(--t-s); line-height: 1.55; color: var(--on-navy-soft); }
+.pp-btns { background: #fff; border-radius: 6px; padding: .9rem .9rem .3rem; min-height: 3.2rem; }
+.pp-btns:empty { display: none; }
+.pp-cargando { margin: 0 0 .6rem; color: #536176; font-size: var(--t-s); text-align: center; }
