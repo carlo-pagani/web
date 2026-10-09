@@ -10,6 +10,10 @@
   try { cerrada = sessionStorage.getItem('pest-cerrada') === '1'; } catch (e) {}
   // Abierto de entrada en computadora; en pantallas angostas taparía el texto y queda como pestaña
   abrir(!cerrada && window.innerWidth >= 1400);
+  // Bajo el menú al inicio; al bajar por la página sube a la esquina
+  function subir() { p.classList.toggle('arriba', window.scrollY > 70); }
+  subir();
+  window.addEventListener('scroll', subir, { passive: true });
   tab.addEventListener('click', function () {
     abrir(true);
     try { sessionStorage.removeItem('pest-cerrada'); } catch (e) {}

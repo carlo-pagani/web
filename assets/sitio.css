@@ -598,7 +598,8 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 /* Pestaña fija a la derecha, solo en computadora: Consulta Express y Masterclass desde cualquier punto */
 .pest { display: none; }
 @media (min-width: 60.01rem) {
-  .pest { display: block; position: fixed; right: 0; top: 5.5rem; z-index: 40; }
+  .pest { display: block; position: fixed; right: 0; top: 5.5rem; z-index: 40; transition: top .25s ease; }
+  .pest.arriba { top: 1rem; }
   /* Texto girado con transform y no con writing-mode: Safari no respeta writing-mode en los botones y lo recorta. */
   .pest-tab { position: absolute; right: 0; bottom: 0; transform-origin: 100% 100%; transform: rotate(-90deg); white-space: nowrap; background: var(--brass); color: #10151C; border: 0; border-radius: 6px 6px 0 0; padding: .65rem 1.1rem; font: 600 var(--t-s)/1 var(--body); letter-spacing: .02em; cursor: pointer; box-shadow: 0 -4px 18px -8px rgba(14,27,44,.55); }
   .pest-tab:hover { filter: brightness(1.05); }
@@ -617,4 +618,4 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   .pest-op:first-of-type { background: var(--brass); border-color: var(--brass); color: #10151C; }
   .pest-op:first-of-type span, .pest-op:first-of-type i { color: #10151C; opacity: .8; }
 }
-@media (prefers-reduced-motion: reduce) { .pest-op { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pest, .pest-op { transition: none; } }
