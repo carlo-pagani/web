@@ -275,7 +275,7 @@
   /* ---------- PayPal: cobro con monto exacto y confirmación inmediata ---------- */
   // clientId es el identificador público de la app «Live» en developer.paypal.com (no es la clave secreta). Vacío: apagado y se usa Deuna.
   // El navegador crea y captura la orden; el número de orden queda en cada envío para cotejarlo. La verificación en el servidor llega con el Worker.
-  var PAYPAL = { clientId: '' };
+  var PAYPAL = { clientId: 'BAAHPHYxpHokQA3PYUEiaYFXl32IAU8mMO-xXonNNzPgKvJHvtmyiMOBh-gI1SXRa9NoRBQVyrSMF_EWpE' };
   var ppCarga = null;
   function cargarPayPal() {
     if (window.paypal && window.paypal.Buttons) return Promise.resolve(window.paypal);
