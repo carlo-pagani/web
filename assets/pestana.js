@@ -9,7 +9,7 @@
   var cerrada = false;
   try { cerrada = sessionStorage.getItem('pest-cerrada') === '1'; } catch (e) {}
   // Abierta de entrada solo donde hay margen libre a la derecha (página Aprende en pantallas anchas)
-  abrir(!cerrada && p.hasAttribute('data-abierta') && window.innerWidth >= 1280);
+  abrir(!cerrada && p.hasAttribute('data-abierta') && window.innerWidth >= 1600);
   tab.addEventListener('click', function () {
     abrir(true);
     try { sessionStorage.removeItem('pest-cerrada'); } catch (e) {}
