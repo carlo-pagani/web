@@ -1,0 +1,27 @@
+name: Transcripciones (uso puntual)
+
+on:
+  push:
+    branches: [claude/seo-sem-pe70re]
+    paths: [".github/workflows/transcripciones.yml", "scripts/transcripciones.py"]
+
+permissions:
+  contents: write
+
+jobs:
+  transcribir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install youtube-transcript-api yt-dlp
+      - run: python scripts/transcripciones.py
+      - name: Guardar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add transcripciones
+          git commit -m "Transcripciones de los videos (temporal)" || echo "sin cambios"
+          git push
