@@ -1,0 +1,3 @@
+ERROR
+con_api: RequestBlocked()
+con_ytdlp: RuntimeError('sin subtítulos')
