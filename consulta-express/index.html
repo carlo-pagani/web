@@ -78,7 +78,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/assets/sitio.css?v=9">
+<link rel="stylesheet" href="/assets/sitio.css?v=10">
 </head>
 <body class="lp">
 
@@ -343,8 +343,23 @@
       <span class="ae-err" id="ae-dp-err" role="status"></span>
     </div>
   </section>
+  <section class="ae-res" id="ae-pp" hidden aria-label="Pago con PayPal">
+    <div class="ae-res-body" id="ae-pp-body" tabindex="-1">
+      <div class="dp-qr pp-total">
+        <span>Total con IVA (15 %)</span><strong id="ae-pp-total">$40.25 USD</strong>
+      </div>
+      <p class="pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. El monto ya está fijado; en cuanto se aprueba el pago, tus respuestas me llegan y empiezo tu análisis.</p>
+      <div class="pp-btns" id="ae-pp-btns"></div>
+    </div>
+    <div class="res-pie">
+      <div class="res-pagar">
+        <button type="button" class="back" id="ae-pp-volver">↶ Volver al resumen</button>
+      </div>
+      <span class="ae-err" id="ae-pp-err" role="status"></span>
+    </div>
+  </section>
 </dialog>
 
-<script src="/assets/sitio.js?v=8"></script>
+<script src="/assets/sitio.js?v=9"></script>
 </body>
 </html>

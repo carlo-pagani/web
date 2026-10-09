@@ -577,3 +577,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .ae-band.portafolio .ae-precio .btn { white-space: normal; text-align: center; }
 .news .meta .region { font-weight: 600; color: var(--accent); margin-right: .55em; }
 .news .meta .region::after { content: "·"; margin-left: .55em; color: var(--ink-soft); font-weight: 400; }
+/* Pago con PayPal: los botones van sobre un fondo claro para que se lean bien en las secciones azules */
+.pp-total { margin-bottom: .6rem; }
+.pp-ayuda { margin: 0 0 1rem; font-size: var(--t-s); line-height: 1.55; color: var(--on-navy-soft); }
+.pp-btns { background: #fff; border-radius: 6px; padding: .9rem .9rem .3rem; min-height: 3.2rem; }
+.pp-btns:empty { display: none; }
+.pp-cargando { margin: 0 0 .6rem; color: #536176; font-size: var(--t-s); text-align: center; }
