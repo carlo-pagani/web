@@ -261,12 +261,14 @@
   // Vacío: la solicitud se guarda y Carlo envía el enlace por correo.
   var PAGO = { url: '' };
   var LINKEDIN = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>';
-  function enviar(cfg, datos) {
+  function enviar(cfg, datos, archivos) {
     var fd = new FormData();
     Object.keys(datos).forEach(function (k) {
       var nombre = cfg.campos ? cfg.campos[k] : k;
       if (nombre) fd.append(nombre, datos[k]);
     });
+    // Archivos adjuntos: van al campo de subida del formulario, si lo tiene
+    if (archivos && archivos.length && cfg.campos && cfg.campos.archivos) archivos.forEach(function (f) { fd.append(cfg.campos.archivos, f, f.name); });
     var opaco = /jotform\.com/.test(cfg.url);
     if (opaco) { var fid = cfg.url.split('/').pop(); fd.append('formID', fid); fd.append('simple_spc', fid + '-' + fid); }
     return fetch(cfg.url, opaco ? { method: 'POST', mode: 'no-cors', body: fd } : { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
@@ -490,15 +492,22 @@
   /* ---------- Consulta Express: una entrevista breve en una ventana (solo en /consulta-express/) ---------- */
   if (document.getElementById('ae')) (function () {
   var P = 'Mis finanzas personales';
-  var DEUDAS_P = ['Tarjeta de crédito', 'Préstamo de consumo', 'Hipotecario', 'Préstamo vehicular', 'Cooperativa', 'Préstamo de familiares o amigos', 'Otra'];
   var DEUDAS_E = ['Préstamo bancario', 'Línea de crédito o sobregiro', 'Tarjeta de crédito corporativa', 'Leasing', 'Cooperativa', 'Socios o familiares', 'Otra'];
   var O = 'Otra decisión de dinero';
-  var SIN_TC = 'No, uso efectivo, transferencia o débito', TC_TOTAL = 'Pago el total', TC_DIF = 'Pago el total, pero tengo compras diferidas';
-  var TC_GASTOS = ['Supermercado', 'Gasolina y transporte', 'Servicios básicos y suscripciones', 'Restaurantes y salidas', 'Salud y farmacia', 'Educación', 'Ropa y cuidado personal', 'Compras grandes: electrodomésticos, tecnología o viajes'];
-  function usaTarjeta() { return !!resp.p5b && resp.p5b !== SIN_TC; }
-  function difiere() { return usaTarjeta() && resp.p5g === TC_DIF; }
-  function tcTotal() { return usaTarjeta() && (resp.p5g === TC_TOTAL || resp.p5g === TC_DIF); }
-  var Q_DEUDAS = 'Hablemos de deudas: tarjetas, préstamos, hipoteca, vehículo o cooperativas. Anota cada una con su saldo y su cuota mensual. La tasa y el plazo son opcionales: casi nadie los sabe, y calcular cuánto te cuesta de verdad cada deuda es parte de tu informe.';
+  // Finanzas personales: el hogar puede analizarse con la pareja, y entonces cada cifra lleva una segunda columna
+  var PAREJA = 'De mi hogar: mi pareja y yo aportamos';
+  function conPareja() { return resp.tema === P && resp.p2c === PAREJA; }
+  var QUIEN = { k: 'quien', l: 'De quién', sel: ['', 'Tuyo', 'De tu pareja', 'De ambos'], si: conPareja };
+  var CONFIDENCIAL = 'Recuerda: esta información es confidencial y solo la uso para preparar tu análisis. ';
+  var LEYENDA = 'Anota todo lo que sepas: mientras más datos me des, más útil será tu análisis. Si no sabes alguno, déjalo en blanco y lo calculo yo. ';
+  var MEDICO = 'Asistencia médica';
+  function filas(id) { return Array.isArray(resp[id]) ? resp[id] : []; }
+  function tieneTarjetas() { return resp.p5b === 'Sí, una' || resp.p5b === 'Sí, varias'; }
+  function conDiferidos() { return filas('p5t').some(function (t) { return t.diferido > 0 || /diferidos/.test(t.pago || ''); }); }
+  function invierte() { var v = resp.p11 || {}; return ['polizas', 'polizas_p', 'inversiones', 'inversiones_p'].some(function (k) { return v[k] > 0; }); }
+  function variasMedicas() { return filas('p13s').filter(function (s) { return s.tipo === MEDICO; }).length > 1; }
+  function pagando(b) { return b.paga === 'Lo estoy pagando'; }
+
   var OT = { deuda: 'Refinanciar una deuda o seguir igual', prepago: 'Pagar antes una deuda con dinero que tengo', compra: 'Comprar vivienda o seguir arrendando',
     credito: 'Comprar algo al contado o a crédito', trabajo: 'Cambiar de trabajo o emprender', venta: 'Vender un bien o un negocio', otra: 'Otra decisión' };
   var DIAS = ['De contado', 'Hasta 30 días', 'De 31 a 60 días', 'De 61 a 90 días', 'Más de 90 días'];
@@ -532,27 +541,30 @@
     { id: 'e14', si: 'Mi empresa', nota: lecturaEmpresa },
 
     { id: 'p1', si: P, q: '¿Qué quieres lograr? Puedes marcar varias.', op: ['Ordenar mi presupuesto', 'Salir de deudas', 'Tener un fondo de emergencia', 'Empezar a invertir', 'Comprar vivienda o vehículo', 'Planear mi jubilación'], multi: true },
+    { id: 'p0', si: P, para: 'La pregunta concreta que el informe debe responder.', q: 'En pocas palabras, ¿qué te gustaría que te responda este informe?', ph: 'Por ejemplo: ¿me alcanza para cambiar de carro el próximo año?',
+      conversa: 'Que la expectativa del cliente quede concreta: qué decisión quiere tomar o qué quiere saber, para cuándo, y qué consideraría una buena respuesta. Cuando esté claro, resume lo que quiere saber; ese resumen encabezará el informe.' },
+    { id: 'p0b', si: P, cond: function () { return !IA.url; }, para: 'Lo que el cliente considera una respuesta útil.', q: '¿Qué tendría que decir el informe para que te sea útil?', ph: 'Por ejemplo: cuánto tendría que ahorrar al mes y si conviene vender mi carro actual' },
     { id: 'p2', si: P, q: '¿En qué rango de edad estás?', op: ['Menos de 30', 'De 30 a 39', 'De 40 a 49', 'De 50 a 59', '60 o más'] },
     { id: 'p3', si: P, q: '¿Cuál es tu situación laboral?', op: ['Empleado con relación de dependencia', 'Independiente o con negocio propio', 'Ambas', 'Jubilado', 'Sin ingresos fijos por ahora'] },
-    { id: 'p4', si: P, q: 'Además de ti, ¿cuántas personas dependen económicamente de tus ingresos?', op: ['Ninguna', '1', '2', '3', '4 o más'] },
-    { id: 'p5', si: P, para: 'Ingreso neto mensual y extras anuales.', q: 'Empecemos por tus ingresos, ya libres de descuentos. Un aviso antes: el informe será tan bueno como estas cifras. Si no estás seguro de alguna, pon un aproximado razonable.', req: true, total: 'Ingreso mensual', ficha: [
+    { id: 'p2c', si: P, q: '¿El análisis es solo de tus finanzas o de tu hogar?', op: ['Solo de las mías', PAREJA, 'De mi hogar, pero solo aporto yo'] },
+    { id: 'p2p', si: P, cond: conPareja, q: 'Desde aquí, cada cifra lleva una columna para ti y otra para tu pareja. ¿En qué rango de edad está tu pareja?', op: ['Menos de 30', 'De 30 a 39', 'De 40 a 49', 'De 50 a 59', '60 o más'] },
+    { id: 'p3p', si: P, cond: conPareja, q: '¿Y cuál es su situación laboral?', op: ['Empleado con relación de dependencia', 'Independiente o con negocio propio', 'Ambas', 'Jubilado', 'Sin ingresos fijos por ahora'] },
+    { id: 'p4', si: P, get q() { return 'Además de ' + (conPareja() ? 'ustedes dos' : 'ti') + ', ¿cuántas personas dependen económicamente de ' + (conPareja() ? 'sus' : 'tus') + ' ingresos?'; }, op: ['Ninguna', '1', '2', '3', '4 o más'] },
+    { id: 'p5', si: P, dos: ['Tú', 'Tu pareja'], para: 'Ingreso neto mensual y extras anuales.', q: 'Empecemos por tus ingresos, ya libres de descuentos. Un aviso antes: el informe será tan bueno como estas cifras. Si no estás seguro de alguna, pon un aproximado razonable.', req: true, total: 'Ingreso mensual', ficha: [
       { k: 'sueldo', l: 'Sueldo o ingreso principal', d: 'al mes' },
       { k: 'extra', l: 'Negocio o trabajos independientes', d: 'al mes' },
       { k: 'otros', l: 'Otros ingresos', d: 'alquileres que cobras, jubilación u otros, al mes' },
       { k: 'anual', l: 'Ingresos extra del año', d: 'décimos, utilidades y bonos, en total', anual: true }] },
-    { id: 'p5b', si: P, q: 'Mucho de lo que se paga con tarjeta de crédito es gasto del mes, no deuda, y quiero contarlo bien. ¿Pagas algunos o todos tus gastos con tarjeta?', op: [SIN_TC, 'Sí, algunos', 'Sí, casi todos'] },
-    { id: 'p5c', si: P, cond: usaTarjeta, q: '¿Qué pagas con tarjeta? Puedes marcar varios.', op: TC_GASTOS, multi: true },
-    { id: 'p5g', si: P, cond: usaTarjeta, q: 'Cuando llega el estado de cuenta, ¿cómo lo pagas?', op: [TC_TOTAL, TC_DIF, 'Pago más del mínimo, sin llegar al total', 'Pago solo el mínimo'] },
-    { id: 'p6', si: P, para: 'Gastos fijos mensuales por rubro, para armar el presupuesto.', get q() { return 'Ahora tus gastos fijos de cada mes. ' + (usaTarjeta() ? 'Anota cada gasto en su rubro, también los que pagas con tarjeta. ' : '') + 'Un estimado basta; deja en blanco lo que no aplique.'; }, req: true, total: 'Gastos fijos al mes', ficha: [
-      { k: 'vivienda', l: 'Vivienda', d: 'arriendo y alícuota; la hipoteca va con las deudas' },
+    { id: 'p6', si: P, dos: ['Lo pagas tú', 'Lo paga tu pareja'], para: 'Gastos fijos mensuales por rubro, para armar el presupuesto.', q: 'Ahora tus gastos fijos de cada mes. Anota cada gasto en su rubro, también los que pagas con tarjeta. Un estimado basta; deja en blanco lo que no aplique.', req: true, total: 'Gastos fijos al mes', ficha: [
+      { k: 'vivienda', l: 'Vivienda', d: 'arriendo y alícuota; la cuota de la hipoteca va más adelante, con tus bienes' },
       { k: 'servicios', l: 'Servicios básicos', d: 'luz, agua, gas, internet y celular' },
       { k: 'alimentacion', l: 'Alimentación', d: 'supermercado y mercado' },
-      { k: 'transporte', l: 'Transporte', d: 'gasolina, pasajes, parqueadero y mantenimiento' },
-      { k: 'seguros', l: 'Seguros', d: 'médico, de vida y del vehículo' },
-      { k: 'salud', l: 'Salud', d: 'consultas y medicinas' },
+      { k: 'transporte', l: 'Transporte', d: 'gasolina, pasajes, parqueadero y mantenimiento; la cuota del carro va con tus bienes' },
+      { k: 'seguros', l: 'Cuotas de seguros', d: 'médico, de vida y del vehículo; solo lo que pagas tú. Si te lo descuentan del sueldo, no lo pongas; si lo pagas una vez al año, va en los gastos del año' },
+      { k: 'salud', l: 'Salud de tu bolsillo', d: 'consultas, exámenes y medicinas: solo lo que el seguro no te devuelve' },
       { k: 'educacion', l: 'Educación', d: 'pensiones escolares, universidad y cursos' },
       { k: 'familia', l: 'Apoyo a familiares' }] },
-    { id: 'p7', si: P, para: 'Gastos variables mensuales por rubro, para armar el presupuesto.', q: 'Y los gastos variables, que suelen ser los que más se escapan:', total: 'Gastos variables al mes', ficha: [
+    { id: 'p7', si: P, dos: ['Lo pagas tú', 'Lo paga tu pareja'], para: 'Gastos variables mensuales por rubro, para armar el presupuesto.', q: 'Y los gastos variables, que suelen ser los que más se escapan:', total: 'Gastos variables al mes', ficha: [
       { k: 'comidas', l: 'Comidas fuera y delivery' },
       { k: 'ocio', l: 'Entretenimiento y salidas' },
       { k: 'suscripciones', l: 'Suscripciones', d: 'streaming, aplicaciones y gimnasio' },
@@ -560,16 +572,83 @@
       { k: 'ropa', l: 'Ropa y cuidado personal' },
       { k: 'mascotas', l: 'Mascotas' },
       { k: 'otros', l: 'Otros' }] },
-    { id: 'p8', si: P, para: 'Cada deuda con saldo, cuota, tasa y plazo, para medir el endeudamiento.', get q() { return (!usaTarjeta() ? '' : tcTotal() ? 'Como pagas la tarjeta completa cada mes, no la anotes aquí: esos consumos ya están en tus gastos. Si tienes compras diferidas, anota solo lo que te falta pagar de ellas. ' : 'Ojo con la tarjeta: tus compras del mes ya están en tus gastos, así que anota solo el saldo que arrastras y lo diferido que te falta pagar. ') + (tcTotal() ? Q_DEUDAS.replace('tarjetas, ', '') : Q_DEUDAS); },  deudas: DEUDAS_P },
-    { id: 'p9', si: P, cond: function () { return !usaTarjeta() && (resp.p8 || []).some(function (d) { return d.tipo === 'Tarjeta de crédito'; }); }, q: 'Con esa tarjeta, ¿qué sueles pagar cada mes?', op: ['Más del mínimo, sin llegar al total', 'Solo el mínimo', 'Depende del mes'] },
+    { id: 'p6a', si: P, dos: ['Lo pagas tú', 'Lo paga tu pareja'], todoAnual: true, opcional: true, para: 'Gastos que llegan una o dos veces al año, para provisionarlos cada mes.', q: 'Hay gastos que llegan una o dos veces al año y desordenan cualquier presupuesto. Anota cuánto suman en el año; solo lo que no pusiste en los gastos del mes.', total: 'Gastos del año', ficha: [
+      { k: 'matricula', l: 'Matrícula del vehículo e impuesto predial' },
+      { k: 'segurosanual', l: 'Seguros que pagas una vez al año' },
+      { k: 'escolar', l: 'Matrículas, útiles y uniformes escolares' },
+      { k: 'vacaciones', l: 'Vacaciones y viajes' },
+      { k: 'navidad', l: 'Navidad, cumpleaños y regalos' },
+      { k: 'otrosanual', l: 'Otros', d: 'arreglos grandes de la casa o del carro' }] },
+    { id: 'p12', si: P, q: '¿Tienes vivienda, terreno o vehículo, ya pagados o que estés pagando?', op: ['Sí', 'No'] },
+    { id: 'p12b', si: P, cond: function () { return resp.p12 === 'Sí'; }, para: 'Valor de compra y de mercado de cada bien, y su crédito, para el patrimonio neto.',
+      get q() { return CONFIDENCIAL + 'Anota cada bien. Lo que vale hoy es un aproximado: lo que te darían si lo vendieras. Si lo estás pagando, lo indispensable es la cuota y los meses que te faltan; el saldo lo calculo yo si no lo sabes.'; },
+      filas: { add: '+ Agregar otro bien', total: { k: 'cuota', l: 'Cuotas al mes' }, campos: [
+        { k: 'tipo', l: 'Qué es', sel: ['Vivienda', 'Terreno', 'Vehículo', 'Otro'] }, QUIEN,
+        { k: 'costo', l: 'Cuánto te costó', t: 'usd' },
+        { k: 'anio', l: 'Año de compra', t: 'anio' },
+        { k: 'valor', l: 'Cuánto vale hoy, más o menos', t: 'usd', req: true },
+        { k: 'paga', l: '¿Lo estás pagando?', sel: ['', 'Ya está pagado', 'Lo estoy pagando'], req: true },
+        { k: 'cuota', l: 'Cuota al mes', t: 'usd', req: true, si: pagando },
+        { k: 'meses', l: 'Meses que te faltan', t: 'meses', req: true, si: pagando },
+        { k: 'saldo', l: 'Saldo que debes, si lo sabes', t: 'usd', si: pagando }],
+        error: 'De cada bien necesito cuánto vale hoy, más o menos, si lo estás pagando y, en ese caso, la cuota y los meses que te faltan.' } },
+    { id: 'p8', si: P, para: 'Cada préstamo con saldo, cuota y meses que faltan, para medir el endeudamiento.',
+      get q() { return (resp.p12 === 'Sí' ? '' : CONFIDENCIAL) + 'Ahora tus préstamos. ' + LEYENDA + 'Lo indispensable son tres datos: cuánto crees que debes hoy, cuánto pagas de cuota y cuántos meses te faltan. La hipoteca y el préstamo del carro ya van con tus bienes, y las tarjetas tienen su propio apartado.'; },
+      filas: { add: '+ Agregar otro préstamo', vacio: 'No tengo préstamos', total: { k: 'cuota', l: 'Cuotas al mes' }, campos: [
+        { k: 'tipo', l: 'Tipo', sel: ['Préstamo de consumo', 'Cooperativa', 'Crédito educativo', 'Familiares o amigos', 'Otro'] }, QUIEN,
+        { k: 'entidad', l: 'Banco o entidad, si quieres', t: 'txt' },
+        { k: 'saldo', l: 'Cuánto crees que debes hoy', t: 'usd', req: true },
+        { k: 'cuota', l: 'Cuota al mes', t: 'usd', req: true },
+        { k: 'meses', l: 'Meses que te faltan', t: 'meses', req: true },
+        { k: 'tasa', l: 'Tasa anual, si la sabes', t: 'pct' }],
+        error: 'De cada préstamo necesito, aunque sea aproximado, cuánto debes, la cuota y los meses que te faltan.' } },
+    { id: 'p5b', si: P, q: '¿Tienes tarjetas de crédito?', op: ['No', 'Sí, una', 'Sí, varias'] },
+    { id: 'p5t', si: P, cond: tieneTarjetas, para: 'Cada tarjeta con emisor, marca, nivel, estado de cuenta y forma de pago, para estimar su costo real.',
+      q: 'Una tarjeta mezcla dos cosas distintas: el gasto del mes que pagas con ella, como el supermercado o la gasolina, y la deuda que arrastras, que es el saldo que no pagas completo y los diferidos. Ya anotaste tus gastos del mes por rubro; aquí me interesa la deuda y cómo usas cada tarjeta, para separar bien una cosa de la otra. El banco, la marca y el tipo me ayudan a estimar cuánto te cobra cada una.',
+      filas: { add: '+ Agregar otra tarjeta', campos: [
+        { k: 'banco', l: 'Banco', t: 'txt' },
+        { k: 'marca', l: 'Marca', sel: ['', 'Visa', 'Mastercard', 'American Express', 'Diners Club', 'Discover', 'Otra'] },
+        { k: 'nivel', l: 'Tipo o color', sel: ['', 'Clásica', 'Oro', 'Platinum', 'Black o similar', 'No sé'] },
+        { k: 'millas', l: '¿Acumula millas o puntos?', sel: ['', 'Sí', 'No', 'No sé'] }, QUIEN,
+        { k: 'estado', l: 'Cuánto te llegó en el último estado de cuenta', t: 'usd', req: true },
+        { k: 'pago', l: 'Cómo lo pagas', sel: ['', 'El total', 'El total, pero tengo diferidos', 'Más del mínimo', 'Solo el mínimo'], req: true },
+        { k: 'diferido', l: 'Lo que te falta pagar de diferidos, si los tienes', t: 'usd' },
+        { k: 'cupo', l: 'Cupo, si lo sabes', t: 'usd' }],
+        error: 'De cada tarjeta necesito cuánto te llegó en el último estado de cuenta y cómo lo pagas.' } },
+    { id: 'p5u', si: P, cond: function () { return tieneTarjetas() && !!IA.url; }, para: 'Uso de cada tarjeta, diferidos, costo anual y beneficios.',
+      q: 'Cuéntame cómo usas tus tarjetas: qué pagas con cada una y si tienes alguna para algo en particular, como la gasolina, el supermercado o las compras grandes.', ph: 'Por ejemplo: la Visa para todo por las millas y la Mastercard solo para electrodomésticos a meses',
+      conversa: 'Entender el uso de cada tarjeta para separar el gasto corriente de la deuda y estimar su costo: qué paga con cada una (gasto del mes como supermercado, combustible o restaurantes; compras grandes o de temporada como electrodomésticos, pensiones o viajes; o todo, por las millas y beneficios); qué difiere y a cuántos meses; si sabe cuánto paga al año por cada tarjeta (si no lo sabe, dile que lo estimamos con lo que nos dio); qué beneficios aprovecha de verdad; si saca avances de efectivo; y si las compras que paga con tarjeta las anotó en sus gastos del mes, para no contarlas dos veces. Haz que sienta que conoces bien cómo funcionan las tarjetas en Ecuador.' },
+    { id: 'p5c', si: P, cond: function () { return tieneTarjetas() && !IA.url; }, q: '¿Qué pagas con tarjeta? Puedes marcar varias.', op: ['Gastos del mes: supermercado, combustible, restaurantes, entretenimiento', 'Compras grandes: electrodomésticos, pensiones o matrículas, viajes', 'Todo, porque me gusta usar las millas para viajes y otros beneficios'], multi: true, solo: ['Todo, porque me gusta usar las millas para viajes y otros beneficios'] },
+    { id: 'p5g', si: P, cond: function () { return tieneTarjetas() && !IA.url; }, q: 'Las compras que pagas con tarjeta, ¿las anotaste en tus gastos del mes?', op: ['Sí, todas en su rubro', 'Algunas sí y otras no', 'No, no las anoté'] },
+    { id: 'p5f', si: P, cond: function () { return tieneTarjetas() && !IA.url; }, q: '¿Sabes si pagas un monto anual por la tarjeta? Si no lo sabes, no te preocupes: lo estimo con la información que me diste.', op: ['Sí, sé cuánto', 'No lo sé', 'No pago nada al año'] },
+    { id: 'p5fm', si: P, cond: function () { return tieneTarjetas() && !IA.url && resp.p5f === 'Sí, sé cuánto'; }, q: '¿Cuánto pagas al año por tus tarjetas, en total?', opcional: true, ficha: [{ k: 'anual', l: 'Monto anual por tus tarjetas', anual: true }] },
+    { id: 'p5d', si: P, cond: function () { return tieneTarjetas() && !IA.url && conDiferidos(); }, opcional: true, para: 'Compras diferidas: qué y a cuántos meses.', q: '¿Qué compras tienes diferidas y a cuántos meses?', ph: 'Por ejemplo: refrigeradora a 12 meses, quedan 5; pasajes a 6 meses, quedan 2' },
     { id: 'p10', si: P, q: '¿Has tenido atrasos en algún pago en los últimos doce meses?', op: ['Ninguno', 'Alguna vez', 'Sí, tengo pagos atrasados ahora'] },
-    { id: 'p11', si: P, para: 'Ahorros e inversiones disponibles, para medir el colchón de emergencia.', q: '¿Qué ahorros e inversiones tienes hoy?', opcional: true, total: 'Ahorro e inversiones', ficha: [
+    { id: 'p11', si: P, dos: ['Tú', 'Tu pareja'], para: 'Ahorros e inversiones disponibles, para medir el colchón de emergencia.', q: '¿Qué ahorros e inversiones tienes hoy?', opcional: true, total: 'Ahorro e inversiones', ficha: [
       { k: 'ahorro', l: 'Ahorro disponible', d: 'cuentas de ahorro y efectivo' },
-      { k: 'polizas', l: 'Pólizas y depósitos a plazo' },
+      { k: 'polizas', l: 'Pólizas y depósitos a plazo', d: 'el monto' },
+      { k: 'tasapol', l: 'Interés que te pagan por esas pólizas', d: 'al año, aproximado', t: 'pct', noSuma: true },
       { k: 'inversiones', l: 'Fondos, acciones u otras inversiones' }] },
-    { id: 'p12', si: P, q: '¿Qué bienes tienes? Puedes marcar varios.', op: ['Vivienda propia', 'Terreno', 'Vehículo', 'Ninguno'], multi: true, solo: ['Ninguno'] },
-    { id: 'p13', si: P, q: '¿Con qué protección cuentas? Puedes marcar varias.', op: ['Afiliación al IESS', 'Seguro médico privado', 'Seguro de vida', 'Ninguna'], multi: true, solo: ['Ninguna'] },
+    { id: 'p11b', si: P, cond: invierte, opcional: true, para: 'En qué y con quién está invertido el dinero, para detectar inversiones riesgosas.', q: 'Cuéntame en qué y con quién tienes invertido tu dinero, y qué rendimiento te ofrecieron.', ph: 'Por ejemplo: póliza a un año en una cooperativa al 9 %; un fondo en una casa de valores',
+      conversa: 'Saber en qué está invertido su dinero, con quién (banco, cooperativa, casa de valores, plataforma o persona), qué rendimiento le prometieron, si puede retirarlo cuando quiera y si la entidad está controlada por alguna superintendencia. El objetivo es detectar inversiones en las que podría perder su dinero: no adviertas nada al cliente, solo reúne la información.' },
+    { id: 'p13i', si: P, get q() { return 'Ahora tu protección. ¿Estás afiliado al IESS?'; }, op: ['Sí', 'No', 'Soy jubilado'] },
+    { id: 'p13ip', si: P, cond: conPareja, q: '¿Y tu pareja?', op: ['Sí', 'No', 'Es jubilada o jubilado'] },
+    { id: 'p13s', si: P, opcional: true, para: 'Seguros con aseguradora, cobertura, deducible y montos asegurados.',
+      q: 'Este apartado es opcional. Me ayuda a decirte si estás bien protegido y si pagas de más; si lo saltas, el resto de tu informe no cambia. Anota tus seguros, aunque los datos sean de memoria.',
+      filas: { add: '+ Agregar otro seguro', vacio: 'No tengo seguros privados', campos: [
+        { k: 'tipo', l: 'Tipo', sel: [MEDICO, 'Vida', 'Desgravamen', 'Vehículo', 'Otro'] }, QUIEN,
+        { k: 'aseguradora', l: 'Aseguradora', t: 'txt' },
+        { k: 'costo', l: 'Cuánto cuesta, si lo sabes', t: 'usd', unidad: 'periodo' },
+        { k: 'periodo', l: 'Ese costo es', sel: ['', 'Al mes', 'Al año'], enTexto: false },
+        { k: 'cobertura', l: 'Porcentaje de cobertura', t: 'pct', si: function (r) { return r.tipo === MEDICO; } },
+        { k: 'deducible', l: 'Deducible', t: 'usd', si: function (r) { return r.tipo === MEDICO; } },
+        { k: 'maximo', l: 'Monto máximo de cobertura', t: 'usd', si: function (r) { return r.tipo === MEDICO; } },
+        { k: 'asegurado', l: 'Monto asegurado', t: 'usd', si: function (r) { return r.tipo === 'Vida'; } },
+        { k: 'encuota', l: '¿Va incluido en la cuota de un préstamo?', sel: ['', 'Sí', 'No', 'No sé'], si: function (r) { return r.tipo === 'Desgravamen'; } }] } },
+    { id: 'p13x', si: P, cond: variasMedicas, opcional: true, para: 'Para qué usa cada póliza médica y cómo se complementan.', q: 'Tienes más de un seguro médico. Cuéntame para qué usas cada uno y si uno cubre lo que el otro no.', ph: 'Por ejemplo: con una me atiendo lo del día a día y la otra es para algo grave, a partir de un deducible alto',
+      conversa: 'Entender para qué usa cada póliza médica, cómo se coordinan los beneficios entre ellas (qué cubre una que la otra no, deducibles, porcentajes), y si alguna podría sobrar. No preguntes por enfermedades ni diagnósticos: solo coberturas, deducibles, costos y uso. Si el cliente menciona una enfermedad, no profundices en ella.' },
     { id: 'p14', si: P, q: '¿Llevas un registro de tus gastos?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
+    { id: 'p14p', si: P, cond: conPareja, q: '¿Y tu pareja?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
     { id: 'p15', si: P, q: '¿Ya tienes en mente una meta concreta para los próximos doce meses? Si no, la propongo yo en el informe.', op: ['Sí, la tengo clara', 'No, que salga del informe'] },
     { id: 'p15b', si: P, cond: function () { return resp.p15 === 'Sí, la tengo clara'; }, para: 'Una meta medible, con monto y plazo.', q: 'Escríbela con monto y fecha, si puedes.', ph: 'Por ejemplo: pagar la tarjeta de 2.400 antes de junio' },
     { id: 'p16', si: P, nota: lecturaPersonal },
@@ -647,7 +726,10 @@
       { k: 'ahorro', l: 'Ahorro o caja disponible', d: 'ej.: 4.000' }] },
     { id: 'o6', si: O, q: 'Si solo pudieras cuidar una cosa en esta decisión, ¿cuál sería?', op: ['Pagar menos en total', 'Una cuota mensual cómoda', 'Correr poco riesgo', 'Tener dinero disponible', 'Resolverlo rápido'] },
 
-    { id: 'mas', para: 'Cambios, ingresos o gastos previstos que modifiquen el análisis.', q: '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?', opcional: true },
+    { id: 'mas', para: 'Cambios, ingresos o gastos previstos que modifiquen el análisis.', opcional: true,
+      get q() { return resp.tema === P ? '¿Hay algo más que quieras contarme, o alguna parte que quieras explicarme mejor, para que tu informe se ajuste a lo que esperas?' : '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?'; },
+      get conversa() { return resp.tema === P ? 'Profundizar en lo que el cliente cuenta aquí para que el informe se ajuste a lo que espera: cambios previstos, ingresos o gastos que vienen, o cualquier punto de sus respuestas que quiera explicar mejor. Pregunta solo lo que aporte al informe y nada que ya esté respondido.' : ''; } },
+    { id: 'adj', si: P, archivos: true, q: '¿Quieres adjuntar algo que me ayude? Por ejemplo, tu último estado de cuenta de la tarjeta, la tabla de pagos de un préstamo o tus pólizas de seguro. Hasta 5 archivos de 5 MB cada uno, en PDF, foto o Excel. Tapa el número completo de la tarjeta: me bastan los últimos cuatro dígitos. Tus archivos se tratan con la misma confidencialidad que tus respuestas.' },
     { id: 'datos', q: 'Perfecto. ¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
     { id: 'factura', q: '¿Necesitas factura?', op: ['Sí', 'No'] },
     { id: 'fdatos', cond: function () { return resp.factura === 'Sí'; }, q: '¿A nombre de quién la emito y con qué RUC o cédula?', ph: 'Por ejemplo: Comercial Andes S.A., RUC 1790000000001' }
@@ -658,9 +740,14 @@
     e1: 'A qué se dedica la empresa', e2: 'Personas que trabajan', e3: 'Cifras del último año', e4: 'Gastos fijos al mes', e5: 'Capital de trabajo',
     e6: 'Plazo de cobro a clientes', e7: 'Plazo de pago a proveedores', e8: 'Deudas de la empresa', e9: 'Caja en los últimos tres meses',
     e10: 'Obligaciones', e11: 'Información financiera que llevan', e12: 'Problema o decisión principal', e13: 'Lo que han intentado',
-    p1: 'Lo que quieres lograr', p2: 'Edad', p3: 'Situación laboral', p4: 'Personas que dependen de ti', p5: 'Ingresos', p6: 'Gastos fijos',
-    p7: 'Gastos variables', p8: 'Deudas', p5b: 'Paga gastos con tarjeta', p5c: 'Lo que paga con tarjeta', p5g: 'Pago del estado de cuenta', p9: 'Pago de la tarjeta que debe', p10: 'Atrasos en los últimos doce meses', p11: 'Ahorros e inversiones',
-    p12: 'Bienes', p13: 'Protección', p14: 'Registro de gastos', p15: '¿Tiene una meta definida?', p15b: 'Meta para los próximos doce meses',
+    p1: 'Lo que quieres lograr', p0: 'Lo que quieres que responda el informe', p0b: 'Lo que haría útil el informe', p2: 'Edad', p3: 'Situación laboral',
+    p2c: 'Unidad del análisis', p2p: 'Edad de tu pareja', p3p: 'Situación laboral de tu pareja', p4: 'Personas que dependen de los ingresos',
+    p5: 'Ingresos', p6: 'Gastos fijos', p7: 'Gastos variables', p6a: 'Gastos del año', p12: '¿Tiene vivienda, terreno o vehículo?', p12b: 'Bienes',
+    p8: 'Préstamos', p5b: 'Tarjetas de crédito', p5t: 'Detalle de tus tarjetas', p5u: 'Uso de tus tarjetas', p5c: 'Lo que pagas con tarjeta',
+    p5g: '¿Anotaste las compras con tarjeta en tus gastos?', p5f: 'Monto anual por la tarjeta', p5fm: 'Monto anual por tus tarjetas', p5d: 'Compras diferidas',
+    p10: 'Atrasos en los últimos doce meses', p11: 'Ahorros e inversiones', p11b: 'En qué y con quién inviertes', p13i: 'Afiliación al IESS',
+    p13ip: 'Afiliación al IESS de tu pareja', p13s: 'Seguros', p13x: 'Uso de tus seguros médicos', p14: 'Registro de gastos', p14p: 'Registro de gastos de tu pareja',
+    p15: '¿Tiene una meta definida?', p15b: 'Meta para los próximos doce meses', adj: 'Archivos adjuntos',
     i1: 'Inversión que evalúas', i2: 'Condiciones de la inversión', i3: 'Objetivo del dinero', i4: 'Origen del dinero', i5: 'Peso en tu patrimonio',
     i6: 'Necesidad del dinero antes del plazo', i7: 'Si cayera 20 % en un año', i8: 'Inversiones anteriores', i9: 'Costos y condiciones de retiro',
     i10: 'Control de una superintendencia', i11: 'Tu situación general', i12: 'Alternativas que comparas',
@@ -668,10 +755,10 @@
     o5b: 'Cifras principales', o5c: 'Cifras principales', o5d: 'Cifras principales', o5e: 'Cifras principales', o5f: 'Cifras principales',
     o6: 'Lo que más cuida'
   };
-  var CONDICIONES = 'versión del 8 de octubre de 2026';
-  var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará unos diez minutos; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Uso tus datos solo para preparar tu análisis.';
+  var CONDICIONES = 'versión del 9 de octubre de 2026';
+  var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará entre diez y veinte minutos, según tu caso; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Todo lo que me cuentes es confidencial: se guarda con medidas de seguridad, lo uso solo para preparar tu informe y no lo comparto con nadie sin tu consentimiento expreso.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
-  var INTRO_PRECIO = 'El análisis cuesta desde $35 USD + IVA: el precio sube un poco según lo que me pidas analizar, nunca más de $60 + IVA. Antes de pagar verás un resumen de tus respuestas y de lo que incluye tu análisis, y podrás quitar lo que no necesites.';
+  var INTRO_PRECIO = 'El análisis cuesta desde $35 USD + IVA: el precio sube según las partes que tu caso necesite analizar. Antes de pagar verás un resumen de tus respuestas y de lo que incluye tu análisis, y podrás quitar lo que no necesites.';
   function intro() { return INTRO + '\n\n' + (IA.url ? INTRO_IA + '\n\n' : '') + INTRO_PRECIO; }
   var dlg = document.getElementById('ae'), log = document.getElementById('ae-log'), chipsEl = document.getElementById('ae-chips');
   var row = document.getElementById('ae-row'), txt = document.getElementById('ae-txt'), camposEl = document.getElementById('ae-campos');
@@ -713,19 +800,32 @@
   function dec(n) { return n.toLocaleString('en-US', { maximumFractionDigits: 2 }); }
   function usd(n) { return (n < 0 ? '−$' : '$') + Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: Math.abs(n) >= 1000 ? 0 : 2 }); }
   function pc(x) { return Math.round(x * 100) + ' %'; }
-  function sumar(v) { v = v || {}; var t = 0; for (var k in v) if (k !== 'anual') t += v[k]; return t + (v.anual || 0) / 12; }
+  // Suma mensual de una ficha: los extras del año se prorratean y las tasas no se suman; las claves _p son de la pareja
+  function sumar(v) { v = v || {}; var t = 0; for (var k in v) if (!/^tasa/.test(k)) t += /^anual(_p)?$/.test(k) ? v[k] / 12 : v[k]; return t; }
+  function sumaPlana(v) { v = v || {}; var t = 0; for (var k in v) if (!/^tasa/.test(k)) t += v[k]; return t; }
+  function sumarDe(v, pareja) { var o = {}; for (var k in v || {}) if (/_p$/.test(k) === pareja) o[k] = v[k]; return o; }
   function sumaDeuda(l, k) { return (l || []).reduce(function (t, d) { return t + (d[k] || 0); }, 0); }
   function valor(f, n) { return f.t === 'pct' ? dec(n) + ' %' : f.t === 'meses' ? dec(n) + (n === 1 ? ' mes' : ' meses') : usd(n) + (f.anual ? ' al año' : ''); }
   function lecturaPersonal() {
-    var deudas = (resp.p8 || []).filter(function (d) { return !(tcTotal() && !difiere() && d.tipo === 'Tarjeta de crédito'); });
-    var ing = sumar(resp.p5), gas = sumar(resp.p6) + sumar(resp.p7), cuo = sumaDeuda(deudas, 'cuota');
+    var ing = sumar(resp.p5), gas = sumar(resp.p6) + sumar(resp.p7) + sumaPlana(resp.p6a) / 12;
+    var bienes = filas('p12b'), prest = filas('p8');
+    var cuo = sumaDeuda(prest, 'cuota') + sumaDeuda(bienes.filter(pagando), 'cuota');
     if (!ing || !gas) return '';
-    var libre = ing - gas - cuo;
-    var t = 'Un primer vistazo con lo que me contaste: ingresas unos ' + usd(ing) + ' al mes; tus gastos suman ' + usd(gas) + (cuo ? ' y las cuotas de tus deudas, ' + usd(cuo) : '') + '. ';
-    t += libre >= 0 ? 'Te quedan unos ' + usd(libre) + ' al mes, el ' + pc(libre / ing) + ' de tu ingreso.' : 'Te faltan unos ' + usd(-libre) + ' al mes, que hoy salen de deuda o de tus ahorros.';
-    if (cuo) t += ' Las cuotas se llevan el ' + pc(cuo / ing) + ' de tu ingreso' + (cuo / ing > 0.4 ? ', por encima del 30 al 40 % que suele considerarse prudente.' : '.');
-    var ah = resp.p11 && resp.p11.ahorro;
-    if (ah) { var m = ah / (gas + cuo); t += m < 1 ? ' Tu ahorro disponible no alcanza a cubrir un mes de gastos.' : ' Tu ahorro disponible cubre ' + (Math.round(m) === 1 ? 'cerca de un mes' : 'unos ' + Math.round(m) + ' meses') + ' de gastos.'; }
+    var libre = ing - gas - cuo, nos = conPareja();
+    var t = 'Un primer vistazo con lo que me contaste: ' + (nos ? 'entre los dos ingresan' : 'ingresas') + ' unos ' + usd(ing) + ' al mes; los gastos suman ' + usd(gas) +
+      (resp.p6a && sumaPlana(resp.p6a) ? ', contando la parte mensual de los gastos del año,' : '') + (cuo ? ' y las cuotas de préstamos y bienes, ' + usd(cuo) : '') + '. ';
+    t += libre >= 0 ? (nos ? 'Les quedan' : 'Te quedan') + ' unos ' + usd(libre) + ' al mes, el ' + pc(libre / ing) + ' del ingreso.' : (nos ? 'Les faltan' : 'Te faltan') + ' unos ' + usd(-libre) + ' al mes, que hoy salen de deuda o de ahorros.';
+    if (cuo) t += ' Las cuotas se llevan el ' + pc(cuo / ing) + ' del ingreso' + (cuo / ing > 0.4 ? ', por encima del 30 al 40 % que suele considerarse prudente.' : '.');
+    var v = resp.p11 || {}, ah = (v.ahorro || 0) + (v.ahorro_p || 0);
+    if (ah) { var m = ah / (gas + cuo); t += m < 1 ? ' El ahorro disponible no alcanza a cubrir un mes de gastos.' : ' El ahorro disponible cubre ' + (Math.round(m) === 1 ? 'cerca de un mes' : 'unos ' + Math.round(m) + ' meses') + ' de gastos.'; }
+    if (filas('p5t').length) t += ' Las tarjetas las analizo aparte, separando el gasto del mes de la deuda.';
+    // Patrimonio neto, solo si se conoce el saldo de cada bien que se está pagando
+    var deben = bienes.filter(pagando);
+    if (bienes.length && deben.every(function (b) { return b.saldo != null; })) {
+      var pat = sumaDeuda(bienes, 'valor') + ah + (v.polizas || 0) + (v.polizas_p || 0) + (v.inversiones || 0) + (v.inversiones_p || 0)
+        - sumaDeuda(deben, 'saldo') - sumaDeuda(prest, 'saldo') - sumaDeuda(filas('p5t'), 'diferido');
+      t += ' ' + (nos ? 'Su' : 'Tu') + ' patrimonio neto aproximado, lo que vale lo que ' + (nos ? 'tienen' : 'tienes') + ' menos lo que ' + (nos ? 'deben' : 'debes') + ', es de ' + usd(pat) + '.';
+    }
     return t + ' En el informe lo vemos a fondo.';
   }
   function lecturaEmpresa() {
@@ -748,11 +848,26 @@
   function textoResp(p, v) {
     if (p.campos) return v.nombre + ' · ' + v.email + (v.whatsapp ? ' · ' + v.whatsapp : '');
     if (p.ficha) {
-      var ls = p.ficha.filter(function (f) { return v[f.k] != null; }).map(function (f) { return f.l + ': ' + valor(f, v[f.k]); });
+      var dos = p.dos && Object.keys(v).some(function (k) { return /_p$/.test(k); });
+      var ls = p.ficha.filter(function (f) { return v[f.k] != null || v[f.k + '_p'] != null; }).map(function (f) {
+        if (!dos) return f.l + ': ' + valor(f, v[f.k]);
+        return f.l + ': ' + [v[f.k] != null ? p.dos[0].toLowerCase() + ' ' + valor(f, v[f.k]) : '', v[f.k + '_p'] != null ? p.dos[1].toLowerCase() + ' ' + valor(f, v[f.k + '_p']) : ''].filter(Boolean).join(' · ');
+      });
       if (!ls.length) return 'Prefiero no responder';
-      if (p.total && ls.length > 1) ls.push(p.total + ': ' + usd(sumar(v)));
+      if (p.total && (ls.length > 1 || dos)) {
+        var porPersona = function (x) { return p.todoAnual ? usd(sumaPlana(x)) : usd(sumar(x)); };
+        ls.push(p.total + ': ' + totalFicha(p, v) + (dos ? ' (' + p.dos[0].toLowerCase() + ' ' + porPersona(sumarDe(v, false)) + ' · ' + p.dos[1].toLowerCase() + ' ' + porPersona(sumarDe(v, true)) + ')' : '') +
+          (p.todoAnual ? ', unos ' + usd(sumaPlana(v) / 12) + ' al mes' : ''));
+      }
       return ls.join('\n');
     }
+    if (p.filas) {
+      if (!v.length) return p.filas.vacio || 'Prefiero no responder';
+      var fs = v.map(function (r) { return textoFila(p.filas, r); });
+      if (v.length > 1 && p.filas.total) fs.push(p.filas.total.l + ': ' + usd(sumaDeuda(v, p.filas.total.k)));
+      return fs.join('\n');
+    }
+    if (p.archivos) return v.length ? v.join(', ') : 'Sin archivos adjuntos';
     if (p.deudas) {
       if (!v.length) return 'No tengo deudas';
       var ds = v.map(function (d) {
@@ -787,9 +902,11 @@
     });
   }
   function ficha(p, confirmar) {
-    var prev = previo[p.id] || {};
-    var c = burbuja('<div class="f-list">' + p.ficha.map(function (f) {
-        return '<label class="f"><span class="f-l">' + esc(f.l) + (f.d ? '<small>' + esc(f.d) + '</small>' : '') + '</span>' + campo(f.k, prev[f.k], f.t, f.l) + '</label>';
+    var prev = previo[p.id] || {}, dos = p.dos && conPareja();
+    var c = burbuja((dos ? '<p class="f f2 f-cab"><span></span><b>' + esc(p.dos[0]) + '</b><b>' + esc(p.dos[1]) + '</b></p>' : '') +
+      '<div class="f-list">' + p.ficha.map(function (f) {
+        return '<label class="f' + (dos ? ' f2' : '') + '"><span class="f-l">' + esc(f.l) + (f.d ? '<small>' + esc(f.d) + '</small>' : '') + '</span>' + campo(f.k, prev[f.k], f.t, f.l + (dos ? ', ' + p.dos[0] : '')) +
+          (dos ? campo(f.k + '_p', prev[f.k + '_p'], f.t, f.l + ', ' + p.dos[1]) : '') + '</label>';
       }).join('') + '</div>' +
       (p.total ? '<p class="f-tot"><span>' + esc(p.total) + '</span><b></b></p>' : '') +
       '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button>' +
@@ -798,7 +915,7 @@
     var leer = function () {
       var v = {}; c.querySelectorAll('input[data-k]').forEach(function (i) { var n = monto(i.value); if (n != null) v[i.dataset.k] = n; }); return v;
     };
-    var tot = c.querySelector('.f-tot b'), calc = function () { if (tot) tot.textContent = usd(sumar(leer())); };
+    var tot = c.querySelector('.f-tot b'), calc = function () { if (tot) tot.textContent = totalFicha(p, leer()); };
     c.addEventListener('input', calc); calc();
     c.querySelector('.f-ok').addEventListener('click', function () {
       var v = leer();
@@ -806,6 +923,125 @@
       c.remove(); responder(v);
     });
     enterAvanza(c);
+    return c;
+  }
+  // Total de una ficha: mensual (los extras del año se prorratean) o, en los gastos del año, la suma anual
+  function totalFicha(p, v) { return p.todoAnual ? usd(sumaPlana(v)) + ' al año' : usd(sumar(v)); }
+  // Filas repetibles (bienes, préstamos, tarjetas, seguros): cada campo puede depender de lo elegido en la misma fila
+  function visible(f, r) { return !f.si || (f.si.length ? f.si(r) : f.si()); }
+  function leerFila(el, def) {
+    var r = {};
+    el.querySelectorAll('[data-k]').forEach(function (i) {
+      if (i.tagName === 'SELECT') { if (i.value) r[i.dataset.k] = i.value; }
+      else if (i.dataset.t === 'txt') { if (i.value.trim()) r[i.dataset.k] = i.value.trim(); }
+      else { var n = monto(i.value); if (n != null) r[i.dataset.k] = n; }
+    });
+    def.campos.forEach(function (f) { if (!visible(f, r)) delete r[f.k]; });
+    return r;
+  }
+  function filaConDatos(def, r) {
+    return def.campos.some(function (f) { return r[f.k] != null && (!f.sel || f.sel[0] === ''); });
+  }
+  function htmlFila(def, r) {
+    r = r || {};
+    var campos = def.campos.map(function (f, i) {
+      var cuerpo = f.sel ? '<select data-k="' + f.k + '" aria-label="' + esc(f.l) + '">' + f.sel.map(function (o) {
+          return '<option value="' + esc(o) + '"' + (r[f.k] === o ? ' selected' : '') + '>' + esc(o || 'Elige…') + '</option>'; }).join('') + '</select>' :
+        f.t === 'txt' ? '<span class="f-in txt"><input data-k="' + f.k + '" data-t="txt" autocomplete="off" value="' + esc(r[f.k] || '') + '" aria-label="' + esc(f.l) + '"></span>' :
+        campo(f.k, r[f.k], f.t === 'anio' ? 'num' : f.t, f.l);
+      return '<label data-c="' + f.k + '"' + (i === 0 ? ' class="r-tipo"' : '') + '><span>' + esc(f.l) + '</span>' + cuerpo + '</label>';
+    });
+    return '<div class="d-row r-row"><div class="d-top">' + campos[0] + '<button type="button" class="d-x" aria-label="Quitar esta fila">×</button></div><div class="d-cols r-cols">' + campos.slice(1).join('') + '</div></div>';
+  }
+  function ajustarFila(def, el) {
+    var r = leerFila(el, def), crudo = {};
+    el.querySelectorAll('select[data-k]').forEach(function (s) { crudo[s.dataset.k] = s.value; });
+    def.campos.forEach(function (f) { var l = el.querySelector('[data-c="' + f.k + '"]'); if (l) l.hidden = !visible(f, Object.assign({}, crudo, r)); });
+  }
+  function listaFilas(p, confirmar) {
+    var def = p.filas, prev = previo[p.id];
+    var c = burbuja('<div class="d-list">' + (prev && prev.length ? prev : [{}]).map(function (r) { return htmlFila(def, r); }).join('') + '</div>' +
+      '<button type="button" class="back d-add">' + esc(def.add) + '</button>' +
+      (def.total ? '<p class="f-tot"><span>' + esc(def.total.l) + '</span><b></b></p>' : '') +
+      '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button>' +
+      (confirmar ? '<button type="button" class="btn btn-line f-igual">Está bien así</button>' : def.vacio ? '<button type="button" class="btn btn-line d-no">' + esc(def.vacio) + '</button>' : '') + '</div>', 'ficha', true, true);
+    var lista = c.querySelector('.d-list'), tot = c.querySelector('.f-tot b');
+    var leer = function () {
+      return Array.prototype.map.call(lista.querySelectorAll('.r-row'), function (el) { return leerFila(el, def); })
+        .filter(function (r) { return filaConDatos(def, r); });
+    };
+    var calc = function () {
+      lista.querySelectorAll('.r-row').forEach(function (el) { ajustarFila(def, el); });
+      if (tot) tot.textContent = usd(sumaDeuda(leer(), def.total.k));
+    };
+    c.addEventListener('input', calc); c.addEventListener('change', calc); calc();
+    c.addEventListener('click', function (e) {
+      var r;
+      if (e.target.closest('.d-add')) { lista.insertAdjacentHTML('beforeend', htmlFila(def)); calc(); lista.lastElementChild.querySelector('select, input').focus(); }
+      else if ((r = e.target.closest('.d-x'))) {
+        r = r.closest('.r-row');
+        if (lista.children.length > 1) r.remove(); else r.outerHTML = htmlFila(def);
+        calc();
+      }
+      else if (e.target.closest('.d-no')) { c.remove(); responder([]); }
+      else if (e.target.closest('.f-igual')) { c.remove(); responder(previo[p.id]); }
+      else if (e.target.closest('.f-ok')) {
+        var v = leer();
+        if (!v.length) { errEl.textContent = def.vacio ? 'Anota al menos una fila, o elige «' + def.vacio + '».' : 'Anota al menos una fila.'; return; }
+        var falta = v.some(function (x) { return def.campos.some(function (f) { return f.req && visible(f, x) && x[f.k] == null; }); });
+        if (falta) { errEl.textContent = def.error || 'Completa los datos indispensables de cada fila.'; return; }
+        c.remove(); responder(v);
+      }
+    });
+    enterAvanza(c);
+    return c;
+  }
+  function textoFila(def, r) {
+    var tipo = def.campos[0].sel ? r[def.campos[0].k] : '';
+    var partes = def.campos.slice(tipo ? 1 : 0).filter(function (f) { return r[f.k] != null && visible(f, r) && f.enTexto !== false; }).map(function (f) {
+      var x = r[f.k];
+      return f.sel || f.t === 'txt' ? f.l + ': ' + x : f.l + ': ' + (f.t === 'pct' ? dec(x) + ' %' : f.t === 'meses' ? dec(x) + (x === 1 ? ' mes' : ' meses') : f.t === 'anio' ? x : usd(x)) +
+        (f.unidad && r[f.unidad] ? ' ' + r[f.unidad].toLowerCase() : '');
+    });
+    return (tipo ? tipo + (partes.length ? ' · ' : '') : '') + partes.join(' · ');
+  }
+  // Adjuntos: se guardan en memoria y se suben solo al enviar; las fotos grandes se reducen antes
+  var adjuntos = [], MAX_ARCH = 5, MAX_MB = 5;
+  function reducir(file) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 1.5e6 || !window.createImageBitmap) return Promise.resolve(file);
+    return createImageBitmap(file).then(function (img) {
+      var k = Math.min(1, 2000 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      return new Promise(function (ok) { cv.toBlob(function (b) { ok(b && b.size < file.size ? new File([b], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }) : file); }, 'image/jpeg', 0.82); });
+    }).catch(function () { return file; });
+  }
+  function archivos(p, confirmar) {
+    var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.xls,.xlsx,.csv,application/pdf,image/*" hidden></label>' +
+      '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button><button type="button" class="btn btn-line d-no">No tengo nada que adjuntar</button></div>', 'ficha', true, true);
+    var ul = c.querySelector('.a-list'), input = c.querySelector('input[type=file]');
+    var pintarA = function () {
+      ul.innerHTML = adjuntos.map(function (a, i) { return '<li><span>' + esc(a.name) + '</span><small>' + (a.size / 1e6).toFixed(1) + ' MB</small><button type="button" class="d-x" data-i="' + i + '" aria-label="Quitar ' + esc(a.name) + '">×</button></li>'; }).join('');
+      c.querySelector('.a-pick').hidden = adjuntos.length >= MAX_ARCH;
+    };
+    pintarA();
+    input.addEventListener('change', function () {
+      var nuevos = Array.prototype.slice.call(input.files, 0, MAX_ARCH - adjuntos.length); input.value = '';
+      errEl.textContent = input.files && input.files.length > nuevos.length ? 'Puedes adjuntar hasta ' + MAX_ARCH + ' archivos.' : '';
+      Promise.all(nuevos.map(reducir)).then(function (fs) {
+        fs.forEach(function (f) {
+          if (f.size > MAX_MB * 1e6) errEl.textContent = '«' + f.name + '» pesa más de ' + MAX_MB + ' MB. Si es una foto, prueba con una captura de pantalla; si es un PDF, envía solo las páginas necesarias.';
+          else adjuntos.push(f);
+        });
+        pintarA();
+      });
+    });
+    c.addEventListener('click', function (e) {
+      var b = e.target.closest('.d-x');
+      if (b) { adjuntos.splice(+b.dataset.i, 1); pintarA(); }
+      else if (e.target.closest('.d-no')) { adjuntos = []; c.remove(); responder([]); }
+      else if (e.target.closest('.f-ok')) { c.remove(); responder(adjuntos.map(function (a) { return a.name; })); }
+    });
     return c;
   }
   function filaDeuda(tipos, d) {
@@ -854,9 +1090,9 @@
     return c;
   }
   function mostrarFicha(p, ancla, confirmar) {
-    var c = p.ficha ? ficha(p, confirmar) : deudas(p, confirmar);
+    var c = p.ficha ? ficha(p, confirmar) : p.filas ? listaFilas(p, confirmar) : p.archivos ? archivos(p, confirmar) : deudas(p, confirmar);
     skipBtn.hidden = !p.opcional || confirmar;
-    dudaBtn.hidden = !IA.url;
+    dudaBtn.hidden = !IA.url || !!p.archivos;
     log.scrollTop += ancla.getBoundingClientRect().top - log.getBoundingClientRect().top - 12;
     if (dlg.open && window.matchMedia('(hover: hover)').matches) c.querySelector('input, select').focus({ preventScroll: true });
   }
@@ -880,7 +1116,7 @@
     var mostrar = function () {
       var qb = burbuja(p.q, 'yo', true);
       dudaBtn.hidden = !IA.url || !!p.campos || p.id === 'factura' || p.id === 'fdatos';
-      if (p.ficha || p.deudas) return mostrarFicha(p, qb, false);
+      if (p.ficha || p.deudas || p.filas || p.archivos) return mostrarFicha(p, qb, false);
       if (p.op) {
         var antes = previo[p.id];
         chipsEl.innerHTML = (typeof p.op === 'function' ? p.op() : p.op).map(function (o) {
@@ -910,13 +1146,13 @@
       aclar[p.id] = [{ pregunta: revisada[p.id], respuesta: JSON.stringify(v) === JSON.stringify(previo[p.id]) ? 'Confirmó las cifras.' : 'Ajustó las cifras.' }];
       return preguntar(true);
     }
-    if (IA.url && !p.op && !p.campos && p.id !== 'fdatos' && !(v === '' || (p.ficha && !Object.keys(v).length))) return revisar(p);
+    if (IA.url && !p.op && !p.campos && !p.archivos && p.id !== 'fdatos' && !(v === '' || (p.ficha && !Object.keys(v).length) || (p.filas && !v.length))) return revisar(p);
     preguntar(true);
   }
   function contexto(hasta) {
     var t = camino.filter(function (id) { return id !== hasta && !aePaso(id).nota; })
       .map(function (id) { var p = aePaso(id); return p.q + '\n' + textoResp(p, resp[id]); }).join('\n\n');
-    return t.slice(-5000);
+    return t.slice(-8000);
   }
   function pedirIA(datos) {
     var ctl = window.AbortController ? new AbortController() : null;
@@ -934,12 +1170,20 @@
   function revisar(p) {
     var lista = aclar[p.id] || [];
     var espera = burbuja('• • •', 'yo escribe');
-    pedirIA({ modo: 'revisar', tema: resp.tema, pregunta: p.q, proposito: p.para || '', respuesta: textoResp(p, resp[p.id]), aclaraciones: lista, contexto: contexto(p.id) })
+    // Las preguntas con «conversa» son una conversación guiada: la IA pregunta lo que falte y cierra con un resumen que el cliente confirma.
+    // El tope de 15 es solo un resguardo técnico; la IA termina cuando el objetivo está cumplido.
+    var conversa = p.conversa || '';
+    pedirIA({ modo: conversa ? 'conversar' : 'revisar', tema: resp.tema, pregunta: p.q, proposito: p.para || '', objetivo: conversa, respuesta: textoResp(p, resp[p.id]), aclaraciones: lista, contexto: contexto(p.id) })
       .then(function (r) {
         espera.remove();
         if (camino[camino.length - 1] !== p.id || enviado) return;   // el cliente corrigió mientras tanto
-        if (r.accion === 'seguir' || !r.mensaje || lista.length >= 2) return preguntar(false);
-        if (p.ficha || p.deudas) {
+        if (r.accion === 'seguir' || !r.mensaje || lista.length >= (conversa ? 15 : 2)) return preguntar(false);
+        if (r.accion === 'resumir') {
+          burbuja(r.mensaje, 'yo', true);
+          pendiente = { id: p.id, q: r.mensaje, resumen: true };
+          return abrirTexto('Escribe «sí» si está correcto, o corrige lo que haga falta…', false);
+        }
+        if (p.ficha || p.deudas || p.filas) {
           previo[p.id] = resp[p.id]; delete resp[p.id]; camino.pop();
           revisada[p.id] = r.mensaje; actual = p;
           return mostrarFicha(p, burbuja(r.mensaje, 'yo', true), true);
@@ -954,6 +1198,7 @@
     (aclar[pe.id] = aclar[pe.id] || []).push({ pregunta: pe.q, respuesta: a });
     burbuja(a, 'tu', true); row.hidden = true; skipBtn.hidden = true;
     if (a === 'Prefiero no responder') return preguntar(true);
+    if (pe.resumen && /^(s[ií]|correcto|exacto|as[ií] es|ok|de acuerdo|perfecto)(?=$|[\s,.;!])/i.test(a.trim())) return preguntar(true);
     revisar(aePaso(pe.id));
   }
   function enviarDuda(d) {
@@ -966,7 +1211,7 @@
       var m = r.mensaje || 'Ahora no pude responderte. Responde como mejor puedas; si algo no queda claro, lo vemos en el informe.';
       burbuja(m, 'yo', true); dudas.push({ pregunta: p.q, duda: d, respuesta: m });
       var c = log.querySelector('.msg.ficha'); if (c) log.appendChild(c);   // la ficha queda al final, a la vista
-      if (!p.op && !p.ficha && !p.deudas) abrirTexto(p.ph || 'Escribe tu respuesta…', p.opcional);
+      if (!p.op && !p.ficha && !p.deudas && !p.filas && !p.archivos) abrirTexto(p.ph || 'Escribe tu respuesta…', p.opcional);
       dudaBtn.hidden = false; log.scrollTop = log.scrollHeight;
     });
   }
@@ -987,12 +1232,17 @@
     AE.forEach(function (p) {
       if (p.id in resp && !aplica(p)) { previo[p.id] = resp[p.id]; delete resp[p.id]; delete aclar[p.id]; delete revisada[p.id]; }
     });
+    // Si ya no se analiza con la pareja, se quitan sus cifras y el «de quién» de cada fila
+    if (!conPareja()) AE.forEach(function (p) {
+      if (p.dos && resp[p.id]) Object.keys(resp[p.id]).forEach(function (k) { if (/_p$/.test(k)) delete resp[p.id][k]; });
+      if (p.filas && Array.isArray(resp[p.id])) resp[p.id].forEach(function (r) { delete r.quien; });
+    });
     AE.forEach(function (p) { if (p.nota && p.id in resp) resp[p.id] = p.nota(); });
     camino = camino.filter(function (id) { return id in resp; });
   }
   function enOrden() { return AE.map(function (p) { return p.id; }).filter(function (id) { return id in resp; }); }
-  // Precio según lo que se analiza: $35 de base más partes adicionales que el cliente puede quitar, con tope de $60 (antes de IVA)
-  var BASE = 35, TOPE = 60, IVA = 0.15, quitados = {};
+  // Precio según lo que se analiza: $35 de base más partes adicionales que el cliente puede quitar (antes de IVA), sin tope
+  var BASE = 35, TOPE = Infinity, IVA = 0.15, quitados = {};
   function tiene(id, v) { return Array.isArray(resp[id]) && resp[id].indexOf(v) > -1; }
   function cifras(id) { return resp[id] && typeof resp[id] === 'object' && !Array.isArray(resp[id]) ? Object.keys(resp[id]).length : 0; }
   function modulos() {
@@ -1003,11 +1253,13 @@
       if ((resp.e8 || []).length) m.push({ c: 'las deudas', k: 'deudas', l: 'Carga de las deudas de la empresa y cómo ordenarlas', p: 10 });
       if ((resp.e10 || []).some(function (x) { return /^Atrasos/.test(x); })) m.push({ c: 'el plan de atrasos', k: 'atrasos', l: 'Plan para ponerse al día con las obligaciones atrasadas', p: 5 });
     } else if (t === P) {
-      m.push({ k: 'base', l: 'Diagnóstico de tu presupuesto, con tres recomendaciones', p: BASE });
-      if ((resp.p8 || []).some(function (d) { return !(tcTotal() && !difiere() && d.tipo === 'Tarjeta de crédito'); }) || difiere()) m.push({ c: 'el plan de deudas', k: 'deudas', l: 'Plan de deudas: cuánto te cuesta de verdad cada una, con su tasa, y en qué orden pagarlas', p: 10 });
-      if (tiene('p1', 'Empezar a invertir') || tiene('p1', 'Planear mi jubilación')) m.push({ c: 'invertir o jubilarte', k: 'invertir', l: 'Primeros pasos para invertir o planear tu jubilación', p: 10 });
+      m.push({ k: 'base', l: 'Diagnóstico de tu presupuesto del mes y del año y de tu patrimonio, con la respuesta a tu pregunta y tres recomendaciones', p: BASE });
+      if (filas('p8').length || filas('p12b').some(pagando)) m.push({ c: 'los préstamos', k: 'deudas', l: 'Préstamos y bienes financiados: cuánto te cuesta de verdad cada uno y en qué orden pagarlos', p: 5 });
+      if (filas('p5t').length) m.push({ c: 'las tarjetas', k: 'tarjetas', l: 'Tarjetas de crédito: costo real, uso y beneficios de cada una', p: 5 });
+      if (invierte()) m.push({ c: 'tus inversiones', k: 'inversiones', l: 'Revisión de tus inversiones actuales: riesgo y rendimiento real', p: 5 });
+      if (tiene('p1', 'Empezar a invertir') || tiene('p1', 'Planear mi jubilación')) m.push({ c: 'invertir o jubilarte', k: 'invertir', l: 'Plan para invertir o para tu jubilación', p: 5 });
       if (tiene('p1', 'Comprar vivienda o vehículo')) m.push({ c: 'el plan de compra', k: 'compra', l: 'Plan para comprar vivienda o vehículo', p: 5 });
-      if (tiene('p1', 'Tener un fondo de emergencia') || tiene('p13', 'Ninguna')) m.push({ c: 'el fondo de emergencia', k: 'colchon', l: 'Fondo de emergencia y protección', p: 5 });
+      if (tiene('p1', 'Tener un fondo de emergencia') || filas('p13s').length) m.push({ c: 'el fondo de emergencia y los seguros', k: 'colchon', l: 'Fondo de emergencia y seguros', p: 5 });
     } else if (t === 'Una inversión') {
       m.push({ k: 'base', l: 'Evaluación de la inversión: riesgo, rendimiento real y costos', p: BASE });
       if (cifras('i11')) m.push({ c: 'el encaje con tus finanzas', k: 'encaje', l: 'Cómo encaja en tu situación financiera general', p: 5 });
@@ -1106,6 +1358,7 @@
       .map(function (id) {
         var p = aePaso(id);
         if (p.nota) return 'Primer vistazo calculado en la web\n→ ' + resp[id];
+        if (p.archivos) return 'Archivos adjuntos\n→ ' + textoResp(p, resp[id]);
         return p.q + '\n→ ' + textoResp(p, resp[id]).replace(/\n/g, '\n→ ') +
           (aclar[id] || []).map(function (a) { return '\n  Asistente: ' + a.pregunta + '\n  → ' + a.respuesta; }).join('');
       }).join('\n\n') +
@@ -1121,13 +1374,14 @@
   function pagar() {
     if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
     var datos = paquete();
+    if (PRUEBA) return mostrarPrueba(datos);
     if (COBRO.url) return iniciarCobro(datos);
     if (PAYPAL.clientId) return mostrarPayPal(datos);
     if (DEUNA.qr) return mostrarDeuna(datos);
     var btn = pagarBtn; btn.disabled = true; resErr.textContent = '';
     var u = PAGO.url;
     var pestana = u ? window.open('', '_blank') : null;   // se abre en el clic para que el navegador no la bloquee
-    enviar(FORMS.analisis, datos).then(function () {
+    enviar(FORMS.analisis, datos, adjuntos).then(function () {
       enviado = true; backBtn.hidden = true; cerrarResumen();
       chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
       if (u) {
@@ -1140,6 +1394,15 @@
       if (pestana) pestana.close();
       btn.disabled = false; resErr.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
     });
+  }
+  // Versión de prueba (la página la activa con window.AE_PRUEBA): no cobra ni envía nada; muestra lo que llegaría a Jotform
+  var PRUEBA = !!window.AE_PRUEBA;
+  function mostrarPrueba(datos) {
+    enviado = true; backBtn.hidden = true; cerrarResumen();
+    chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
+    burbuja('Versión de prueba: no se cobra ni se envía nada. Esto es lo que me llegaría, por ' + datos.importe + ':', 'yo', true);
+    var d = burbuja(datos.respuestas + (adjuntos.length ? '\n\nArchivos adjuntos: ' + adjuntos.map(function (a) { return a.name + ' (' + (a.size / 1e6).toFixed(1) + ' MB)'; }).join(', ') : ''), 'yo prueba', true);
+    log.scrollTop = d.offsetTop - 12;
   }
   function guardarEstado(v) { try { if (v) localStorage.setItem(ESTADO, JSON.stringify(v)); else localStorage.removeItem(ESTADO); return true; } catch (e) { return false; } }
   function consultar(ruta, cuerpo) {
@@ -1184,7 +1447,7 @@
       ppErr.textContent = 'Pago aprobado. Enviando tus respuestas…';
       document.getElementById('ae-pp-volver').hidden = true;
       var guardar = function () {
-        return enviar(FORMS.analisis, envio).then(function () {
+        return enviar(FORMS.analisis, envio, adjuntos).then(function () {
           enviado = true; backBtn.hidden = true; ppEl.hidden = true; cerrarResumen();
           chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
           document.getElementById('ae-bar').style.width = '100%';
@@ -1226,7 +1489,7 @@
       dpNum.setAttribute('aria-invalid', 'true'); dpErr.textContent = 'Escribe el número de comprobante que te mostró la app al pagar.'; dpNum.focus(); return;
     }
     dpOk.disabled = true; dpOk.textContent = 'Enviando…'; dpErr.textContent = '';
-    enviar(FORMS.analisis, Object.assign({}, porPagar, { pago: 'Deuna: comprobante ' + n + ' por ' + porPagar.importe + '. Por confirmar en Deuna Negocios que el monto esté completo.' })).then(function () {
+    enviar(FORMS.analisis, Object.assign({}, porPagar, { pago: 'Deuna: comprobante ' + n + ' por ' + porPagar.importe + '. Por confirmar en Deuna Negocios que el monto esté completo.' }), adjuntos).then(function () {
       guardarDeuna(null); enviado = true; backBtn.hidden = true; cerrarResumen();
       chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
       document.getElementById('ae-bar').style.width = '100%';
@@ -1274,7 +1537,7 @@
     document.getElementById('ae-bar').style.width = '100%';
     var espera = burbuja('Consultando tu pago con el banco…', 'yo', true), intentos = 0;
     var guardar = function (pago, mensaje) {
-      return enviar(FORMS.analisis, Object.assign({}, g.datos, { pago: pago })).then(function () {
+      return enviar(FORMS.analisis, Object.assign({}, g.datos, { pago: pago }), adjuntos).then(function () {
         guardarEstado(null); limpiar(); enviado = true; burbuja(mensaje, 'yo', true);
       }, function () {
         burbuja('No pude guardar tus respuestas. Recarga esta página para intentarlo de nuevo, o escríbeme por ' + LINKEDIN + ' con tu referencia, ' + esc(tx) + '.', 'yo', true, true);
@@ -1326,7 +1589,7 @@
       errEl.textContent = '';
       return modoDuda ? enviarDuda(t) : aclarar(t);
     }
-    if (!actual || actual.op || actual.ficha || actual.deudas) return;
+    if (!actual || actual.op || actual.ficha || actual.deudas || actual.filas || actual.archivos) return;
     if (actual.campos) {
       var n = document.getElementById('ae-nombre'), c = document.getElementById('ae-correo');
       var okN = n.value.trim().length > 1, okC = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c.value.trim());
@@ -1347,7 +1610,7 @@
     if (pendiente) return aclarar('Prefiero no responder');
     if (!actual || !actual.opcional) return;
     var c = log.querySelector('.msg.ficha'); if (c) c.remove();
-    responder(actual.ficha ? {} : '');
+    responder(actual.ficha ? {} : actual.filas || actual.archivos ? [] : '');
   });
   backBtn.addEventListener('click', function () {
     if (editando) return cancelarCorreccion();
@@ -1363,7 +1626,7 @@
   });
   function abrir() {
     if (typeof dlg.showModal !== 'function') { location.hash = '#contacto'; return; }
-    if (enviado) { quitados = {}; resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; editando = null; log.innerHTML = ''; cerrarResumen(); }
+    if (enviado) { quitados = {}; adjuntos = []; resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; editando = null; log.innerHTML = ''; cerrarResumen(); }
     dlg.showModal(); document.documentElement.style.overflow = 'hidden';
     if (!log.children.length) { pintar(); preguntar(true); }
   }

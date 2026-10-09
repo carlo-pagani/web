@@ -487,9 +487,30 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .d-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
 .d-cols label { display: grid; gap: .25rem; min-width: 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
 .d-add { justify-self: start; color: var(--brass); }
+/* Consulta Express: dos columnas (tú y tu pareja), filas repetibles con campos condicionales y adjuntos */
+.f.f2 { grid-template-columns: minmax(0, 1fr) 7.5rem 7.5rem; }
+.f-cab { padding: 0; border: 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
+.f-cab b { font-weight: 600; text-align: right; }
+.r-tipo { flex: 1; display: grid; gap: .25rem; min-width: 0; font-size: var(--t-xs); color: var(--on-navy-soft); }
+.r-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.r-cols label[hidden], .r-tipo[hidden] { display: none; }
+.r-cols select, .r-tipo select, .f-in.txt input { width: 100%; min-width: 0; font: inherit; font-size: 1rem; color: var(--on-navy); background: var(--navy); border: 1px solid rgba(238,242,247,.22); border-radius: 4px; padding: .5rem .6rem; color-scheme: dark; }
+.f-in.txt input { text-align: left; }
+.r-cols select:focus-visible, .r-tipo select:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+.r-row .d-top { align-items: end; }
+.a-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.a-list:empty { display: none; }
+.a-list li { display: flex; align-items: center; gap: .6rem; padding: .45rem .6rem; border: 1px solid rgba(238,242,247,.12); border-radius: 6px; font-size: var(--t-s); }
+.a-list li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.a-list small { color: var(--on-navy-soft); }
+.a-pick { justify-self: start; cursor: pointer; }
+.a-pick[hidden] { display: none; }
+.msg.prueba { max-width: none; align-self: stretch; font-size: var(--t-xs); }
 @media (max-width: 40rem) {
   .f { grid-template-columns: minmax(0, 1fr) 7.5rem; }
   .d-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .f.f2 { grid-template-columns: minmax(0, 1fr) 6.2rem 6.2rem; gap: .3rem .5rem; }
+  .r-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 40rem) {
   .ae { width: 100vw; height: 100dvh; border-radius: 0; border: 0; margin: 0; }
