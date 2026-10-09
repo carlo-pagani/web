@@ -198,7 +198,7 @@
     var items = data.items.slice(0, 5);
     list.innerHTML = items.map(function (n) {
       var f = n.fecha ? fmtFecha.format(new Date(n.fecha)) : '';
-      return '<li><span class="meta">' + esc([f, n.fuente].filter(Boolean).join(' · ')) + '</span><a href="' + esc(n.url) + '" target="_blank" rel="noopener">' + esc(n.titulo) + '</a></li>';
+      return '<li><span class="meta">' + (n.region ? '<b class="region">' + esc(n.region) + '</b>' : '') + esc([f, n.fuente].filter(Boolean).join(' · ')) + '</span><a href="' + esc(n.url) + '" target="_blank" rel="noopener">' + esc(n.titulo) + '</a></li>';
     }).join('');
     if (data.actualizado) document.getElementById('news-updated').textContent = 'Actualizado el ' + fmtFechaLarga.format(new Date(data.actualizado)) + '. Se renueva automáticamente cada seis horas con titulares de medios; las noticias pertenecen a sus fuentes.';
     carrete(items);
@@ -207,7 +207,7 @@
   // Carrete: un titular a la vez; cambia solo cada 6 s y se detiene al pasar el cursor o al enfocarlo
   function carrete(items) {
     var box = document.getElementById('carrete'), rot = document.getElementById('ticker-rot'), nEl = document.getElementById('rot-n');
-    rot.innerHTML = items.map(function (n) { return '<a href="' + esc(n.url) + '" target="_blank" rel="noopener"><span>' + esc(n.fuente || '') + '</span>' + esc(n.titulo) + '</a>'; }).join('');
+    rot.innerHTML = items.map(function (n) { return '<a href="' + esc(n.url) + '" target="_blank" rel="noopener"><span>' + esc(n.region || n.fuente || '') + '</span>' + esc(n.titulo) + '</a>'; }).join('');
     var links = rot.querySelectorAll('a'), k = 0, timer = null;
     var quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     function mostrar(j) {

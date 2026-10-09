@@ -171,7 +171,6 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
   .service { scroll-snap-align: start; }
   .desliza { display: block; }
   .pmi-note { display: none; }
-  .news li:nth-child(n+4) { display: none; }
   .pains { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 30rem) {
@@ -576,3 +575,5 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .contact .c-btns { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
 .ae-band.portafolio { margin-top: 2.5rem; }
 .ae-band.portafolio .ae-precio .btn { white-space: normal; text-align: center; }
+.news .meta .region { font-weight: 600; color: var(--accent); margin-right: .55em; }
+.news .meta .region::after { content: "·"; margin-left: .55em; color: var(--ink-soft); font-weight: 400; }

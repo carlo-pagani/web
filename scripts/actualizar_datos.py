@@ -1,4 +1,4 @@
-"""Actualiza data/noticias.json (tasas de interés) y data/videos.json (canal de YouTube).
+"""Actualiza data/noticias.json (economía: EE. UU., América Latina y Ecuador) y data/videos.json (canal de YouTube).
 
 Lo ejecuta la acción programada de GitHub; solo usa la biblioteca estándar.
 """
@@ -13,9 +13,19 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 CANAL = "UCgNAS6dyYXn8vcLnmSci03A"
-CONSULTA = '"tasas de interés" ("banco central" OR "Reserva Federal" OR Fed) when:7d'
-MAX_NOTICIAS = 5
-TEMA = re.compile(r"\btasas?\b|tipos de inter|\blos tipos\b|\bFed\b|Reserva Federal|Banxico|banco central|\bBCE\b", re.I)
+# Carrete y sección de noticias: dos titulares de economía mundial centrados en EE. UU., uno de América Latina y dos de Ecuador
+GRUPOS = [
+    {"region": "EE. UU.", "n": 2, "gl": "US",
+     "q": '("Reserva Federal" OR "Wall Street" OR "economía de Estados Unidos" OR "inflación en Estados Unidos" OR "empleo en Estados Unidos" OR aranceles OR "bonos del Tesoro") when:3d',
+     "foco": r"Estados Unidos|EE\. ?UU|EEUU|\bFed\b|Reserva Federal|Wall Street|Powell|Tesoro|Trump|S&P|Nasdaq|Dow Jones|estadounidense"},
+    {"region": "América Latina", "n": 1, "gl": "US",
+     "q": '("América Latina" OR Latinoamérica OR CEPAL OR "la región") economía when:7d',
+     "foco": r"América Latina|Latinoam[eé]rica|latinoamerican|CEPAL|\bBID\b|la región|Sudam[eé]rica"},
+    {"region": "Ecuador", "n": 2, "gl": "EC",
+     "q": 'Ecuador (economía OR "Banco Central del Ecuador" OR "riesgo país" OR SRI OR petróleo OR impuestos OR IVA OR exportaciones OR FMI OR crédito OR inversión) when:4d',
+     "foco": r"Ecuador|ecuatorian|Quito|Guayaquil|\bSRI\b|Noboa"},
+]
+ECONOMIA = re.compile(r"econom|inflaci|\btasas?\b|interés|\bFed\b|Reserva Federal|banc|bolsa|Wall Street|d[oó]lar|\bPIB\b|empleo|desempleo|arancel|petr[oó]leo|crudo|deuda|bonos?\b|riesgo pa[ií]s|\bFMI\b|impuest|\bIVA\b|\bSRI\b|export|import|cr[eé]dito|inversi|mercado|precio|salari|presupuest|fiscal|recesi[oó]n|crecimiento|\bBID\b|CEPAL|comercio|remesas|miner[ií]a|financ|recaudaci", re.I)
 MAX_VIDEOS = 12
 
 
@@ -25,30 +35,53 @@ def leer(url):
         return r.read()
 
 
-def noticias():
+def buscar(grupo):
     url = "https://news.google.com/rss/search?" + urllib.parse.urlencode(
-        {"q": CONSULTA, "hl": "es-419", "gl": "US", "ceid": "US:es-419"})
+        {"q": grupo["q"], "hl": "es-419", "gl": grupo["gl"], "ceid": grupo["gl"] + ":es-419"})
     raiz = ET.fromstring(leer(url))
-    vistas, items = set(), []
+    items = []
     for it in raiz.iter("item"):
         titulo = (it.findtext("title") or "").strip()
         fuente = (it.findtext("source") or "").strip()
         if fuente and titulo.endswith(" - " + fuente):
             titulo = titulo[: -len(" - " + fuente)]
-        clave = titulo.lower()[:60]
-        if not titulo or clave in vistas:
+        if not titulo:
             continue
-        vistas.add(clave)
         try:
             fecha = parsedate_to_datetime(it.findtext("pubDate")).astimezone(timezone.utc).isoformat()
         except Exception:
             fecha = None
-        items.append({"titulo": titulo, "fuente": fuente, "url": it.findtext("link"), "fecha": fecha})
+        items.append({"region": grupo["region"], "titulo": titulo, "fuente": fuente, "url": it.findtext("link"), "fecha": fecha})
     items.sort(key=lambda x: x["fecha"] or "", reverse=True)
-    # primero los titulares que hablan de tasas; si no alcanzan, se completa con el resto
-    sobre_tasas = [i for i in items if TEMA.search(i["titulo"])]
-    resto = [i for i in items if i not in sobre_tasas]
-    return (sobre_tasas + resto)[:MAX_NOTICIAS]
+    # primero los titulares que hablan de economía y de esa región; si no alcanzan, se completa con los de economía
+    foco = re.compile(grupo["foco"], re.I)
+    mejores = [i for i in items if ECONOMIA.search(i["titulo"]) and foco.search(i["titulo"])]
+    return mejores + [i for i in items if ECONOMIA.search(i["titulo"]) and i not in mejores]
+
+
+def noticias():
+    ruta = RAIZ / "data" / "noticias.json"
+    anteriores = json.loads(ruta.read_text("utf-8")).get("items", []) if ruta.exists() else []
+    vistas, out = set(), []
+    for grupo in GRUPOS:
+        try:
+            candidatos = buscar(grupo)
+        except Exception as exc:
+            print(f"noticias {grupo['region']}: error {exc!r}")
+            candidatos = []
+        # si una región no trae nada, se conservan sus titulares anteriores
+        candidatos += [i for i in anteriores if i.get("region") == grupo["region"]]
+        tomados = 0
+        for i in candidatos:
+            clave = i["titulo"].lower()[:60]
+            if clave in vistas:
+                continue
+            vistas.add(clave)
+            out.append(i)
+            tomados += 1
+            if tomados == grupo["n"]:
+                break
+    return out
 
 
 def videos():
