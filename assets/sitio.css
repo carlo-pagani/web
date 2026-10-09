@@ -567,3 +567,5 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   .pmi.tres, .lp-tarifa, .lp-quien { grid-template-columns: minmax(0, 1fr); }
   .pmi.tres li { margin-right: 0; }
 }
+.res-porque { margin: .55rem 0 0; font-size: var(--t-xs); line-height: 1.5; color: var(--on-navy-soft); }
+.res-porque a { color: var(--brass); }
