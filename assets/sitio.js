@@ -416,11 +416,11 @@
   var DEUDAS_P = ['Tarjeta de crédito', 'Préstamo de consumo', 'Hipotecario', 'Préstamo vehicular', 'Cooperativa', 'Préstamo de familiares o amigos', 'Otra'];
   var DEUDAS_E = ['Préstamo bancario', 'Línea de crédito o sobregiro', 'Tarjeta de crédito corporativa', 'Leasing', 'Cooperativa', 'Socios o familiares', 'Otra'];
   var O = 'Otra decisión de dinero';
-  var SIN_TC = 'No, uso efectivo, transferencia o débito', TC_TOTAL = 'El total del estado de cuenta';
+  var SIN_TC = 'No, uso efectivo, transferencia o débito', TC_TOTAL = 'Pago el total', TC_DIF = 'Pago el total, pero tengo compras diferidas';
   var TC_GASTOS = ['Supermercado', 'Gasolina y transporte', 'Servicios básicos y suscripciones', 'Restaurantes y salidas', 'Salud y farmacia', 'Educación', 'Ropa y cuidado personal', 'Compras grandes: electrodomésticos, tecnología o viajes'];
   function usaTarjeta() { return !!resp.p5b && resp.p5b !== SIN_TC; }
-  function difiere() { return usaTarjeta() && !!resp.p5d && resp.p5d !== 'Todo a un solo pago'; }
-  function tcTotal() { return usaTarjeta() && resp.p5g === TC_TOTAL; }
+  function difiere() { return usaTarjeta() && resp.p5g === TC_DIF; }
+  function tcTotal() { return usaTarjeta() && (resp.p5g === TC_TOTAL || resp.p5g === TC_DIF); }
   var Q_DEUDAS = 'Hablemos de deudas: tarjetas, préstamos, hipoteca, vehículo o cooperativas. Anota cada una con su saldo y su cuota mensual. La tasa y el plazo son opcionales: casi nadie los sabe, y calcular cuánto te cuesta de verdad cada deuda es parte de tu informe.';
   var OT = { deuda: 'Refinanciar una deuda o seguir igual', prepago: 'Pagar antes una deuda con dinero que tengo', compra: 'Comprar vivienda o seguir arrendando',
     credito: 'Comprar algo al contado o a crédito', trabajo: 'Cambiar de trabajo o emprender', venta: 'Vender un bien o un negocio', otra: 'Otra decisión' };
@@ -465,10 +465,7 @@
       { k: 'anual', l: 'Ingresos extra del año', d: 'décimos, utilidades y bonos, en total', anual: true }] },
     { id: 'p5b', si: P, q: 'Mucho de lo que se paga con tarjeta de crédito es gasto del mes, no deuda, y quiero contarlo bien. ¿Pagas algunos o todos tus gastos con tarjeta?', op: [SIN_TC, 'Sí, algunos', 'Sí, casi todos'] },
     { id: 'p5c', si: P, cond: usaTarjeta, q: '¿Qué pagas con tarjeta? Puedes marcar varios.', op: TC_GASTOS, multi: true },
-    { id: 'p5d', si: P, cond: usaTarjeta, q: 'Esas compras, ¿las pagas en un solo pago o las difieres a meses?', op: ['Todo a un solo pago', 'Difiero algunas', 'Difiero casi todas'] },
-    { id: 'p5e', si: P, cond: difiere, q: '¿Cuáles difieres? Puedes marcar varias.', op: function () { return (resp.p5c && resp.p5c.length ? resp.p5c : TC_GASTOS); }, multi: true },
-    { id: 'p5f', si: P, cond: difiere, q: '¿A cuántos meses sueles diferir?', op: ['3 meses o menos', 'De 6 a 12 meses', 'Más de 12 meses', 'Depende de la compra'] },
-    { id: 'p5g', si: P, cond: usaTarjeta, q: 'Cuando llega el estado de cuenta, ¿cuánto pagas?', op: [TC_TOTAL, 'Más del mínimo, sin llegar al total', 'Solo el mínimo', 'Depende del mes'] },
+    { id: 'p5g', si: P, cond: usaTarjeta, q: 'Cuando llega el estado de cuenta, ¿cómo lo pagas?', op: [TC_TOTAL, TC_DIF, 'Pago más del mínimo, sin llegar al total', 'Pago solo el mínimo'] },
     { id: 'p6', si: P, para: 'Gastos fijos mensuales por rubro, para armar el presupuesto.', get q() { return 'Ahora tus gastos fijos de cada mes. ' + (usaTarjeta() ? 'Anota cada gasto en su rubro, también los que pagas con tarjeta. ' : '') + 'Un estimado basta; deja en blanco lo que no aplique.'; }, req: true, total: 'Gastos fijos al mes', ficha: [
       { k: 'vivienda', l: 'Vivienda', d: 'arriendo y alícuota; la hipoteca va con las deudas' },
       { k: 'servicios', l: 'Servicios básicos', d: 'luz, agua, gas, internet y celular' },
@@ -585,7 +582,7 @@
     e6: 'Plazo de cobro a clientes', e7: 'Plazo de pago a proveedores', e8: 'Deudas de la empresa', e9: 'Caja en los últimos tres meses',
     e10: 'Obligaciones', e11: 'Información financiera que llevan', e12: 'Problema o decisión principal', e13: 'Lo que han intentado',
     p1: 'Lo que quieres lograr', p2: 'Edad', p3: 'Situación laboral', p4: 'Personas que dependen de ti', p5: 'Ingresos', p6: 'Gastos fijos',
-    p7: 'Gastos variables', p8: 'Deudas', p5b: 'Paga gastos con tarjeta', p5c: 'Lo que paga con tarjeta', p5d: 'Pago de las compras con tarjeta', p5e: 'Lo que difiere', p5f: 'Plazo al que difiere', p5g: 'Pago del estado de cuenta', p9: 'Pago de la tarjeta que debe', p10: 'Atrasos en los últimos doce meses', p11: 'Ahorros e inversiones',
+    p7: 'Gastos variables', p8: 'Deudas', p5b: 'Paga gastos con tarjeta', p5c: 'Lo que paga con tarjeta', p5g: 'Pago del estado de cuenta', p9: 'Pago de la tarjeta que debe', p10: 'Atrasos en los últimos doce meses', p11: 'Ahorros e inversiones',
     p12: 'Bienes', p13: 'Protección', p14: 'Registro de gastos', p15: '¿Tiene una meta definida?', p15b: 'Meta para los próximos doce meses',
     i1: 'Inversión que evalúas', i2: 'Condiciones de la inversión', i3: 'Objetivo del dinero', i4: 'Origen del dinero', i5: 'Peso en tu patrimonio',
     i6: 'Necesidad del dinero antes del plazo', i7: 'Si cayera 20 % en un año', i8: 'Inversiones anteriores', i9: 'Costos y condiciones de retiro',
