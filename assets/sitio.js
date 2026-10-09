@@ -416,14 +416,14 @@
   var DEUDAS_P = ['Tarjeta de crédito', 'Préstamo de consumo', 'Hipotecario', 'Préstamo vehicular', 'Cooperativa', 'Préstamo de familiares o amigos', 'Otra'];
   var DEUDAS_E = ['Préstamo bancario', 'Línea de crédito o sobregiro', 'Tarjeta de crédito corporativa', 'Leasing', 'Cooperativa', 'Socios o familiares', 'Otra'];
   var O = 'Otra decisión de dinero';
-  var PAGO_EF = 'Efectivo, transferencia o débito', PAGO_TOTAL = 'Tarjeta de crédito, y pago el total cada mes', PAGO_PARTE = 'Tarjeta de crédito, y pago solo una parte';
+  var SIN_TC = 'No, uso efectivo, transferencia o débito', TC_TOTAL = 'El total del estado de cuenta';
+  var TC_GASTOS = ['Supermercado', 'Gasolina y transporte', 'Servicios básicos y suscripciones', 'Restaurantes y salidas', 'Salud y farmacia', 'Educación', 'Ropa y cuidado personal', 'Compras grandes: electrodomésticos, tecnología o viajes'];
+  function usaTarjeta() { return !!resp.p5b && resp.p5b !== SIN_TC; }
+  function difiere() { return usaTarjeta() && !!resp.p5d && resp.p5d !== 'Todo a un solo pago'; }
+  function tcTotal() { return usaTarjeta() && resp.p5g === TC_TOTAL; }
   var Q_DEUDAS = 'Hablemos de deudas: tarjetas, préstamos, hipoteca, vehículo o cooperativas. Anota cada una con su saldo y su cuota mensual. La tasa y el plazo son opcionales: casi nadie los sabe, y calcular cuánto te cuesta de verdad cada deuda es parte de tu informe.';
   var OT = { deuda: 'Refinanciar una deuda o seguir igual', prepago: 'Pagar antes una deuda con dinero que tengo', compra: 'Comprar vivienda o seguir arrendando',
     credito: 'Comprar algo al contado o a crédito', trabajo: 'Cambiar de trabajo o emprender', venta: 'Vender un bien o un negocio', otra: 'Otra decisión' };
-  // Las dos opciones reales de cada tipo de decisión, para preguntar hacia cuál se inclina
-  var OPC = {};
-  OPC[OT.deuda] = ['Refinanciar', 'Seguir igual']; OPC[OT.prepago] = ['Pagar antes', 'Seguir con las cuotas']; OPC[OT.compra] = ['Comprar', 'Seguir arrendando'];
-  OPC[OT.credito] = ['Al contado', 'A crédito']; OPC[OT.trabajo] = ['Hacer el cambio', 'Quedarme como estoy']; OPC[OT.venta] = ['Vender', 'Conservar']; OPC[OT.otra] = ['Sí', 'No'];
   var DIAS = ['De contado', 'Hasta 30 días', 'De 31 a 60 días', 'De 61 a 90 días', 'Más de 90 días'];
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
@@ -463,8 +463,13 @@
       { k: 'extra', l: 'Negocio o trabajos independientes', d: 'al mes' },
       { k: 'otros', l: 'Otros ingresos', d: 'alquileres que cobras, jubilación u otros, al mes' },
       { k: 'anual', l: 'Ingresos extra del año', d: 'décimos, utilidades y bonos, en total', anual: true }] },
-    { id: 'p5b', si: P, q: '¿Cómo pagas la mayoría de tus gastos del mes?', op: [PAGO_EF, PAGO_TOTAL, PAGO_PARTE, 'Una mezcla de todo'] },
-    { id: 'p6', si: P, para: 'Gastos fijos mensuales por rubro, para armar el presupuesto.', q: 'Ahora tus gastos fijos de cada mes. Anota cada gasto en su rubro, aunque lo pagues con tarjeta. Un estimado basta; deja en blanco lo que no aplique.', req: true, total: 'Gastos fijos al mes', ficha: [
+    { id: 'p5b', si: P, q: 'Mucho de lo que se paga con tarjeta de crédito es gasto del mes, no deuda, y quiero contarlo bien. ¿Pagas algunos o todos tus gastos con tarjeta?', op: [SIN_TC, 'Sí, algunos', 'Sí, casi todos'] },
+    { id: 'p5c', si: P, cond: usaTarjeta, q: '¿Qué pagas con tarjeta? Puedes marcar varios.', op: TC_GASTOS, multi: true },
+    { id: 'p5d', si: P, cond: usaTarjeta, q: 'Esas compras, ¿las pagas en un solo pago o las difieres a meses?', op: ['Todo a un solo pago', 'Difiero algunas', 'Difiero casi todas'] },
+    { id: 'p5e', si: P, cond: difiere, q: '¿Cuáles difieres? Puedes marcar varias.', op: function () { return (resp.p5c && resp.p5c.length ? resp.p5c : TC_GASTOS); }, multi: true },
+    { id: 'p5f', si: P, cond: difiere, q: '¿A cuántos meses sueles diferir?', op: ['3 meses o menos', 'De 6 a 12 meses', 'Más de 12 meses', 'Depende de la compra'] },
+    { id: 'p5g', si: P, cond: usaTarjeta, q: 'Cuando llega el estado de cuenta, ¿cuánto pagas?', op: [TC_TOTAL, 'Más del mínimo, sin llegar al total', 'Solo el mínimo', 'Depende del mes'] },
+    { id: 'p6', si: P, para: 'Gastos fijos mensuales por rubro, para armar el presupuesto.', get q() { return 'Ahora tus gastos fijos de cada mes. ' + (usaTarjeta() ? 'Anota cada gasto en su rubro, también los que pagas con tarjeta. ' : '') + 'Un estimado basta; deja en blanco lo que no aplique.'; }, req: true, total: 'Gastos fijos al mes', ficha: [
       { k: 'vivienda', l: 'Vivienda', d: 'arriendo y alícuota; la hipoteca va con las deudas' },
       { k: 'servicios', l: 'Servicios básicos', d: 'luz, agua, gas, internet y celular' },
       { k: 'alimentacion', l: 'Alimentación', d: 'supermercado y mercado' },
@@ -481,8 +486,8 @@
       { k: 'ropa', l: 'Ropa y cuidado personal' },
       { k: 'mascotas', l: 'Mascotas' },
       { k: 'otros', l: 'Otros' }] },
-    { id: 'p8', si: P, para: 'Cada deuda con saldo, cuota, tasa y plazo, para medir el endeudamiento.', get q() { return (resp.p5b === PAGO_EF ? '' : resp.p5b === PAGO_TOTAL ? 'Como pagas la tarjeta completa cada mes, no la anotes aquí: esos consumos ya están en tus gastos. ' : 'Ojo con la tarjeta: tus compras del mes ya están en tus gastos, así que anota solo el saldo que arrastras de meses anteriores y lo que pagas para bajarlo. ') + (resp.p5b === PAGO_TOTAL ? Q_DEUDAS.replace('tarjetas, ', '') : Q_DEUDAS); },  deudas: DEUDAS_P },
-    { id: 'p9', si: P, cond: function () { return resp.p5b !== PAGO_TOTAL && (resp.p8 || []).some(function (d) { return d.tipo === 'Tarjeta de crédito'; }); }, q: 'Con tus tarjetas de crédito, ¿qué sueles pagar cada mes?', op: ['El total del estado de cuenta', 'Más del mínimo, sin llegar al total', 'Solo el mínimo', 'Difiero la mayoría de las compras'] },
+    { id: 'p8', si: P, para: 'Cada deuda con saldo, cuota, tasa y plazo, para medir el endeudamiento.', get q() { return (!usaTarjeta() ? '' : tcTotal() ? 'Como pagas la tarjeta completa cada mes, no la anotes aquí: esos consumos ya están en tus gastos. Si tienes compras diferidas, anota solo lo que te falta pagar de ellas. ' : 'Ojo con la tarjeta: tus compras del mes ya están en tus gastos, así que anota solo el saldo que arrastras y lo diferido que te falta pagar. ') + (tcTotal() ? Q_DEUDAS.replace('tarjetas, ', '') : Q_DEUDAS); },  deudas: DEUDAS_P },
+    { id: 'p9', si: P, cond: function () { return !usaTarjeta() && (resp.p8 || []).some(function (d) { return d.tipo === 'Tarjeta de crédito'; }); }, q: 'Con esa tarjeta, ¿qué sueles pagar cada mes?', op: ['Más del mínimo, sin llegar al total', 'Solo el mínimo', 'Depende del mes'] },
     { id: 'p10', si: P, q: '¿Has tenido atrasos en algún pago en los últimos doce meses?', op: ['Ninguno', 'Alguna vez', 'Sí, tengo pagos atrasados ahora'] },
     { id: 'p11', si: P, para: 'Ahorros e inversiones disponibles, para medir el colchón de emergencia.', q: '¿Qué ahorros e inversiones tienes hoy?', opcional: true, total: 'Ahorro e inversiones', ficha: [
       { k: 'ahorro', l: 'Ahorro disponible', d: 'cuentas de ahorro y efectivo' },
@@ -567,7 +572,6 @@
       { k: 'ingreso', l: 'Tu ingreso mensual neto', d: 'o el de la empresa; ej.: 1.500' },
       { k: 'ahorro', l: 'Ahorro o caja disponible', d: 'ej.: 4.000' }] },
     { id: 'o6', si: O, q: 'Si solo pudieras cuidar una cosa en esta decisión, ¿cuál sería?', op: ['Pagar menos en total', 'Una cuota mensual cómoda', 'Correr poco riesgo', 'Tener dinero disponible', 'Resolverlo rápido'] },
-    { id: 'o7', si: O, q: 'Antes de hacer cuentas, ¿qué opción te tienta más hoy?', op: function () { return (OPC[resp.o1] || ['Sí', 'No']).concat('No tengo idea'); } },
 
     { id: 'mas', para: 'Cambios, ingresos o gastos previstos que modifiquen el análisis.', q: '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?', opcional: true },
     { id: 'datos', q: 'Perfecto. ¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
@@ -581,14 +585,14 @@
     e6: 'Plazo de cobro a clientes', e7: 'Plazo de pago a proveedores', e8: 'Deudas de la empresa', e9: 'Caja en los últimos tres meses',
     e10: 'Obligaciones', e11: 'Información financiera que llevan', e12: 'Problema o decisión principal', e13: 'Lo que han intentado',
     p1: 'Lo que quieres lograr', p2: 'Edad', p3: 'Situación laboral', p4: 'Personas que dependen de ti', p5: 'Ingresos', p6: 'Gastos fijos',
-    p7: 'Gastos variables', p8: 'Deudas', p9: 'Pago de tarjetas', p10: 'Atrasos en los últimos doce meses', p11: 'Ahorros e inversiones',
-    p12: 'Bienes', p13: 'Protección', p14: 'Registro de gastos', p15: '¿Tiene una meta definida?', p15b: 'Meta para los próximos doce meses', p5b: 'Cómo paga sus gastos',
+    p7: 'Gastos variables', p8: 'Deudas', p5b: 'Paga gastos con tarjeta', p5c: 'Lo que paga con tarjeta', p5d: 'Pago de las compras con tarjeta', p5e: 'Lo que difiere', p5f: 'Plazo al que difiere', p5g: 'Pago del estado de cuenta', p9: 'Pago de la tarjeta que debe', p10: 'Atrasos en los últimos doce meses', p11: 'Ahorros e inversiones',
+    p12: 'Bienes', p13: 'Protección', p14: 'Registro de gastos', p15: '¿Tiene una meta definida?', p15b: 'Meta para los próximos doce meses',
     i1: 'Inversión que evalúas', i2: 'Condiciones de la inversión', i3: 'Objetivo del dinero', i4: 'Origen del dinero', i5: 'Peso en tu patrimonio',
     i6: 'Necesidad del dinero antes del plazo', i7: 'Si cayera 20 % en un año', i8: 'Inversiones anteriores', i9: 'Costos y condiciones de retiro',
     i10: 'Control de una superintendencia', i11: 'Tu situación general', i12: 'Alternativas que comparas',
     o1: 'La decisión', o2: 'Ámbito de la decisión', o3c: 'Lo que va a comprar', o3d: 'Su caso', o3e: 'Lo que quiere vender', o3f: 'La decisión', o5a: 'Cifras principales', o5g: 'Cifras principales',
     o5b: 'Cifras principales', o5c: 'Cifras principales', o5d: 'Cifras principales', o5e: 'Cifras principales', o5f: 'Cifras principales',
-    o6: 'Lo que más cuida', o7: 'Opción que le tienta hoy'
+    o6: 'Lo que más cuida'
   };
   var CONDICIONES = 'versión del 8 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Te tomará unos diez minutos; ayuda tener a mano un estimado de tus ingresos, gastos y deudas. Con tus respuestas preparo un informe con un diagnóstico y tres recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles. Uso tus datos solo para preparar tu análisis.';
@@ -638,7 +642,7 @@
   function sumaDeuda(l, k) { return (l || []).reduce(function (t, d) { return t + (d[k] || 0); }, 0); }
   function valor(f, n) { return f.t === 'pct' ? dec(n) + ' %' : f.t === 'meses' ? dec(n) + (n === 1 ? ' mes' : ' meses') : usd(n) + (f.anual ? ' al año' : ''); }
   function lecturaPersonal() {
-    var deudas = (resp.p8 || []).filter(function (d) { return !(resp.p5b === PAGO_TOTAL && d.tipo === 'Tarjeta de crédito'); });
+    var deudas = (resp.p8 || []).filter(function (d) { return !(tcTotal() && !difiere() && d.tipo === 'Tarjeta de crédito'); });
     var ing = sumar(resp.p5), gas = sumar(resp.p6) + sumar(resp.p7), cuo = sumaDeuda(deudas, 'cuota');
     if (!ing || !gas) return '';
     var libre = ing - gas - cuo;
@@ -646,8 +650,7 @@
     t += libre >= 0 ? 'Te quedan unos ' + usd(libre) + ' al mes, el ' + pc(libre / ing) + ' de tu ingreso.' : 'Te faltan unos ' + usd(-libre) + ' al mes, que hoy salen de deuda o de tus ahorros.';
     if (cuo) t += ' Las cuotas se llevan el ' + pc(cuo / ing) + ' de tu ingreso' + (cuo / ing > 0.4 ? ', por encima del 30 al 40 % que suele considerarse prudente.' : '.');
     var ah = resp.p11 && resp.p11.ahorro;
-    if (ah) { var m = ah / (gas + cuo); t += m < 1 ? ' Tu ahorro disponible no alcanza a cubrir un mes de gastos.' : ' Tu ahorro disponible cubre unos ' + (Math.round(m) === 1 ? 'un mes' : Math.round(m) + ' meses') + ' de gastos.'; }
-    if (gas + cuo > ing * 1.5) t += ' Ojo: lo que sale supera con mucho lo que entra. Si alguna cifra es anual o la anotaste dos veces, corrígela antes de pagar; en el resumen tienes «Corregir» junto a cada dato.';
+    if (ah) { var m = ah / (gas + cuo); t += m < 1 ? ' Tu ahorro disponible no alcanza a cubrir un mes de gastos.' : ' Tu ahorro disponible cubre ' + (Math.round(m) === 1 ? 'cerca de un mes' : 'unos ' + Math.round(m) + ' meses') + ' de gastos.'; }
     return t + ' En el informe lo vemos a fondo.';
   }
   function lecturaEmpresa() {
@@ -926,7 +929,7 @@
       if ((resp.e10 || []).some(function (x) { return /^Atrasos/.test(x); })) m.push({ c: 'el plan de atrasos', k: 'atrasos', l: 'Plan para ponerse al día con las obligaciones atrasadas', p: 5 });
     } else if (t === P) {
       m.push({ k: 'base', l: 'Diagnóstico de tu presupuesto, con tres recomendaciones', p: BASE });
-      if ((resp.p8 || []).some(function (d) { return !(resp.p5b === PAGO_TOTAL && d.tipo === 'Tarjeta de crédito'); })) m.push({ c: 'el plan de deudas', k: 'deudas', l: 'Plan de deudas: cuánto te cuesta de verdad cada una, con su tasa, y en qué orden pagarlas', p: 10 });
+      if ((resp.p8 || []).some(function (d) { return !(tcTotal() && !difiere() && d.tipo === 'Tarjeta de crédito'); }) || difiere()) m.push({ c: 'el plan de deudas', k: 'deudas', l: 'Plan de deudas: cuánto te cuesta de verdad cada una, con su tasa, y en qué orden pagarlas', p: 10 });
       if (tiene('p1', 'Empezar a invertir') || tiene('p1', 'Planear mi jubilación')) m.push({ c: 'invertir o jubilarte', k: 'invertir', l: 'Primeros pasos para invertir o planear tu jubilación', p: 10 });
       if (tiene('p1', 'Comprar vivienda o vehículo')) m.push({ c: 'el plan de compra', k: 'compra', l: 'Plan para comprar vivienda o vehículo', p: 5 });
       if (tiene('p1', 'Tener un fondo de emergencia') || tiene('p13', 'Ninguna')) m.push({ c: 'el fondo de emergencia', k: 'colchon', l: 'Fondo de emergencia y protección', p: 5 });
