@@ -1,4 +1,4 @@
-// Servicios del análisis exprés de carlogalarza-pagani.com.
+// Servicios del análisis exprés de carlo-pagani.com.
 // /guia: asistente con IA; recibe una pregunta y la respuesta del cliente, y decide si seguir,
 //        repreguntar o explicar. La clave de Anthropic vive solo aquí, como secreto del Worker.
 // /pago: cobro con el Botón de Pagos del Banco Pichincha (WebCheckout de Placetopay).
@@ -7,6 +7,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 const ORIGENES = [
+  "https://carlo-pagani.com",
+  "https://www.carlo-pagani.com",
   "https://carlogalarza-pagani.com",
   "https://www.carlogalarza-pagani.com",
   "https://carlo-pagani.github.io",
