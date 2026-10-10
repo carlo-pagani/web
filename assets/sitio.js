@@ -1285,7 +1285,7 @@
   function mostrarFicha(p, ancla, confirmar) {
     var c = p.ficha ? ficha(p, confirmar) : p.filas ? listaFilas(p, confirmar) : p.archivos ? archivos(p, confirmar) : deudas(p, confirmar);
     skipBtn.hidden = !p.opcional || confirmar;
-    dudaBtn.hidden = !IA.url || !!p.archivos;
+    dudaBtn.hidden = !IA.url || !!p.archivos; llamarDuda();
     log.scrollTop += ancla.getBoundingClientRect().top - log.getBoundingClientRect().top - 12;
     if (dlg.open && window.matchMedia('(hover: hover)').matches) c.querySelector('input, select').focus({ preventScroll: true });
   }
@@ -1341,7 +1341,7 @@
     }
     var mostrar = function () {
       var qb = burbuja(p.q, 'yo', true);
-      dudaBtn.hidden = !IA.url || !!p.campos || p.id === 'factura' || p.id === 'fdatos';
+      dudaBtn.hidden = !IA.url || !!p.campos || p.id === 'factura' || p.id === 'fdatos'; llamarDuda();
       if (p.ficha || p.deudas || p.filas || p.archivos) return mostrarFicha(p, qb, false);
       if (p.op) {
         var antes = previo[p.id];
@@ -1406,16 +1406,16 @@
         if (camino[camino.length - 1] !== p.id || enviado) return;   // el cliente corrigió mientras tanto
         if (r.accion === 'seguir' || !r.mensaje || lista.length >= (conversa ? 15 : 2)) return preguntar(false);
         if (r.accion === 'resumir') {
-          burbuja(r.mensaje, 'yo', true);
+          burbuja(r.mensaje, 'yo ia', true);
           pendiente = { id: p.id, q: r.mensaje, resumen: true };
           return abrirTexto('Escribe «sí» si está correcto, o corrige lo que haga falta…', false);
         }
         if (p.ficha || p.deudas || p.filas) {
           previo[p.id] = resp[p.id]; delete resp[p.id]; camino.pop();
           revisada[p.id] = r.mensaje; actual = p;
-          return mostrarFicha(p, burbuja(r.mensaje, 'yo', true), true);
+          return mostrarFicha(p, burbuja(r.mensaje, 'yo ia', true), true);
         }
-        burbuja(r.mensaje, 'yo', true);
+        burbuja(r.mensaje, 'yo ia', true);
         pendiente = { id: p.id, q: r.mensaje };
         abrirTexto('Escribe tu respuesta…', true);
       });
@@ -1436,16 +1436,20 @@
       espera.remove();
       if (actual !== p) return;
       var m = r.mensaje || 'Ahora no pude responderte. Responde como mejor puedas; si algo no queda claro, lo vemos en el informe.';
-      burbuja(m, 'yo', true); dudas.push({ pregunta: p.q, duda: d, respuesta: m });
+      burbuja(m, r.mensaje ? 'yo ia' : 'yo', true); dudas.push({ pregunta: p.q, duda: d, respuesta: m });
       var c = log.querySelector('.msg.ficha'); if (c) log.appendChild(c);   // la ficha queda al final, a la vista
       if (!p.op && !p.ficha && !p.deudas && !p.filas && !p.archivos) abrirTexto(p.ph || 'Escribe tu respuesta…', p.opcional);
       dudaBtn.hidden = false; log.scrollTop = log.scrollHeight;
     });
   }
+  // La primera vez que aparece, el botón del asistente late dos veces para que se note
+  var dudaVista = false;
+  function llamarDuda() { if (dudaBtn.hidden || dudaVista) return; dudaVista = true; dudaBtn.classList.add('llama'); }
   dudaBtn.addEventListener('click', function () {
     if (!actual || !IA.url) return;
     modoDuda = true; dudaBtn.hidden = true; errEl.textContent = '';
-    abrirTexto('Escribe tu duda…', false, 'Preguntar');
+    dudaBtn.classList.remove('llama');
+    abrirTexto('Escribe tu duda y mi asistente te responde…', false, 'Preguntar');
   });
   function cierre() {
     document.getElementById('ae-bar').style.width = '100%';

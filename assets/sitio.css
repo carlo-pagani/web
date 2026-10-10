@@ -406,6 +406,21 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .ae-campos [aria-invalid="true"] { border-color: #E8857A; }
 .ae-foot { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem 1.2rem; margin-top: .5rem; min-height: 1.4rem; }
 .ae-foot .back { font-size: var(--t-xs); }
+/* Botón del asistente con IA: se ve como una invitación, no como un enlace más */
+.ae-ia { order: 3; margin-left: auto; display: inline-flex; align-items: center; gap: .5rem; font: inherit; font-size: var(--t-s); color: var(--on-navy); background: linear-gradient(135deg, rgba(201,161,91,.2), rgba(201,161,91,.06)); border: 1px solid rgba(201,161,91,.65); border-radius: 999px; padding: .4rem .45rem .4rem .75rem; cursor: pointer; transition: background .2s, border-color .2s; }
+.ae-ia[hidden] { display: none; }
+.ae-ia svg { width: 1.1rem; height: 1.1rem; flex: none; color: var(--brass); }
+.ae-ia b { font-weight: 600; color: var(--brass); }
+.ae-ia i { font-style: normal; font-family: var(--mono); font-size: .68rem; font-weight: 500; letter-spacing: .08em; color: #10151C; background: var(--brass); border-radius: 999px; padding: .15rem .45rem; }
+.ae-ia-c { display: none; }
+@media (hover: hover) { .ae-ia:hover { background: rgba(201,161,91,.28); border-color: var(--brass); } }
+.ae-ia.llama { animation: ae-ia-llama 1.4s ease-out 2; }
+@keyframes ae-ia-llama { 0% { box-shadow: 0 0 0 0 rgba(201,161,91,.6); } 100% { box-shadow: 0 0 0 12px rgba(201,161,91,0); } }
+.ae-foot .ae-err { order: 4; flex-basis: 100%; }
+@media (max-width: 560px) { .ae-ia { order: -1; margin-left: 0; width: 100%; justify-content: center; white-space: nowrap; } .ae-ia-l { display: none; } .ae-ia-c { display: inline; } }
+@media (prefers-reduced-motion: reduce) { .ae-ia.llama { animation: none; } }
+/* Lo que escribe el asistente lleva su marca */
+.msg.yo.ia::before { content: "✦ Asistente con IA"; display: block; margin-bottom: .3rem; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); }
 .ae-err { font-size: var(--t-xs); color: #E8857A; }
 .ae-err:empty { display: none; }
 .ae-res { flex: 1; min-height: 0; display: flex; flex-direction: column; }
