@@ -1,9 +1,9 @@
 // Servicios del análisis exprés de carlo-pagani.com.
 // /guia: asistente con IA; recibe una pregunta y la respuesta del cliente, y decide si seguir,
 //        repreguntar o explicar. La clave de Anthropic vive solo aquí, como secreto del Worker.
-// /pago: cobro con el Botón de Pagos del Banco Pichincha (WebCheckout de Placetopay).
-//        /pago/sesion crea la sesión y devuelve la página segura de pago; /pago/estado consulta el resultado.
-//        La web guarda las respuestas en Jotform solo cuando /pago/estado dice que el pago está aprobado.
+// /pago: cobro con tarjeta mediante la Cajita de Pagos de Payphone.
+//        GET /pago entrega a la web los datos para mostrar la Cajita; POST /pago/confirmar confirma con Payphone
+//        que el pago está aprobado y devuelve el monto cobrado. La web guarda los datos en Jotform solo con esa confirmación.
 import Anthropic from "@anthropic-ai/sdk";
 
 const ORIGENES = [
@@ -13,9 +13,7 @@ const ORIGENES = [
   "https://www.carlogalarza-pagani.com",
   "https://carlo-pagani.github.io",
 ];
-const MODELO = "claude-opus-5-5";
-// Cobro: $35 + IVA 15 % = $40.25
-const COBRO = { currency: "USD", total: 40.25, taxes: [{ kind: "valueAddedTax", amount: 5.25, base: 35 }] };
+const MODELO = "claude-sonnet-5-5";
 const SEGUIR = { accion: "seguir", mensaje: "" };
 
 const SISTEMA = `Eres el asistente que acompaña el cuestionario del «análisis exprés» en la web de Carlo Pagani, consultor financiero y CFO fraccional en Ecuador. El cliente responde un cuestionario como el de una primera reunión de asesoría; con sus respuestas, Carlo prepara después un informe con un diagnóstico y tres recomendaciones. Tu único trabajo es ayudar a que las respuestas queden claras y completas.
@@ -99,137 +97,60 @@ function mensajeUsuario(d) {
     .join("\n");
 }
 
-const b64 = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes)));
-const hex = (bytes) => [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
-
-// Autenticación de Placetopay: tranKey = Base64(SHA-256(nonce + seed + secretKey)), con el nonce en bruto
-async function autenticacion(env) {
-  const nonce = crypto.getRandomValues(new Uint8Array(16));
-  const seed = new Date().toISOString().replace(/\.\d{3}Z$/, "+00:00");
-  const resto = new TextEncoder().encode(seed + env.PLACETOPAY_SECRET_KEY);
-  const todo = new Uint8Array(nonce.length + resto.length);
-  todo.set(nonce);
-  todo.set(resto, nonce.length);
-  const tranKey = b64(await crypto.subtle.digest("SHA-256", todo));
-  return { login: env.PLACETOPAY_LOGIN, tranKey, nonce: b64(nonce), seed };
+// La Cajita necesita el token en el navegador: así la diseñó Payphone, que lo limita al dominio registrado en su aplicación
+const listo = (env) => env.PAYPHONE_TOKEN && env.PAYPHONE_STORE_ID;
+function datosCajita(env, origen) {
+  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
+  return json({ token: env.PAYPHONE_TOKEN, storeId: env.PAYPHONE_STORE_ID }, 200, origen);
 }
 
-async function placetopay(env, ruta, cuerpo) {
-  const res = await fetch(`${env.PLACETOPAY_URL || "https://checkout.placetopay.ec"}${ruta}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ auth: await autenticacion(env), ...cuerpo }),
-  });
-  return res.json();
-}
-
-async function leer(request, max) {
+// Confirma con Payphone que el pago está aprobado y devuelve el monto en centavos; la web lo compara con lo que cobró.
+// Sin esta confirmación en cinco minutos, Payphone anula el cobro por su cuenta.
+async function confirmarPago(request, env, origen) {
+  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
   const cuerpo = await request.text();
-  if (cuerpo.length > max) throw new Error("Demasiado largo");
-  return JSON.parse(cuerpo);
-}
-
-const listo = (env) => env.PLACETOPAY_LOGIN && env.PLACETOPAY_SECRET_KEY;
-
-// Crea la sesión de pago y devuelve la dirección de la página segura del banco
-async function crearSesion(request, env, origen) {
-  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
+  if (cuerpo.length > 2000) return json({ error: "Demasiado largo" }, 413, origen);
   let d;
   try {
-    d = await leer(request, 2000);
+    d = JSON.parse(cuerpo);
   } catch {
-    return json({ error: "Solicitud no válida" }, 400, origen);
+    return json({ error: "JSON no válido" }, 400, origen);
   }
-  const referencia = corto(d.referencia, 32);
-  if (!/^AE-[A-Z0-9-]+$/.test(referencia)) return json({ error: "Referencia no válida" }, 400, origen);
-  const vuelta = `${origen}/consulta-express/?pago=${encodeURIComponent(referencia)}`;
-  const buyer = d.email ? { name: corto(d.nombre, 60), email: corto(d.email, 80) } : undefined;
-  try {
-    const r = await placetopay(env, "/api/session", {
-      locale: "es_EC",
-      buyer,
-      payment: { reference: referencia, description: "Análisis exprés", amount: COBRO },
-      expiration: new Date(Date.now() + 30 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "+00:00"),
-      returnUrl: vuelta,
-      cancelUrl: vuelta,
-      ipAddress: request.headers.get("CF-Connecting-IP") || "127.0.0.1",
-      userAgent: corto(request.headers.get("User-Agent") || "navegador", 250),
-      skipResult: true,
-    });
-    if (!r || !r.status || r.status.status !== "OK" || !r.processUrl) {
-      console.error("Placetopay no creó la sesión:", r && r.status && r.status.message);
-      return json({ error: "No se pudo crear el pago" }, 502, origen);
-    }
-    return json({ requestId: r.requestId, processUrl: r.processUrl }, 200, origen);
-  } catch (e) {
-    console.error("Placetopay no respondió:", e && e.message);
-    return json({ error: "No se pudo crear el pago" }, 502, origen);
-  }
-}
+  const id = parseInt(d.id, 10), tx = corto(d.clientTxId, 50);
+  if (!id || !tx) return json({ error: "Faltan datos" }, 400, origen);
 
-// Consulta la sesión: aprobado solo si el banco aprobó $40.25 USD con la misma referencia
-async function estadoPago(request, env, origen) {
-  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
-  let d;
-  try {
-    d = await leer(request, 1000);
-  } catch {
-    return json({ error: "Solicitud no válida" }, 400, origen);
-  }
-  const id = parseInt(d.requestId, 10), referencia = corto(d.referencia, 32);
-  if (!id || !referencia) return json({ error: "Faltan datos" }, 400, origen);
   let r;
   try {
-    r = await placetopay(env, `/api/session/${id}`, {});
+    const res = await fetch(`${env.PAYPHONE_URL || "https://paymentbox.payphonetodoesposible.com"}/api/confirm`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.PAYPHONE_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ id, clientTxId: tx }),
+    });
+    r = await res.json();
   } catch (e) {
-    console.error("Placetopay no respondió:", e && e.message);
-    return json({ estado: "error", motivo: "No pude consultar el pago con el banco." }, 502, origen);
+    console.error("Payphone no respondió:", e && e.message);
+    return json({ aprobado: false, motivo: "No pude comprobar el pago con Payphone." }, 502, origen);
   }
-  const estado = r && r.status && r.status.status;
-  const ref = r && r.request && r.request.payment && r.request.payment.reference;
-  const pago = ((r && r.payment) || []).find((p) => p.status && p.status.status === "APPROVED");
-  const monto = pago && pago.amount && (pago.amount.from || pago.amount.to);
-  if (estado === "APPROVED" && pago && ref === referencia && monto && monto.currency === "USD" && Math.abs(Number(monto.total) - COBRO.total) < 0.001) {
-    const texto = `Pagado con el Botón de Pagos del Banco Pichincha: $${COBRO.total.toFixed(2)} · autorización ${pago.authorization} · recibo ${pago.receipt}` +
-      (pago.franchiseName || pago.franchise ? ` · ${pago.franchiseName || pago.franchise}` : "") +
-      (pago.issuerName ? ` · ${pago.issuerName}` : "") + ` · sesión ${id} · ${(pago.status && pago.status.date) || ""}`;
-    return json({ estado: "aprobado", autorizacion: pago.authorization, pago: texto.trim() }, 200, origen);
+  const aprobado = r && r.statusCode === 3 && r.transactionStatus === "Approved" && r.clientTransactionId === tx &&
+    Number.isInteger(r.amount) && r.amount > 0 && (!r.currency || r.currency === "USD");
+  if (!aprobado) {
+    const motivo = r && r.statusCode === 2 ? "El pago fue cancelado." : (r && r.message) || "El pago no fue aprobado.";
+    console.log(`Payphone: transacción ${id} (${tx}) no aprobada: ${corto(motivo, 200)}`);
+    return json({ aprobado: false, motivo: corto(motivo, 200) }, 200, origen);
   }
-  if (estado === "PENDING" || estado === "PENDING_CONFIRMATION") return json({ estado: "pendiente" }, 200, origen);
-  let motivo = estado === "APPROVED" ? "El pago no corresponde al monto o a la referencia de este análisis." :
-    (r && r.status && r.status.message) || "El pago no fue aprobado.";
-  motivo = corto(motivo, 200).trim();
-  return json({ estado: "rechazado", motivo: /[.!?]$/.test(motivo) ? motivo : `${motivo}.` }, 200, origen);
-}
-
-// Aviso de Placetopay cuando cambia una sesión (llega desde sus servidores, sin Origin).
-// Se verifica la firma y se deja en el registro del Worker; la web ya consulta el estado por su cuenta.
-async function notificacion(request, env) {
-  if (!listo(env)) return new Response("No configurado", { status: 503 });
-  let d;
-  try {
-    d = await leer(request, 5000);
-  } catch {
-    return new Response("Solicitud no válida", { status: 400 });
-  }
-  const firma = String(d.signature || "");
-  const texto = new TextEncoder().encode(`${d.requestId}${d.status && d.status.status}${d.status && d.status.date}${env.PLACETOPAY_SECRET_KEY}`);
-  const sha256 = firma.startsWith("sha256:");
-  const calculada = hex(await crypto.subtle.digest(sha256 ? "SHA-256" : "SHA-1", texto));
-  if (calculada !== firma.replace(/^sha256:/, "")) return new Response("Firma no válida", { status: 401 });
-  console.log(`Placetopay: sesión ${d.requestId}, referencia ${d.reference}, estado ${d.status && d.status.status}`);
-  return new Response("ok");
+  const tarjeta = r.cardBrand ? ` · ${r.cardBrand} ${r.lastDigits || ""}`.trimEnd() : "";
+  const pago = `Payphone: pagado $${(r.amount / 100).toFixed(2)} USD · autorización ${r.authorizationCode} · transacción ${r.transactionId}${tarjeta} · ${r.date || new Date().toISOString()}`;
+  return json({ aprobado: true, centavos: r.amount, autorizacion: corto(r.authorizationCode, 40), transaccion: r.transactionId, pago }, 200, origen);
 }
 
 export default {
   async fetch(request, env) {
     const ruta = new URL(request.url).pathname;
-    if (ruta === "/pago/notificacion" && request.method === "POST") return notificacion(request, env);
     const origen = request.headers.get("Origin") || "";
     if (!ORIGENES.includes(origen)) return new Response("No autorizado", { status: 403 });
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origen) });
-    if (ruta === "/pago/sesion" && request.method === "POST") return crearSesion(request, env, origen);
-    if (ruta === "/pago/estado" && request.method === "POST") return estadoPago(request, env, origen);
+    if (ruta === "/pago" && request.method === "GET") return datosCajita(env, origen);
+    if (ruta === "/pago/confirmar" && request.method === "POST") return confirmarPago(request, env, origen);
     if (request.method !== "POST" || ruta !== "/guia") {
       return json({ error: "Ruta no válida" }, 404, origen);
     }
