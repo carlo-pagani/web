@@ -1,0 +1,61 @@
+/* Sección de la app «Organizo mis Finanzas»: un iPhone 18 Pro dibujado con CSS que muestra la app en uso. */
+.appsec { background: #F3EEE4; --surface: #FFFDF9; --rule: #E3D9C6; }
+.appsec .wrap.app-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 0 clamp(2rem, 6vw, 5rem); align-items: start; }
+.app-eyebrow { color: #7A5A1E; }
+.app-intro h2 { font-size: clamp(2rem, 4.4vw, 3rem); }
+.app-intro .lead { color: var(--ink-soft); max-width: 36rem; margin: .9rem 0 0; }
+.app-h3 { font-family: var(--mono); font-weight: 500; font-size: var(--t-xs); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 2.2rem 0 .8rem; }
+
+/* Teléfono */
+.app-fono { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 5.5rem; justify-self: center; }
+.app-intro, .app-cuerpo { grid-column: 2; }
+.app-intro { align-self: end; }
+.iphone { --w: min(300px, 70vw); width: var(--w); aspect-ratio: 71.9 / 150; position: relative; border-radius: calc(var(--w) * .165); padding: calc(var(--w) * .03);
+  background: linear-gradient(145deg, #3A3D42, #16181B 30%, #2B2E33 70%, #0D0E10);
+  box-shadow: 0 0 0 1px #4A4E55 inset, 0 30px 60px -20px rgba(14,27,44,.45), 0 12px 24px -12px rgba(14,27,44,.3); }
+.iphone::before, .iphone::after { content: ""; position: absolute; width: 3px; border-radius: 2px; background: #2A2D31; }
+.iphone::before { left: -3px; top: 19%; height: 7%; box-shadow: 0 calc(var(--w) * .13) 0 #2A2D31, 0 calc(var(--w) * .26) 0 #2A2D31; } /* acción y volumen */
+.iphone::after { right: -3px; top: 27%; height: 11%; } /* encendido */
+.iphone .cc { position: absolute; right: -3px; top: 52%; width: 3px; height: 9%; border-radius: 2px; background: #2A2D31; } /* Control de Cámara */
+.pantalla { position: relative; width: 100%; height: 100%; border-radius: calc(var(--w) * .135); overflow: hidden; background: #0E1B2C; }
+.pantalla img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s ease; }
+.pantalla img.on { opacity: 1; }
+.isla { position: absolute; left: 50%; top: 2.5%; transform: translateX(-50%); width: 21%; height: 3.1%; border-radius: 999px; background: #000; z-index: 2; }
+.estado { position: absolute; inset: 0 0 auto; height: 7%; display: flex; align-items: center; justify-content: space-between; padding: 0 9% 0 11%; color: #fff; font: 600 calc(var(--w) * .047) / 1 -apple-system, "SF Pro Text", var(--body); z-index: 2; pointer-events: none; }
+.estado svg { height: calc(var(--w) * .038); fill: #fff; }
+.estado span:last-child { display: flex; gap: 5px; align-items: center; }
+.home { position: absolute; left: 50%; bottom: 1.1%; transform: translateX(-50%); width: 34%; height: .55%; border-radius: 9px; background: #111; z-index: 2; }
+
+/* Pasos sincronizados con la pantalla */
+.app-pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; counter-reset: p; }
+.app-pasos button { width: 100%; text-align: left; font: inherit; color: var(--ink); cursor: pointer; display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: .8rem; align-items: start; padding: .8rem 1rem; border-radius: 10px; border: 1px solid transparent; background: transparent; transition: background .25s, border-color .25s; }
+.app-pasos button::before { counter-increment: p; content: counter(p); display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: #E8DFCC; color: #7A5A1E; font-family: var(--display); font-weight: 600; transition: background .25s, color .25s; }
+.app-pasos b { display: block; font-weight: 600; }
+.app-pasos span { color: var(--ink-soft); font-size: var(--t-s); }
+.app-pasos button[aria-current="true"] { background: var(--surface); border-color: var(--rule); box-shadow: 0 6px 18px -12px rgba(14,27,44,.35); }
+.app-pasos button[aria-current="true"]::before { background: #0E1B2C; color: #C9A15B; }
+
+/* Instalación */
+.app-instala { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.app-instala li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 1rem; display: grid; gap: .55rem; align-content: start; font-size: var(--t-s); }
+.app-instala .ic { width: 2.6rem; height: 2.6rem; border-radius: 12px; display: grid; place-items: center; background: #0E1B2C; }
+.app-instala .ic svg { width: 1.45rem; height: 1.45rem; fill: none; stroke: #C9A15B; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.app-instala b { font-weight: 600; font-size: var(--t-m); }
+.app-nota { font-size: var(--t-s); color: var(--ink-soft); margin: .8rem 0 0; }
+
+.app-cta { margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem 2rem; }
+.app-qr { display: flex; align-items: center; gap: .9rem; font-size: var(--t-s); color: var(--ink-soft); max-width: 17rem; }
+.app-qr img { width: 92px; height: 92px; border-radius: 8px; border: 1px solid var(--rule); background: #fff; padding: 4px; }
+.app-datos { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); font-size: var(--t-s); color: var(--ink-soft); }
+.app-datos a { font-weight: 600; }
+
+@media (max-width: 52rem) {
+  .appsec .wrap.app-grid { grid-template-columns: minmax(0, 1fr); }
+  .app-fono, .app-intro, .app-cuerpo { grid-column: 1; grid-row: auto; }
+  .app-fono { position: static; }
+  .iphone { --w: min(250px, 66vw); }
+  .app-fono { margin: 2rem 0 .5rem; }
+  .app-qr { display: none; } /* en el teléfono basta el botón */
+}
+@media (max-width: 34rem) { .app-instala { grid-template-columns: minmax(0, 1fr); } .app-instala li { grid-template-columns: auto minmax(0, 1fr); column-gap: .9rem; } .app-instala .ic { grid-row: span 2; } }
+@media (prefers-reduced-motion: reduce) { .pantalla img, .app-pasos button, .app-pasos button::before { transition: none; } }

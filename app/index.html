@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Organizo mis Finanzas · Carlo Pagani</title>
+<meta name="description" content="Tu acompañante de finanzas del día a día: anota tus gastos con una foto de la factura y te aviso cuándo te estás pasando de tu ingreso y cuándo vence tu tarjeta.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E1B2C">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mis Finanzas">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icono-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icono-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Libre+Bodoni:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./app.css?v=2">
+</head>
+<body>
+<header class="cabeza"><span class="marca">Organizo mis Finanzas</span><span class="de">por Carlo Pagani</span></header>
+<main id="pantalla"><p class="cargando">Cargando…</p></main>
+<div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+<nav id="barra" class="barra" hidden>
+  <a href="#inicio" data-ir="inicio"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="#movimientos" data-ir="movimientos"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Movimientos</a>
+  <a href="#registrar" data-ir="registrar" class="mas" aria-label="Registrar"><span><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></a>
+  <a href="#tarjetas" data-ir="tarjetas"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/></svg>Tarjetas</a>
+  <a href="#mimes" data-ir="mimes"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-3.5 4-5 7-5s6 1.5 7 5"/></svg>Mi mes</a>
+</nav>
+<script src="./app.js?v=2" type="module"></script>
+</body>
+</html>
