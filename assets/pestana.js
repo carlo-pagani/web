@@ -31,7 +31,6 @@
     }
     if (s === actual) return;
     actual = s;
-    p.classList.toggle('modo-mc', !!s && s.getAttribute('data-pest-modo') === 'mc');
     var nuevo = s ? s.getAttribute('data-pest') : inicial;
     if (texto.textContent === nuevo) return;
     texto.classList.add('cambia');
