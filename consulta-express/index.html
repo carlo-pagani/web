@@ -78,7 +78,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,600;1,500&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/assets/sitio.css?v=16">
+<link rel="stylesheet" href="/assets/sitio.css?v=17">
 </head>
 <body class="lp">
 
@@ -343,13 +343,16 @@
       <span class="ae-err" id="ae-dp-err" role="status"></span>
     </div>
   </section>
-  <section class="ae-res" id="ae-pp" hidden aria-label="Pago con PayPal">
+  <section class="ae-res" id="ae-pp" hidden aria-label="Pago">
     <div class="ae-res-body" id="ae-pp-body" tabindex="-1">
       <div class="dp-qr pp-total">
         <span>Total con IVA (15 %)</span><strong id="ae-pp-total">$40.25 USD</strong>
       </div>
-      <p class="pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. El monto ya está fijado; en cuanto se aprueba el pago, tus respuestas me llegan y empiezo tu análisis.</p>
-      <p class="pp-ayuda pp-nota">Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso. Si tu banco la rechaza, activa en su app las compras por internet y en el exterior.</p>
+      <p class="pp-ayuda" id="ae-pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. El monto ya está fijado; en cuanto se aprueba el pago, tus respuestas me llegan y empiezo tu análisis.</p>
+      <p class="pp-ayuda pp-nota" id="ae-pp-nota">Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso. Si tu banco la rechaza, activa en su app las compras por internet y en el exterior.</p>
+      <p class="pp-ayuda" id="ae-pph-ayuda" hidden>Paga con tarjeta de crédito o débito de cualquier banco. El monto ya está fijado; en cuanto se aprueba el pago, tus respuestas me llegan y empiezo tu análisis.</p>
+      <div id="ae-pph" hidden></div>
+      <p class="pp-ayuda pp-o" id="ae-pph-o" hidden>¿Prefieres PayPal? También puedes pagar con tu cuenta:</p>
       <div class="pp-btns" id="ae-pp-btns"></div>
     </div>
     <div class="res-pie">
@@ -370,7 +373,7 @@
     <a class="pest-op" href="/#masterclass"><b>Masterclass · 14 de noviembre</b><span>Finanzas personales, en línea · $15, IVA incluido</span><i aria-hidden="true">→</i></a>
   </div>
 </aside>
-<script src="/assets/sitio.js?v=12"></script>
+<script src="/assets/sitio.js?v=13"></script>
 <script src="/assets/pestana.js?v=4"></script>
 </body>
 </html>

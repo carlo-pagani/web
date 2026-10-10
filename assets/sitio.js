@@ -324,6 +324,102 @@
   }
   function textoPayPal(r) { return 'PayPal: pagado ' + r.monto + ' USD · orden ' + r.orden + ' · captura ' + r.captura + (r.pagador ? ' · ' + r.pagador : ''); }
 
+  /* ---------- Payphone: cobro con tarjeta de cualquier banco del Ecuador ---------- */
+  // Se activa cuando data/asistente.json trae «pago»: la dirección del Worker, que guarda el token de Payphone.
+  // La Cajita de Pagos cobra dentro de la página; después Payphone lleva al cliente a /pago/ con ?id=…&clientTransactionId=…,
+  // el Worker confirma el pago con Payphone y solo entonces se guardan los datos en Jotform.
+  var PAYPHONE = { url: '' }, PPH = 'pph-cobro', CAJITA = 'https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box', cajitaCarga = null;
+  var serviciosWeb = fetch('/data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+  serviciosWeb.then(function (j) { if (j && /^https:\/\//.test(j.pago || '')) PAYPHONE.url = j.pago; });
+  function cargarCajita() {
+    if (window.PPaymentButtonBox) return Promise.resolve();
+    if (cajitaCarga) return cajitaCarga;
+    cajitaCarga = new Promise(function (ok, mal) {
+      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = CAJITA + '.css'; document.head.appendChild(l);
+      var sc = document.createElement('script'); sc.type = 'module'; sc.src = CAJITA + '.js';
+      sc.onload = function () {
+        var n = 0;
+        (function esperar() { if (window.PPaymentButtonBox) return ok(); if (++n > 50) return mal(new Error('sin Cajita')); setTimeout(esperar, 100); })();
+      };
+      sc.onerror = function () { mal(new Error('sin Cajita')); };
+      document.head.appendChild(sc);
+    });
+    cajitaCarga.catch(function () { cajitaCarga = null; });
+    return cajitaCarga;
+  }
+  function guardarPph(v) { try { if (v) localStorage.setItem(PPH, JSON.stringify(v)); else localStorage.removeItem(PPH); return true; } catch (e) { return false; } }
+  function leerPph() { try { return JSON.parse(localStorage.getItem(PPH)); } catch (e) { return null; } }
+  // Pinta la Cajita en `caja` por `monto` (IVA incluido). `cobro` se guarda en este navegador y dice qué hacer al volver de Payphone:
+  //   { form: 'analisis' | 'masterclass', datos, anexo, listo, volver } → /pago/ confirma y guarda `datos` en ese formulario
+  //     (con el texto del pago en `pago` y, si hay `anexo`, también al final de ese campo) y muestra `listo`;
+  //   { retoma: true, volver } → /pago/ devuelve al cliente a `volver`, que retoma su recorrido con confirmarPayphone().
+  function cajitaPayphone(caja, monto, descripcion, referencia, email, cobro, alError) {
+    var centavos = Math.round(monto * 100), base = Math.round(centavos / 1.15);
+    var tx = referencia + '-' + Date.now().toString(36).toUpperCase().slice(-5);
+    if (!guardarPph(Object.assign({ tx: tx, centavos: centavos, t: Date.now() }, cobro))) {
+      return alError('Tu navegador no deja guardar tus datos mientras pagas. Prueba sin navegación privada o con otro navegador.');
+    }
+    caja.innerHTML = '<div class="pph-caja"><p class="pp-cargando">Cargando el pago con tarjeta…</p></div>';
+    Promise.all([fetch(PAYPHONE.url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }), cargarCajita()])
+      .then(function (x) {
+        var id = 'pph-' + Date.now().toString(36);
+        caja.innerHTML = '<div class="pph-caja"><div id="' + id + '"></div></div>';
+        var op = { token: x[0].token, storeId: x[0].storeId, clientTransactionId: tx, reference: descripcion.slice(0, 100),
+          amount: centavos, amountWithTax: base, tax: centavos - base, amountWithoutTax: 0, service: 0, tip: 0,
+          currency: 'USD', lang: 'es', defaultMethod: 'card', timeZone: -5 };
+        if (email) op.email = email;
+        new window.PPaymentButtonBox(op).render(id);
+      })
+      .catch(function () {
+        guardarPph(null); caja.innerHTML = '';
+        alError('No pude abrir el pago con tarjeta. Inténtalo de nuevo en unos minutos.');
+      });
+  }
+  // De vuelta de Payphone: el Worker confirma el pago. ok({ monto, texto, autorizacion, cobro }) solo si está aprobado por el monto que se cobró.
+  function confirmarPayphone(ok, mal) {
+    var q = new URLSearchParams(location.search), id = q.get('id'), tx = q.get('clientTransactionId'), g = leerPph();
+    var limpiar = function () { history.replaceState(null, '', location.pathname + location.hash); };
+    if (!id || !tx) return mal('No encontré los datos de tu pago.');
+    if (!g || g.tx !== tx) { limpiar(); return mal('Volviste del pago, pero no encontré tus datos en este navegador. Si se llegó a cobrar, Payphone anula el cargo en unos minutos.'); }
+    serviciosWeb.then(function () {
+      if (!PAYPHONE.url) throw new Error('sin servicio');
+      return fetch(PAYPHONE.url + '/confirmar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, clientTxId: tx }) })
+        .then(function (r) { return r.json(); });
+    }).then(function (r) {
+      limpiar(); guardarPph(null);
+      if (!r.aprobado) return mal(r.motivo || 'El pago no se completó.');
+      if (r.centavos !== g.centavos) return mal('Payphone confirmó un monto distinto al de tu compra. Escríbeme por ' + LINKEDIN_PAGO + ' y lo reviso.');
+      ok({ monto: g.centavos / 100, texto: r.pago, autorizacion: r.autorizacion, cobro: g });
+    }, function () {
+      mal('No pude confirmar tu pago todavía. Recarga esta página en un momento; si no se confirma en unos minutos, Payphone anula el cargo.');
+    });
+  }
+  var LINKEDIN_PAGO = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener">LinkedIn</a>';
+  // Página /pago/, adonde vuelve Payphone
+  var pphEl = document.getElementById('pph-retorno');
+  if (pphEl) (function () {
+    var g = leerPph(), msg = document.getElementById('pph-msg'), sigue = document.getElementById('pph-volver');
+    if (g && g.volver) sigue.href = g.volver;
+    if (g && g.retoma && g.volver && /^\/[^\/]/.test(g.volver)) { location.replace(g.volver.split('#')[0] + location.search + (g.volver.split('#')[1] ? '#' + g.volver.split('#')[1] : '')); return; }
+    var fin = function (titulo, html) { document.getElementById('pph-t').textContent = titulo; msg.innerHTML = html; sigue.hidden = false; };
+    confirmarPayphone(function (r) {
+      var cfg = FORMS[r.cobro.form], datos = Object.assign({}, r.cobro.datos, { pago: r.texto });
+      if (r.cobro.anexo) datos[r.cobro.anexo] = (datos[r.cobro.anexo] || '') + r.texto;
+      var guardar = function () {
+        msg.textContent = 'Pago aprobado. Guardando tus datos…';
+        enviar(cfg, datos).then(function () {
+          fin('Pago aprobado', esc(r.cobro.listo || 'Recibí tu pago.') + ' Autorización de Payphone: ' + esc(r.autorizacion) + '.');
+        }, function () {
+          fin('Pago aprobado', 'Tu pago se aprobó (autorización ' + esc(r.autorizacion) + '), pero no pude guardar tus datos. <button type="button" class="back" id="pph-re">Reintentar</button>');
+          document.getElementById('pph-re').addEventListener('click', guardar);
+        });
+      };
+      if (!cfg) return fin('Pago aprobado', 'Tu pago se aprobó (autorización ' + esc(r.autorizacion) + '). Escríbeme por ' + LINKEDIN_PAGO + ' y lo registro.');
+      guardar();
+    }, function (m) { fin('El pago no se completó', m); });
+  })();
+  if (pphEl) return;   // en /pago/ no hay más que hacer
+
   if (document.getElementById('cform')) (function () {
   var cf = document.getElementById('cform'), cs = document.getElementById('c-status');
   var paso = 1, atras = document.getElementById('w-atras');
@@ -434,7 +530,7 @@
   });
   function pagoMC(datos, ref, intereses) {
     var nombre = esc(datos.nombre.split(' ')[0]);
-    if (PAYPAL.clientId) return pagoMCPayPal(datos, ref, intereses, nombre);
+    if (PAYPAL.clientId || PAYPHONE.url) return pagoMCPayPal(datos, ref, intereses, nombre);
     mf.innerHTML = '<p class="q">Último paso, ' + nombre + ': paga tu cupo</p>' +
       '<div class="dp-qr"><img src="' + MC.qr + '" alt="Código QR de Deuna para pagar la masterclass a Carlo Pagani"><span>Valor de la masterclass, IVA incluido</span><strong>' + MC.precio + ' USD</strong></div>' +
       '<div class="dp-movil"><p>¿Estás en el celular? <a href="' + MC.qr + '" download="deuna-carlo-pagani.png">Guarda el código</a> y elígelo desde la galería en el lector de QR de tu app.</p></div>' +
@@ -461,13 +557,22 @@
     comp.focus();
   }
   function pagoMCPayPal(datos, ref, intereses, nombre) {
+    var tarjeta = !!PAYPHONE.url, pp = !!PAYPAL.clientId;
     mf.innerHTML = '<p class="q">Último paso, ' + nombre + ': paga tu cupo</p>' +
       '<div class="dp-qr pp-total"><span>Valor de la masterclass, IVA incluido</span><strong>' + MC.precio + ' USD</strong></div>' +
-      '<p class="pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. Tu cupo queda confirmado en cuanto se aprueba el pago.</p>' +
-      '<p class="pp-ayuda pp-nota">Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso. Si tu banco la rechaza, activa en su app las compras por internet y en el exterior.</p>' +
-      '<div class="pp-btns" id="m-pp"></div><p class="cstatus" id="m-status2" role="status"></p>';
+      (tarjeta ? '<p class="pp-ayuda">Paga con tarjeta de crédito o débito de cualquier banco. Tu cupo queda confirmado en cuanto se aprueba el pago.</p>' +
+        '<div id="m-pph"></div>' + (pp ? '<p class="pp-ayuda pp-o">¿Prefieres PayPal? También puedes pagar con tu cuenta:</p>' : '') :
+        '<p class="pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. Tu cupo queda confirmado en cuanto se aprueba el pago.</p>' +
+        '<p class="pp-ayuda pp-nota">Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso. Si tu banco la rechaza, activa en su app las compras por internet y en el exterior.</p>') +
+      (pp ? '<div class="pp-btns" id="m-pp"></div>' : '') + '<p class="cstatus" id="m-status2" role="status"></p>';
     var st = document.getElementById('m-status2');
-    botonesPayPal(document.getElementById('m-pp'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, function (r) {
+    var alError = function (msg) { st.className = 'cstatus'; st.textContent = msg; };
+    if (tarjeta) cajitaPayphone(document.getElementById('m-pph'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, datos.email, {
+      form: 'masterclass', anexo: 'intereses', volver: '/#masterclass',
+      datos: Object.assign({}, datos, { intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' }),
+      listo: 'Listo, ' + datos.nombre.split(' ')[0] + '. Tu cupo en la masterclass está confirmado. Te escribo a ' + datos.email + ' con la hora y el enlace. Si la masterclass no llegara a abrirse, te devuelvo el valor completo.'
+    }, alError);
+    if (pp) botonesPayPal(document.getElementById('m-pp'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, function (r) {
       var pago = textoPayPal(r);
       var d2 = Object.assign({}, datos, { pago: pago, intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' + pago });
       st.className = 'cstatus'; st.textContent = 'Pago aprobado. Guardando tu cupo…';
@@ -687,11 +792,7 @@
   // El cliente paga escaneando el código, escribe el número de comprobante y entonces se guardan sus respuestas; Carlo confirma el pago en la app.
   var DEUNA = { qr: '/assets/deuna-qr.png' }, DEUNA_ESTADO = 'ae-deuna';
   if (PAYPAL.clientId) DEUNA.qr = '';   // con PayPal activo, el código QR sin monto deja de ofrecerse
-  var servicios = fetch('/data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; })
-    .then(function (j) {
-      if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url;
-      if (j && /^https:\/\//.test(j.pago || '')) COBRO.url = j.pago;
-    }).catch(function () {});
+  var servicios = serviciosWeb.then(function (j) { if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url; });
   var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {}, editando = null, respaldo = null;
   var resEl = document.getElementById('ae-res'), resLista = document.getElementById('ae-res-list'), acepto = document.getElementById('ae-acepto');
   var pagarBtn = document.getElementById('ae-pagar'), resErr = document.getElementById('ae-res-err'), tituloAE = document.getElementById('ae-t');
@@ -1060,8 +1161,9 @@
     }).join('');
     pintarPrecio();
     acepto.checked = false; pagarBtn.disabled = true; resErr.textContent = '';
-    pagarBtn.textContent = COBRO.url || PAYPAL.clientId || DEUNA.qr || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
+    pagarBtn.textContent = COBRO.url || PAYPHONE.url || PAYPAL.clientId || DEUNA.qr || PAGO.url ? 'Confirmar y pagar' : 'Confirmar y enviar';
     document.getElementById('ae-res-nota').textContent = COBRO.url ? 'Te llevo a la página segura del Botón de Pagos del Banco Pichincha para pagar con tarjeta; tus respuestas me llegan cuando el pago se aprueba.' :
+      PAYPHONE.url ? 'Pagas con tarjeta de crédito o débito de cualquier banco' + (PAYPAL.clientId ? ', o con PayPal' : '') + '; tus respuestas me llegan en cuanto se aprueba el pago.' :
       PAYPAL.clientId ? 'Pagas con PayPal o con tarjeta de crédito o débito; tus respuestas me llegan en cuanto se aprueba el pago.' :
       DEUNA.qr ? 'Pagas con Deuna, o con la app de tu banco, escaneando mi código QR; tus respuestas me llegan cuando escribas el número de comprobante.' :
       PAGO.url ? 'Se abre la página de pago en otra pestaña.' :
@@ -1123,7 +1225,7 @@
     if (!acepto.checked) { resErr.textContent = 'Marca la casilla para confirmar tus datos.'; return; }
     var datos = paquete();
     if (COBRO.url) return iniciarCobro(datos);
-    if (PAYPAL.clientId) return mostrarPayPal(datos);
+    if (PAYPHONE.url || PAYPAL.clientId) return mostrarPayPal(datos);
     if (DEUNA.qr) return mostrarDeuna(datos);
     var btn = pagarBtn; btn.disabled = true; resErr.textContent = '';
     var u = PAGO.url;
@@ -1180,7 +1282,15 @@
     log.hidden = true; inForm.hidden = true; resEl.hidden = true; dpEl.hidden = true; ppEl.hidden = false;
     ppEl.classList.remove('entra'); void ppEl.offsetWidth; ppEl.classList.add('entra');
     document.getElementById('ae-pp-body').scrollTop = 0;
-    botonesPayPal(document.getElementById('ae-pp-btns'), pr.total, 'Consulta Express ' + ref, ref, function (r) {
+    var tarjeta = !!PAYPHONE.url, cajaPP = document.getElementById('ae-pp-btns');
+    document.getElementById('ae-pp-ayuda').hidden = tarjeta; document.getElementById('ae-pp-nota').hidden = tarjeta;
+    document.getElementById('ae-pph-ayuda').hidden = !tarjeta; document.getElementById('ae-pph-o').hidden = !(tarjeta && PAYPAL.clientId);
+    var cajaT = document.getElementById('ae-pph'); cajaT.hidden = !tarjeta; cajaT.innerHTML = ''; cajaPP.innerHTML = '';
+    if (tarjeta) cajitaPayphone(cajaT, pr.total, 'Consulta Express ' + ref, ref, resp.datos.email, {
+      form: 'analisis', datos: datos, volver: '/consulta-express/',
+      listo: 'Recibí tu pago y tus respuestas con la referencia ' + ref + '. Te envío el informe a ' + resp.datos.email + ' en un máximo de tres días hábiles.'
+    }, function (msg) { ppErr.textContent = msg; });
+    if (PAYPAL.clientId) botonesPayPal(cajaPP, pr.total, 'Consulta Express ' + ref, ref, function (r) {
       var envio = Object.assign({}, datos, { pago: textoPayPal(r) });
       ppErr.textContent = 'Pago aprobado. Enviando tus respuestas…';
       document.getElementById('ae-pp-volver').hidden = true;
