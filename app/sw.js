@@ -1,6 +1,6 @@
 // Permite abrir la app sin conexión. Los datos no pasan por aquí: viven en el teléfono.
-const VERSION = 'fc-1';
-const BASICO = ['./', './app.js?v=1', './app.css?v=1', './manifest.webmanifest', './icono-192.png', './icono-180.png'];
+const VERSION = 'fc-2';
+const BASICO = ['./', './app.js?v=2', './app.css?v=2', './manifest.webmanifest', './icono-192.png', './icono-180.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(BASICO)).then(() => self.skipWaiting()));
