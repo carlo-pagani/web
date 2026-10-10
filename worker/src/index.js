@@ -20,7 +20,7 @@ const SISTEMA = `Eres el asistente que acompaña el cuestionario del «análisis
 
 Cómo escribes:
 - Español, trato de tú, cordial y profesional, sin emojis ni signos de exclamación.
-- Como máximo dos oraciones breves, unas 45 palabras.
+- Como máximo dos oraciones breves, unas 45 palabras (salvo el resumen del modo «conversar»).
 - Las cifras están en dólares, la moneda de Ecuador.
 
 Límites:
@@ -35,13 +35,23 @@ Modo «revisar» (recibes la pregunta, su propósito, la respuesta y las aclarac
 - En las fichas de montos, repregunta solo si algo no cuadra de verdad: gastos que superan con creces los ingresos sin explicación, un rubro básico como alimentación en cero, una cifra con un cero de más, una deuda con cuota pero sin saldo.
 - Si ya hay dos aclaraciones, responde siempre "seguir".
 
+Modo «conversar» (recibes en <objetivo> lo que Carlo necesita saber de esta parte, la respuesta del cliente y la conversación hasta ahora en <aclaraciones>):
+- Es una conversación guiada: haz la siguiente pregunta que falte para cumplir el objetivo, una sola a la vez, en lenguaje llano y con un ejemplo cuando ayude. Responde accion "repreguntar".
+- Nunca preguntes algo que ya esté respondido en <contexto>, <respuesta> o <aclaraciones>.
+- No hay un número máximo de preguntas, pero no preguntes por preguntar: cada pregunta debe aportar algo que el informe necesite.
+- Cuando el objetivo esté cumplido, o el cliente diga que no sabe más, responde accion "resumir": un resumen breve que empiece por «Entonces,» y termine preguntando si es correcto. En el resumen puedes usar hasta 90 palabras.
+- Si el cliente corrige el resumen, incorpora la corrección y vuelve a resumir.
+- Habla como un asesor que conoce bien el sistema financiero ecuatoriano: preguntas precisas y seguras, sin rodeos.
+- No adviertas incoherencias ni riesgos al cliente: son hallazgos para el informe de Carlo.
+- En temas de salud o seguros médicos, nunca preguntes por enfermedades ni diagnósticos: solo coberturas, deducibles, costos y para qué usa cada póliza.
+
 Modo «duda» (el cliente tiene una duda sobre la pregunta actual):
 - Responde accion "explicar": aclara la duda en relación con esa pregunta, con un ejemplo si ayuda, y anímalo a responder como mejor pueda.`;
 
 const FORMATO = {
   type: "object",
   properties: {
-    accion: { type: "string", enum: ["seguir", "repreguntar", "explicar"] },
+    accion: { type: "string", enum: ["seguir", "repreguntar", "explicar", "resumir"] },
     mensaje: { type: "string" },
   },
   required: ["accion", "mensaje"],
@@ -68,9 +78,9 @@ function json(datos, estado, origen) {
 const corto = (x, n) => String(x ?? "").slice(0, n);
 
 function mensajeUsuario(d) {
-  const modo = d.modo === "duda" ? "duda" : "revisar";
+  const modo = ["duda", "conversar"].includes(d.modo) ? d.modo : "revisar";
   const aclaraciones = (Array.isArray(d.aclaraciones) ? d.aclaraciones : [])
-    .slice(0, 3)
+    .slice(0, modo === "conversar" ? 16 : 3)
     .map((a) => `P: ${corto(a && a.pregunta, 400)}\nR: ${corto(a && a.respuesta, 800)}`)
     .join("\n\n");
   return [
@@ -78,9 +88,10 @@ function mensajeUsuario(d) {
     `<tema>${corto(d.tema, 80)}</tema>`,
     `<pregunta>${corto(d.pregunta, 400)}</pregunta>`,
     d.proposito ? `<proposito>${corto(d.proposito, 300)}</proposito>` : "",
+    modo === "conversar" && d.objetivo ? `<objetivo>${corto(d.objetivo, 1500)}</objetivo>` : "",
     modo === "duda" ? `<duda>${corto(d.duda, 800)}</duda>` : `<respuesta>${corto(d.respuesta, 2000)}</respuesta>`,
     aclaraciones ? `<aclaraciones>\n${aclaraciones}\n</aclaraciones>` : "",
-    d.contexto ? `<contexto>\n${corto(d.contexto, 6000)}\n</contexto>` : "",
+    d.contexto ? `<contexto>\n${corto(d.contexto, 9000)}\n</contexto>` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -144,7 +155,7 @@ export default {
       return json({ error: "Ruta no válida" }, 404, origen);
     }
     const cuerpo = await request.text();
-    if (cuerpo.length > 20000) return json({ error: "Demasiado largo" }, 413, origen);
+    if (cuerpo.length > 40000) return json({ error: "Demasiado largo" }, 413, origen);
     let datos;
     try {
       datos = JSON.parse(cuerpo);
@@ -171,8 +182,8 @@ export default {
       if (r.stop_reason !== "end_turn") return json(SEGUIR, 200, origen);
       const texto = r.content.filter((b) => b.type === "text").map((b) => b.text).join("");
       const o = JSON.parse(texto);
-      const accion = ["seguir", "repreguntar", "explicar"].includes(o.accion) ? o.accion : "seguir";
-      return json({ accion, mensaje: accion === "seguir" ? "" : corto(o.mensaje, 600) }, 200, origen);
+      const accion = ["seguir", "repreguntar", "explicar", "resumir"].includes(o.accion) ? o.accion : "seguir";
+      return json({ accion, mensaje: accion === "seguir" ? "" : corto(o.mensaje, 900) }, 200, origen);
     } catch (e) {
       // Cualquier fallo deja seguir el cuestionario sin la IA
       if (e instanceof Anthropic.AuthenticationError) console.error("Clave de Anthropic no válida");
