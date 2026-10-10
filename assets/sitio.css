@@ -594,6 +594,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .pp-cargando { margin: 0 0 .6rem; color: #536176; font-size: var(--t-s); text-align: center; }
 
 .pp-ayuda.pp-nota { font-size: var(--t-xs); opacity: .85; margin-top: -.25rem; }
+.pph-caja { background: #fff; color: #10151C; border-radius: 6px; padding: .9rem; min-height: 3.2rem; margin-bottom: 1rem; }
+.pph-caja .pp-cargando { margin: 0; }
+.pp-ayuda.pp-o { margin-top: .25rem; }
 
 /* Pestaña fija a la derecha, solo en computadora: Consulta Express y Masterclass desde cualquier punto */
 .pest { display: none; }
@@ -619,3 +622,9 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   .pest-op:first-of-type span, .pest-op:first-of-type i { color: #10151C; opacity: .8; }
 }
 @media (prefers-reduced-motion: reduce) { .pest, .pest-op { transition: none; } }
+/* Página /pago/, adonde vuelve Payphone */
+.pph-pag { min-height: 100vh; }
+.pph-main { padding-top: clamp(3rem, 10vh, 6rem); padding-bottom: 4rem; max-width: 40rem; }
+.pph-main h1 { margin: .3rem 0 1rem; }
+.pph-main .lede { margin-bottom: 1.6rem; }
+.pph-main .back { margin-left: .4rem; }

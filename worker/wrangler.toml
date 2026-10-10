@@ -4,7 +4,3 @@ main = "src/index.js"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
-
-[vars]
-# Ambiente de pruebas de Placetopay Ecuador; al certificar, cambiar a https://checkout.placetopay.ec
-PLACETOPAY_URL = "https://checkout-test.placetopay.ec"
