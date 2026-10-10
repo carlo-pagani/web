@@ -69,7 +69,9 @@ jobs:
           PAYPHONE_STORE_ID: ${{ secrets.PAYPHONE_STORE_ID }}
         run: |
           npx wrangler deploy | tee despliegue.txt
-          if [ -n "$ANTHROPIC_API_KEY" ]; then printf '%s' "$ANTHROPIC_API_KEY" | npx wrangler secret put ANTHROPIC_API_KEY; fi
+          # Si el secreto se pegó con texto alrededor (saltos de línea, comandos de ejemplo), se guarda solo la clave sk-ant-…
+          CLAVE=$(printf '%s' "$ANTHROPIC_API_KEY" | grep -o 'sk-ant-[A-Za-z0-9_-]*' | head -1 || true)
+          if [ -n "$CLAVE" ]; then printf '%s' "$CLAVE" | npx wrangler secret put ANTHROPIC_API_KEY; fi
           if [ -n "$PAYPHONE_TOKEN" ]; then printf '%s' "$PAYPHONE_TOKEN" | npx wrangler secret put PAYPHONE_TOKEN; fi
           if [ -n "$PAYPHONE_STORE_ID" ]; then printf '%s' "$PAYPHONE_STORE_ID" | npx wrangler secret put PAYPHONE_STORE_ID; fi
 
