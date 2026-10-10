@@ -599,12 +599,16 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .pp-ayuda.pp-o { margin-top: .25rem; }
 
 /* Pestaña fija a la derecha, solo en computadora: Consulta Express y Masterclass desde cualquier punto */
+/* Recuadro de Consulta Express y Masterclass: siempre a la vista. En computadora, arriba a la derecha; en el teléfono, barra abajo. */
 .pest { display: none; }
+.pest-op em { display: none; font-style: normal; }
 @media (min-width: 60.01rem) {
-  .pest { display: block; position: fixed; right: 0; top: 5.5rem; z-index: 40; transition: top .25s ease; }
+  .pest { display: block; position: fixed; right: 0; top: 5.5rem; z-index: 40; transition: top .25s ease, transform .45s ease, opacity .45s ease; }
   .pest.arriba { top: 1rem; }
-  /* Texto girado con transform y no con writing-mode: Safari no respeta writing-mode en los botones y lo recorta. */
-  .pest-tab { position: absolute; right: 0; bottom: 0; transform-origin: 100% 100%; transform: rotate(-90deg); white-space: nowrap; background: var(--brass); color: #10151C; border: 0; border-radius: 6px 6px 0 0; padding: .65rem 1.1rem; font: 600 var(--t-s)/1 var(--body); letter-spacing: .02em; cursor: pointer; box-shadow: 0 -4px 18px -8px rgba(14,27,44,.55); }
+  /* Mientras se ve la foto de la portada, espera fuera de la pantalla y luego entra deslizándose */
+  .pest.espera { transform: translateX(110%); opacity: 0; pointer-events: none; }
+  .pest-tab { display: block; white-space: nowrap; background: var(--brass); color: #10151C; border: 0; border-radius: 6px 0 0 6px; padding: .85rem 1.2rem; font: 600 1rem/1 var(--body); letter-spacing: .01em; cursor: pointer; box-shadow: -8px 8px 24px -12px rgba(14,27,44,.6); }
+  .pest-tab::after { content: " →"; }
   .pest-tab:hover { filter: brightness(1.05); }
   .pest.abierta .pest-tab { display: none; }
   .pest-caja { display: none; position: relative; width: 21.5rem; background: var(--navy); color: var(--on-navy); border-top: 3px solid var(--brass); border-radius: 6px 0 0 6px; padding: 1.4rem 1.4rem 1.3rem; box-shadow: -10px 10px 30px -16px rgba(14,27,44,.65); }
@@ -612,16 +616,45 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
   .pest .eyebrow { color: var(--brass); margin: 0 0 .5rem; }
   .pest-x { position: absolute; top: .3rem; right: .4rem; background: none; border: 0; color: var(--on-navy-soft); font-size: 1.35rem; line-height: 1; cursor: pointer; padding: .3rem; }
   .pest-x:hover { color: var(--on-navy); }
-  .pest-t { font-size: 1rem; color: var(--on-navy-soft); line-height: 1.45; margin: 0 0 .6rem; }
-  .pest-op { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .8rem; margin-top: .7rem; padding: .95rem 1.05rem; border: 1px solid rgba(238,242,247,.18); border-radius: 4px; color: var(--on-navy); text-decoration: none; line-height: 1.3; transition: border-color .2s ease, background-color .2s ease; }
+  .pest-t { font-size: 1rem; color: var(--on-navy-soft); line-height: 1.45; margin: 0 0 .6rem; transition: opacity .22s ease; }
+  .pest-t.cambia { opacity: 0; }
+  .pest-op { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .8rem; margin-top: .7rem; padding: .95rem 1.05rem; border: 1px solid rgba(238,242,247,.18); border-radius: 4px; color: var(--on-navy); text-decoration: none; line-height: 1.3; transition: border-color .2s ease, background-color .2s ease, color .2s ease; }
   .pest-op:hover { border-color: var(--brass); }
   .pest-op b { font-weight: 600; font-size: 1.1rem; }
   .pest-op span { grid-column: 1; font-size: var(--t-s); color: var(--on-navy-soft); }
   .pest-op i { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-style: normal; font-size: 1.2rem; color: var(--brass); }
+  /* La opción dorada es siempre la Consulta Express */
   .pest-op:first-of-type { background: var(--brass); border-color: var(--brass); color: #10151C; }
   .pest-op:first-of-type span, .pest-op:first-of-type i { color: #10151C; opacity: .8; }
 }
-@media (prefers-reduced-motion: reduce) { .pest, .pest-op { transition: none; } }
+/* Pantallas de computadora más angostas: el recuadro se compacta en vez de plegarse */
+@media (min-width: 60.01rem) and (max-width: 75rem) {
+  .pest-caja { width: 18rem; padding: 1.1rem 1.1rem 1rem; }
+  .pest-t { font-size: var(--t-s); }
+  .pest-op { padding: .75rem .85rem; margin-top: .55rem; }
+  .pest-op b { font-size: 1rem; }
+  .pest-op span { font-size: var(--t-xs); }
+}
+@media (max-width: 60rem) {
+  .pest { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; }
+  .pest.escribiendo { display: none; }
+  /* Mensaje arriba y los dos servicios lado a lado debajo */
+  .pest-caja { display: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; gap: .55rem .5rem; background: var(--navy); color: var(--on-navy); border-top: 3px solid var(--brass); box-shadow: 0 -8px 24px -12px rgba(14,27,44,.5); padding: .65rem 16px calc(.65rem + env(safe-area-inset-bottom)); position: relative; }
+  .pest.abierta .pest-caja { display: grid; }
+  .pest .eyebrow { display: none; }
+  .pest-x { position: absolute; top: .3rem; right: .35rem; background: none; border: 0; color: var(--on-navy-soft); font-size: 1.35rem; line-height: 1; cursor: pointer; padding: .3rem; }
+  .pest-t { grid-column: 1 / -1; margin: 0; padding-right: 1.6rem; font-size: var(--t-xs); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: opacity .22s ease; }
+  .pest-t.cambia { opacity: 0; }
+  .pest-op { display: flex; align-items: center; justify-content: center; text-align: center; border: 1px solid var(--brass); color: var(--on-navy); text-decoration: none; border-radius: 4px; padding: .6rem .5rem; font-weight: 600; font-size: var(--t-s); line-height: 1.2; }
+  .pest-op:first-of-type { background: var(--brass); color: #10151C; }
+  .pest-op b, .pest-op span, .pest-op i { display: none; }
+  .pest-op em { display: inline; }
+  /* Si la persona lo cierra, queda un botón dorado en la esquina */
+  .pest-tab { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); background: var(--brass); color: #10151C; border: 0; border-radius: 999px; padding: .75rem 1.1rem; font: 600 var(--t-s)/1 var(--body); box-shadow: 0 8px 20px -8px rgba(14,27,44,.6); cursor: pointer; }
+  .pest.abierta .pest-tab { display: none; }
+  body.con-pest, body.ap.con-pest { padding-bottom: 7.5rem; }
+}
+@media (prefers-reduced-motion: reduce) { .pest, .pest-op, .pest-t { transition: none; } }
 /* Página /pago/, adonde vuelve Payphone */
 .pph-pag { min-height: 100vh; }
 .pph-main { padding-top: clamp(3rem, 10vh, 6rem); padding-bottom: 4rem; max-width: 40rem; }
