@@ -123,3 +123,6 @@ body.ap.sin-barra .ap-lateral { display: none; }
   body.ap { padding-bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .yt img, .ruta-bat i, .ce-t { transition: none; } }
+/* La barra propia de Aprende cede su lugar a la barra común con los dos servicios (sitio.css, .pest) */
+.ap-lateral { display: none; }
+body.ap { padding-bottom: 0; }
