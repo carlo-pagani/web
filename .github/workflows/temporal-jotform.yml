@@ -1,0 +1,19 @@
+# Temporal (aprobado por Carlo el 2026-10-11): envío de prueba con un PDF en blanco, marcado «Prueba de Claude (borrar)», para comprobar que los adjuntos llegan. Se borra después de usarlo.
+name: temporal-jotform
+on:
+  push:
+    branches: [claude/project-thread-bxckoi]
+    paths: [.github/workflows/temporal-jotform.yml]
+jobs:
+  prueba:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          printf '%%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj\ntrailer<</Root 1 0 R>>\n%%%%EOF\n' > prueba-claude.pdf
+          curl -sS -o r.html -w '%{http_code}\n' https://submit.jotform.com/submit/262794223035052 \
+            -F formID=262794223035052 -F simple_spc=262794223035052-262794223035052 \
+            -F 'q2_textbox0=PRUEBA-ADJUNTO' -F 'q3_textbox1=Prueba de Claude (borrar)' \
+            -F 'q4_textarea2=Prueba de Claude (borrar): comprobar que llega un PDF adjunto.' \
+            -F 'q5_textbox3=Prueba de Claude (borrar)' -F 'q6_email4=prueba@example.com' \
+            -F 'q11_archivosAdjuntos[]=@prueba-claude.pdf;type=application/pdf'
+          grep -o '<title>[^<]*' r.html | head -1
