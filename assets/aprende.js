@@ -32,7 +32,14 @@
     cont.innerHTML = html;
     var form = cont.querySelector('form');
     form.addEventListener('submit', function (e) { e.preventDefault(); });
-    return { form: form, out: cont.querySelector('.herr-out'), n: function (id) { var v = parseFloat($(id).value); return isFinite(v) ? v : 0; } };
+    return { form: form, out: cont.querySelector('.herr-out'), n: function (id) {
+      // Respeta los límites del campo: un valor fuera de rango no debe trabar la página
+      var el = $(id), v = parseFloat(el.value), lo = parseFloat(el.min), hi = parseFloat(el.max);
+      if (!isFinite(v)) v = 0;
+      if (isFinite(lo)) v = Math.max(lo, v);
+      if (isFinite(hi)) v = Math.min(hi, v);
+      return v;
+    } };
   }
   function tarjetas(items) {
     return '<div class="herr-res">' + items.map(function (t) {
@@ -42,7 +49,9 @@
   function hbars(items, max) {
     max = max || Math.max.apply(null, items.map(function (i) { return i.v; }));
     return '<div class="hbars">' + items.map(function (i) {
-      return '<div class="hbar' + (i.hi ? ' hi' : '') + '"><span class="name">' + i.n + (i.s ? '<small>' + i.s + '</small>' : '') + '</span><span class="track"><span class="fill" style="width:' + Math.max(0.6, 100 * i.v / max * 0.78).toFixed(1) + '%"></span><span class="val" style="left:' + Math.max(0.6, 100 * i.v / max * 0.78).toFixed(1) + '%">' + i.t + '</span></span></div>';
+      // En el teléfono, la cifra de una barra larga va dentro de la barra para no salirse de la pantalla (aprende.css)
+      var w = Math.max(0.6, 100 * i.v / max * 0.78).toFixed(1);
+      return '<div class="hbar' + (i.hi ? ' hi' : '') + '"><span class="name">' + i.n + (i.s ? '<small>' + i.s + '</small>' : '') + '</span><span class="track"><span class="fill" style="width:' + w + '%"></span><span class="val' + (w > 55 ? ' larga' : '') + '" style="left:' + w + '%;--w:' + w + '%">' + i.t + '</span></span></div>';
     }).join('') + '</div>';
   }
 
@@ -110,7 +119,7 @@
     var F = formulario(c, [
       { id: 'mt-cap', l: 'Capital que inviertes hoy', s: 'en dólares', v: 50000, step: 1000, min: 0 },
       { id: 'mt-ap', l: 'Aporte mensual', s: 'lo que sumas cada mes', v: 0, step: 50, min: 0 },
-      { id: 'mt-r', l: 'Rendimiento anual', s: '% esperado', v: 18, step: 0.5 },
+      { id: 'mt-r', l: 'Rendimiento anual', s: '% esperado', v: 18, step: 0.5, min: -50, max: 100 },
       { id: 'mt-n', l: 'Años', s: 'cuánto mantienes el compromiso', v: 10, min: 1, max: 60 }
     ], '');
     F.form.insertAdjacentHTML('beforeend', '<label class="check" for="mt-inf"><input id="mt-inf" type="checkbox"><span>Descontar inflación de 3 % anual<br><small style="color:var(--ink-soft)">El resultado queda en dinero de hoy.</small></span></label>');
@@ -140,7 +149,7 @@
     var c = $('h-esperar'); if (!c) return;
     var F = formulario(c, [
       { id: 'es-ap', l: 'Aporte mensual', s: 'en dólares', v: 215, step: 5, min: 0 },
-      { id: 'es-r', l: 'Rendimiento anual', s: '%', v: 6, step: 0.5 },
+      { id: 'es-r', l: 'Rendimiento anual', s: '%', v: 6, step: 0.5, min: -50, max: 100 },
       { id: 'es-e', l: 'Tu edad hoy', v: 25, min: 15, max: 70 },
       { id: 'es-j', l: 'Edad a la que dejas de aportar', v: 50, min: 30, max: 90 }
     ]);
@@ -148,6 +157,7 @@
     function calc() {
       var ap = F.n('es-ap'), r = F.n('es-r') / 100, e = F.n('es-e'), j = F.n('es-j'), rm = r / 12 || 1e-9;
       var esp = [0, 5, 10, 15].filter(function (w) { return e + w < j; });
+      if (!(ap > 0)) { F.out.innerHTML = '<p class="veredicto">Escribe cuánto aportarías al mes.</p>'; return; }
       var vals = esp.map(function (w) { return { w: w, v: fv(ap, rm, (j - e - w) * 12) }; });
       if (!vals.length) { F.out.innerHTML = '<p class="veredicto">Revisa las edades: la de retiro debe ser mayor que la actual.</p>'; return; }
       var hoy = vals[0].v, diez = vals.filter(function (x) { return x.w === 10; })[0];
@@ -177,8 +187,8 @@
       { id: 'jb-p', l: 'Pensión mensual esperada', s: 'del IESS u otra, en dinero de hoy', v: 0, step: 100, min: 0 },
       { id: 'jb-vt', l: 'Valor final', s: 'lo que quieres que quede', v: 10000, step: 1000, min: 0 },
       { id: 'jb-s', l: 'Ahorro que ya tienes', s: 'para la jubilación', v: 10000, step: 1000, min: 0 },
-      { id: 'jb-r', l: 'Rendimiento anual', s: '% de tus inversiones', v: 6, step: 0.5 },
-      { id: 'jb-i', l: 'Inflación anual', s: '%', v: 3, step: 0.5, full: true }
+      { id: 'jb-r', l: 'Rendimiento anual', s: '% de tus inversiones', v: 6, step: 0.5, min: -50, max: 100 },
+      { id: 'jb-i', l: 'Inflación anual', s: '%', v: 3, step: 0.5, min: 0, max: 100, full: true }
     ]);
     function calc() {
       var e = F.n('jb-e'), j = F.n('jb-j'), A = F.n('jb-a'), g = F.n('jb-g'), p = F.n('jb-p'), s = F.n('jb-s'), r = F.n('jb-r') / 100, inf = F.n('jb-i') / 100, vt = F.n('jb-vt');
@@ -243,7 +253,11 @@
       var a = [], b = [];
       for (var y = -30; y <= 15; y += 1) { a.push([y, caso(K, 0, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); b.push([y, caso(K, fin, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); }
       var vals = a.concat(b).map(function (q) { return q[1]; }), lo = Math.floor(Math.min.apply(null, vals) / 25) * 25, hi = Math.ceil(Math.max.apply(null, vals) / 25) * 25, yt = [];
-      for (var v = lo; v <= hi; v += (hi - lo > 150 ? 50 : 25)) yt.push(v);
+      // Paso de las marcas: 25 o 50 puntos, o más grande si los resultados son extremos (como mucho unas ocho marcas)
+      var paso = hi - lo > 150 ? 50 : 25;
+      while ((hi - lo) / paso > 8) paso *= 2;
+      if (!isFinite(lo) || !isFinite(hi)) { lo = -100; hi = 100; }
+      for (var v = lo; v <= hi; v += paso) yt.push(v);
       var svg = grafica(F.out, '<li><i style="background:var(--muted-mark)"></i>Sin préstamo</li><li><i style="background:var(--c1)"></i>Con ' + f0.format(100 * Math.min(fin, K) / Math.max(1, K)) + ' % financiado</li>');
       lineas(svg, { series: [{ pts: a, color: 'var(--muted-mark)', w: 2 }, { pts: b, color: 'var(--c1)', w: 2.5 }], xmin: -30, xmax: 15, ymin: lo, ymax: hi, yt: yt, fy: function (v) { return v + ' %'; }, xt: [-30, -20, -10, 0, 10], fx: function (v) { return v ? (v > 0 ? '+' : '') + v + ' %' : 'esperado'; }, marcas: [{ x: x * 100, y: A.roi * 100, t: pct(A.roi * 100), color: A.roi < 0 ? 'var(--neg)' : 'var(--c1)' }], h: 260 });
     }
@@ -279,7 +293,7 @@
       var html = tarjetas([
         { k: 'Precio hoy', v: usd(hoy[1]), s: fFechaL.format(new Date(hoy[0])) },
         { k: 'Cuando grabé el video', v: usd(enVideo[1]), s: '× ' + f1.format(hoy[1] / enVideo[1]) + ' desde entonces' },
-        { k: 'Máximo histórico, al cierre de semana', v: usd(maxi[1]), s: fFecha.format(new Date(maxi[0])) + (actual > 0.05 ? ' · hoy ' + pct(-actual * 100) + ' por debajo' : '') }
+        { k: 'Máximo histórico, al cierre de semana', v: usd(maxi[1]), s: fFecha.format(new Date(maxi[0])) + (actual > 0.05 ? ' · hoy ' + pct(actual * 100) + ' por debajo' : '') }
       ]);
       c.innerHTML = html;
       var svg = grafica(c, '<li><i class="line" style="background:var(--c1)"></i>Precio de un bitcoin en dólares, escala logarítmica</li>');
@@ -369,7 +383,7 @@
       { id: 'au-mat', l: 'Matrícula y permisos', s: 'al año, aproximado', v: 900, step: 10, min: 0 },
       { id: 'au-d1', l: 'Depreciación el primer año', s: '%', v: 15, step: 1, min: 0, max: 90 },
       { id: 'au-d2', l: 'Depreciación los años siguientes', s: '% por año', v: 12, step: 1, min: 0, max: 60 },
-      { id: 'au-r', l: 'Rendimiento si lo invirtieras', s: '% anual', v: 6, step: 0.5 }
+      { id: 'au-r', l: 'Rendimiento si lo invirtieras', s: '% anual', v: 6, step: 0.5, min: -50, max: 100 }
     ], '<div class="seg" role="radiogroup" aria-label="Tipo de auto"><label><input type="radio" name="au-tipo" value="gas" checked><span>A gasolina</span></label><label><input type="radio" name="au-tipo" value="ev"><span>Eléctrico</span></label></div>');
     var COL = ['var(--c1)', 'var(--c2)', 'var(--s2)', 'var(--s3)', '#7C8BA1', '#9AA9BC', '#B9A27A'];
     function tipo() { return F.form.querySelector('input[name="au-tipo"]:checked').value; }

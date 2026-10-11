@@ -11,10 +11,22 @@ TOPE_DIARIO_USD = "3"       # dólares por día entre todos los visitantes
 TOPE_VISITANTE_USD = "1"    # dólares por día de un mismo visitante (una consulta completa cuesta de 0,10 a 0,50)
 LLAMADAS_POR_HORA = "80"    # llamadas por hora de un mismo visitante (con la IA que llena las casillas, una consulta puede pasar de 40)
 
+# Identificador público de la app «Web Carlo Pagani» de PayPal (el mismo que usa la web). La clave secreta va como secreto: PAYPAL_SECRET.
+PAYPAL_CLIENT_ID = "BAAHPHYxpHokQA3PYUEiaYFXl32IAU8mMO-xXonNNzPgKvJHvtmyiMOBh-gI1SXRa9NoRBQVyrSMF_EWpE"
+
 [[durable_objects.bindings]]
 name = "CUPO"
 class_name = "Cupo"
 
+# Guarda la clave que sella los pagos verificados (ver la clase Sello en src/index.js)
+[[durable_objects.bindings]]
+name = "SELLO"
+class_name = "Sello"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Cupo"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Sello"]
