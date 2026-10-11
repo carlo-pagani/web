@@ -710,3 +710,7 @@ label[data-c] > span .ia-marca { margin-left: .35rem; vertical-align: .1em; }
 .pph-main h1 { margin: .3rem 0 1rem; }
 .pph-main .lede { margin-bottom: 1.6rem; }
 .pph-main .back { margin-left: .4rem; }
+
+/* Avisos legales junto a los formularios */
+.mc-nota a, .c-priv a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.c-priv { font-size: var(--t-s); opacity: .85; margin: .75rem 0 0; }

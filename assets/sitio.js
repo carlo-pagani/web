@@ -427,7 +427,7 @@
     fondos: { q: '¿Cuánto planeas invertir?', o: ['Menos de 10 mil dólares', 'De 10 mil a 50 mil dólares', 'De 50 mil a 250 mil dólares', 'Más de 250 mil dólares'] }
   };
   var PLAZOS = { 1: 'Lo antes posible', 2: 'En uno a tres meses', 3: 'Solo estoy explorando' };
-  function esFondos() { return document.getElementById('w-servicio').value === 'Fondos de inversión'; }
+  function esFondos() { return document.getElementById('w-servicio').value === 'Asesoría de inversiones'; }
   function ir(n) {
     paso = n;
     cf.querySelectorAll('.step').forEach(function (s) { s.hidden = +s.dataset.step !== n; });
@@ -932,11 +932,11 @@
     o5b: 'Cifras principales', o5c: 'Cifras principales', o5d: 'Cifras principales', o5e: 'Cifras principales', o5f: 'Cifras principales',
     o6: 'Lo que más cuida'
   };
-  var CONDICIONES = 'versión del 10 de octubre de 2026';
+  var CONDICIONES = 'versión del 11 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría; te tomarán entre diez y veinte minutos, según tu caso. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles.';
-  var INTRO_PRECIO = 'Primero eliges el tema y las partes que quieres analizar, y pagas: $' + BASE + ' + IVA por lo esencial y $' + PARTE + ' más por cada parte adicional. Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y, 72 horas después de enviarte el informe, borro tus respuestas y los archivos que adjuntes.';
+  var INTRO_PRECIO = 'Primero eliges el tema y las partes que quieres analizar, y pagas: $' + BASE + ' + IVA por lo esencial y $' + PARTE + ' más por cada parte adicional. Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
-  var BORRADO = '72 horas después de enviarte el informe, borro tus respuestas y los archivos que adjuntaste. Solo conservo los datos que la ley me obliga a guardar para tu factura. Si más adelante quieres profundizar o revisar cómo evolucionaste, compárteme el informe que recibiste y partimos de ahí.';
+  var BORRADO = 'Cuando ya no los necesito para tu informe y su seguimiento, borro tus respuestas y los archivos que adjuntaste. Solo conservo lo que la ley me obliga a guardar, como los datos de tu factura. Si más adelante quieres profundizar o revisar cómo evolucionaste, compárteme el informe que recibiste y partimos de ahí.';
   function intro() { return INTRO + '\n\n' + INTRO_PRECIO + (IA.url ? '\n\n' + INTRO_IA : ''); }
   var dlg = document.getElementById('ae'), log = document.getElementById('ae-log'), chipsEl = document.getElementById('ae-chips');
   var row = document.getElementById('ae-row'), txt = document.getElementById('ae-txt'), camposEl = document.getElementById('ae-campos');
