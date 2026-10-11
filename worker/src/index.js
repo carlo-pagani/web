@@ -160,8 +160,13 @@ export class Cupo extends DurableObject {
 }
 
 // Identifica al visitante por su IP sin guardarla tal cual
+// (una conexión IPv6 recibe un bloque /64 entero, así que en IPv6 cuenta el bloque y no cada dirección)
 async function visitante(request) {
-  const ip = request.headers.get("CF-Connecting-IP") || "sin-ip";
+  let ip = request.headers.get("CF-Connecting-IP") || "sin-ip";
+  if (ip.includes(":")) {
+    const [izq, der = ""] = ip.split("::"), a = izq ? izq.split(":") : [], b = der ? der.split(":") : [];
+    ip = [...a, ...Array(Math.max(0, 8 - a.length - b.length)).fill("0"), ...b].slice(0, 4).map((x) => x.toLowerCase().replace(/^0+(?=.)/, "")).join(":") + "::/64";
+  }
   const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("carlo-pagani|" + ip));
   return [...new Uint8Array(h).slice(0, 12)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
@@ -244,7 +249,9 @@ function precioDe(d, ref) {
 
 const P256 = { name: "ECDSA", namedCurve: "P-256" };
 const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-const POR_HORA_VISITANTE = 30, POR_HORA_TOTAL = 600; // pedidos y cobros por hora: de sobra para clientes, poco para martillar PayPal
+// Pedidos nuevos por hora: de sobra para clientes, poco para martillar PayPal. Cobrar un pedido ya creado no cuenta aquí
+// (si no, quien llene el tope impediría pagar a quien ya aprobó su orden); cada pedido admite pocos intentos de cobro.
+const POR_HORA_VISITANTE = 30, POR_HORA_TOTAL = 3000, INTENTOS_POR_PEDIDO = 5;
 
 export class Sello extends DurableObject {
   constructor(ctx, env) {
@@ -266,7 +273,7 @@ export class Sello extends DurableObject {
     const { kty, crv, x, y } = this.k.privada;
     return { kid: this.k.kid, kty, crv, x, y, creada: this.k.creada };
   }
-  // Tope de pedidos y cobros por hora, por visitante y en total
+  // Tope de pedidos nuevos por hora, por visitante y en total
   async permitir(quien) {
     const hora = new Date().toISOString().slice(0, 13), s = this.ctx.storage;
     if (this.hora !== hora) {
@@ -288,6 +295,15 @@ export class Sello extends DurableObject {
   }
   pedido(proveedor, id) {
     return this.ctx.storage.get(`pedido|${proveedor}|${id}`);
+  }
+  // Cuenta un intento de cobro de un pedido; devuelve el pedido, o null si no existe o ya agotó sus intentos sin sellarse
+  async intento(proveedor, id) {
+    const llave = `pedido|${proveedor}|${id}`, p = await this.ctx.storage.get(llave);
+    if (!p) return null;
+    if (p.sello) return p;
+    if ((p.intentos || 0) >= INTENTOS_POR_PEDIDO) return { ...p, agotado: true };
+    await this.ctx.storage.put(llave, { ...p, intentos: (p.intentos || 0) + 1 });
+    return p;
   }
   // Sella el pago `pago` de un pedido anotado, con la referencia, el monto y el detalle del pedido.
   // Un pedido recibe un solo sello y un pago sirve para un solo pedido; si se vuelve a pedir igual, devuelve el mismo sello.
@@ -371,9 +387,11 @@ async function crearPedido(request, env, origen) {
       purchase_units: [{ amount: { currency_code: "USD", value: (precio.centavos / 100).toFixed(2) }, description: corto(d.descripcion, 120) || "Carlo Pagani",
         custom_id: ref, invoice_id: `${ref}-${Date.now().toString(36).toUpperCase()}` }],
       application_context: { brand_name: "Carlo Pagani", shipping_preference: "NO_SHIPPING", user_action: "PAY_NOW" },
-    });
+    }, { Prefer: "return=representation" });
     if (!o.ok || !/^[A-Z0-9]{8,30}$/.test(o.datos.id || "")) throw new Error(`orden ${o.estado}`);
-    await selloDO(env).registrar("paypal", o.datos.id, datos);
+    // Quién recibe el dinero: la cuenta de Carlo, que PayPal pone al crear la orden con sus credenciales
+    const payee = (o.datos.purchase_units && o.datos.purchase_units[0] && o.datos.purchase_units[0].payee) || {};
+    await selloDO(env).registrar("paypal", o.datos.id, { ...datos, payee: corto(payee.merchant_id || env.PAYPAL_MERCHANT_ID, 40) });
     return json({ id: o.datos.id, centavos: precio.centavos }, 200, origen);
   } catch (e) {
     console.error("No pude crear la orden de PayPal:", e && e.message);
@@ -389,13 +407,13 @@ async function cobrarPayPal(request, env, origen) {
   const orden = String(d.orden || "");
   if (!/^[A-Z0-9]{8,30}$/.test(orden)) return json({ error: "Faltan datos" }, 400, origen);
   const no = (motivo, extra) => json({ aprobado: false, motivo, ...(extra || {}) }, 200, origen);
-  const sello = selloDO(env);
-  if (!(await sello.permitir(await visitante(request)))) return muchos(origen);
-  const p = await sello.pedido("paypal", orden);
+  const sello = selloDO(env), p = await sello.intento("paypal", orden);
   if (!p) return no("No encontré tu orden de PayPal.");
+  if (p.agotado) return no("Hubo demasiados intentos con esta orden. Vuelve a empezar el pago.");
   try {
     const u = (x) => (x && x.purchase_units && x.purchase_units[0]) || {};
-    const cuadra = (x) => u(x).amount && u(x).amount.currency_code === "USD" && centavosDe(u(x).amount.value) === p.centavos && u(x).custom_id === p.ref;
+    const cuadra = (x) => u(x).amount && u(x).amount.currency_code === "USD" && centavosDe(u(x).amount.value) === p.centavos && u(x).custom_id === p.ref &&
+      (!p.payee || (u(x).payee && u(x).payee.merchant_id === p.payee));
     let o = (await paypal(env, "GET", `/v2/checkout/orders/${orden}`)).datos;
     if (!o.id || !cuadra(o)) {
       console.log(`PayPal: la orden ${orden} no cuadra con su pedido; no se cobra`);

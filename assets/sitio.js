@@ -1823,11 +1823,14 @@
       pago: cobros.map(function (c) { return c.texto; }).join(' | '), importe: dolares(pagado()) };
   }
   // Constancia de cada pago en Jotform, con la misma referencia, por si el cliente no llega a enviar sus respuestas
+  // La constancia no lleva el sello del servidor: un pago se sella en un solo envío, el de las respuestas, y así un mismo
+  // pago nunca vale para dos consultas (scripts/verificar_sellos.mjs marca REPETIDO un sello que aparece en dos envíos).
   function registrarPago(titulo, r) {
     if (PRUEBA) return;
+    var texto = r.texto.replace(/ · sello v2~\S+/, ' · el sello del servidor llega con las respuestas');
     enviar(FORMS.analisis, { referencia: ref, tema: resp.tema, nombre: resp.datos.nombre, email: resp.datos.email, whatsapp: resp.datos.whatsapp,
-      factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: r.texto,
-      respuestas: titulo + '. El cliente sigue respondiendo el cuestionario; sus respuestas llegan en otro envío con la misma referencia.\n\n' + alcance() + '\n\nPago: ' + r.texto }).catch(function () {});
+      factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: texto,
+      respuestas: titulo + '. El cliente sigue respondiendo el cuestionario; sus respuestas llegan en otro envío con la misma referencia.\n\n' + alcance() + '\n\nPago: ' + texto }).catch(function () {});
   }
   // Pago al inicio: el monto sale de las partes elegidas y las preguntas del caso empiezan cuando la pasarela confirma el pago completo
   var ppEl = document.getElementById('ae-pp'), ppErr = document.getElementById('ae-pp-err');

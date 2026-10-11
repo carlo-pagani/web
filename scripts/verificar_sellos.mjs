@@ -11,13 +11,12 @@
 //   VERIFICADO  la firma es válida y el pago aparece en un solo envío. Compara el detalle (tema y partes) con lo que dice
 //               el registro: si el registro dice más partes de las que se pagaron, no cuadra.
 //   FALSO       la firma no es válida o la clave es desconocida.
-//   REPETIDO    el mismo pago aparece en más de un envío. Única excepción: en la Consulta Express (AE-…) un pago aparece en
-//               dos envíos, la constancia del pago y las respuestas; si son más, o ninguno es la constancia, es REPETIDO.
+//   REPETIDO    el mismo pago aparece en más de un envío: un pago vale para un solo cupo o un solo informe. (La constancia
+//               que la Consulta Express envía al pagar no lleva el sello; el sello llega solo con las respuestas.)
 // Sale con 1 si hay algún sello FALSO o REPETIDO, con 2 si no hay ningún sello y con 0 si todo está verificado.
 import { readFileSync } from "node:fs";
 
 const SELLO = /sello (v2~(paypal|payphone)~([A-Za-z0-9-]{1,40})~([A-Za-z0-9-]{1,40})~(\d{1,7})~([a-z0-9.]{1,160}))~([0-9a-f]{8})~([A-Za-z0-9_-]{40,120})/g;
-const CONSTANCIA = "El cliente sigue respondiendo el cuestionario";
 const raiz = new URL("..", import.meta.url);
 const claves = JSON.parse(readFileSync(new URL("data/sellos.json", raiz), "utf8"));
 const deB64url = (s) => Buffer.from(s.replace(/-/g, "+").replace(/_/g, "/"), "base64");
@@ -49,7 +48,7 @@ for (const e of envios) {
     if (!pagos.has(llave)) pagos.set(llave, { proveedor, id, ref, centavos: Number(centavos), det, kid, firma, firmado, envios: [], otros: [] });
     const p = pagos.get(llave);
     if (p.firmado !== firmado || p.firma !== firma) p.otros.push({ firmado, kid, firma, envio: e.id });
-    p.envios.push({ id: e.id, constancia: e.texto.includes(CONSTANCIA) });
+    p.envios.push(e.id);
   }
 }
 
@@ -62,7 +61,7 @@ async function valida(firmado, kid, firma) {
 
 let malos = 0;
 for (const p of pagos.values()) {
-  const donde = `envío ${p.envios.map((e) => e.id).join(", ")}`;
+  const donde = `envío ${p.envios.join(", ")}`;
   const resumen = `${p.proveedor} ${p.id} · referencia ${p.ref} · $${(p.centavos / 100).toFixed(2)} USD · ${detalle(p.det)}`;
   const buena = await valida(p.firmado, p.kid, p.firma);
   if (!buena || p.otros.length) {
@@ -70,8 +69,7 @@ for (const p of pagos.values()) {
     console.log(`FALSO      ${resumen} · ${donde}${claves.some((k) => k.kid === p.kid) ? "" : " (clave desconocida)"}${p.otros.length ? " (el mismo pago aparece con datos distintos)" : ""}`);
     continue;
   }
-  const n = p.envios.length, constancias = p.envios.filter((e) => e.constancia).length;
-  if (n > 1 && !(p.ref.startsWith("AE-") && n === 2 && constancias === 1)) {
+  if (p.envios.length > 1) {
     malos++;
     console.log(`REPETIDO   ${resumen} · ${donde}`);
     continue;
