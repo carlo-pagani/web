@@ -923,6 +923,7 @@
   var errEl = document.getElementById('ae-err'), inForm = document.getElementById('ae-in'), dudaBtn = document.getElementById('ae-duda');
   // Asistente con IA (opcional): la dirección llega en data/asistente.json cuando el servicio está desplegado
   var IA = { url: '' }, aclar = {}, dudas = [], revisada = {}, pendiente = null, modoDuda = false;
+  var ayudas = {}, porIA = {}, ayudando = null;   // la IA llena las casillas de una ficha después de conversar con el cliente
   var servicios = serviciosWeb.then(function (j) { if (j && /^https:\/\//.test(j.url || '')) IA.url = j.url; });
   // Pasarelas de cobro. El recorrido solo llama a cobrar(caja, monto, descripción, referencia, tipo, datos, alError); la primera pasarela activa
   // pinta el pago en `caja` y llama a ok({ monto, texto }) únicamente cuando confirma el pago completo. Cada pasarela es un objeto con:
@@ -1078,7 +1079,9 @@
       var p = aePaso(id);
       if (p.nota) { if (resp[id]) burbuja(resp[id], 'yo'); return; }
       if (p.cobro) { burbuja('Pago aprobado: ' + dolares(pagado()) + ' USD.', 'yo'); return; }
-      burbuja(p.q, 'yo'); burbuja(textoResp(p, resp[id]), 'tu');
+      burbuja(p.q, 'yo');
+      (ayudas[id] || []).forEach(function (a) { burbuja(a.texto, a.quien === 'cliente' ? 'tu' : a.quien === 'ia' ? 'yo ia' : 'yo'); });
+      burbuja(textoResp(p, resp[id]), 'tu');
       (aclar[id] || []).forEach(function (a) { burbuja(a.pregunta, 'yo'); burbuja(a.respuesta, 'tu'); });
     });
   }
@@ -1110,6 +1113,13 @@
     };
     var tot = c.querySelector('.f-tot b'), calc = function () { if (tot) tot.textContent = totalFicha(p, leer()); };
     c.addEventListener('input', calc); calc();
+    c._ia = { lista: false, filas: function () { return [c]; }, conDatos: function () { return true; },
+      campos: p.ficha.reduce(function (a, f) {
+        var d = [f.d, unidad(f.t, f.anual || p.todoAnual)].filter(Boolean).join('; ');
+        a.push({ k: f.k, l: f.l + (dos ? ' (' + p.dos[0] + ')' : ''), d: d });
+        if (dos) a.push({ k: f.k + '_p', l: f.l + ' (' + p.dos[1] + ')', d: d });
+        return a;
+      }, []) };
     c.querySelector('.f-ok').addEventListener('click', function () {
       var v = leer();
       if (p.req && !Object.keys(v).length) { errEl.textContent = 'Anota al menos un monto aproximado.'; c.querySelector('input').focus(); return; }
@@ -1168,6 +1178,12 @@
       if (tot) tot.textContent = usd(sumaDeuda(leer(), def.total.k));
     };
     c.addEventListener('input', calc); c.addEventListener('change', calc); calc();
+    c._ia = { lista: true, filas: function () { return Array.prototype.slice.call(lista.querySelectorAll('.r-row')); },
+      conDatos: function (el) { return filaConDatos(def, leerFila(el, def)); },
+      agregar: function () { lista.insertAdjacentHTML('beforeend', htmlFila(def)); return lista.lastElementChild; },
+      campos: def.campos.map(function (f) {
+        return { k: f.k, l: f.l, d: f.sel ? '' : unidad(f.t === 'txt' ? 'txt' : f.t, false) + (f.si ? '; solo para algunos tipos' : ''), sel: f.sel ? f.sel.filter(Boolean) : null };
+      }) };
     c.addEventListener('click', function (e) {
       var r;
       if (e.target.closest('.d-add')) { lista.insertAdjacentHTML('beforeend', htmlFila(def)); calc(); lista.lastElementChild.querySelector('select, input').focus(); }
@@ -1176,7 +1192,7 @@
         if (lista.children.length > 1) r.remove(); else r.outerHTML = htmlFila(def);
         calc();
       }
-      else if (e.target.closest('.d-no')) { c.remove(); responder([]); }
+      else if (e.target.closest('.d-no')) { c.remove(); delete porIA[p.id]; responder([]); }
       else if (e.target.closest('.f-igual')) { c.remove(); responder(previo[p.id]); }
       else if (e.target.closest('.f-ok')) {
         var v = leer();
@@ -1239,7 +1255,7 @@
   }
   function filaDeuda(tipos, d) {
     d = d || {};
-    return '<div class="d-row"><div class="d-top"><select aria-label="Tipo de deuda">' +
+    return '<div class="d-row"><div class="d-top"><select data-k="tipo" aria-label="Tipo de deuda">' +
       tipos.map(function (t) { return '<option' + (d.tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') +
       '</select><button type="button" class="d-x" aria-label="Quitar esta deuda">×</button></div><div class="d-cols">' +
       [['saldo', 'Saldo pendiente', 'usd'], ['cuota', 'Cuota al mes', 'usd'], ['tasa', 'Tasa anual, si la sabes', 'pct'], ['plazo', 'Meses que faltan, si lo sabes', 'num']].map(function (x) {
@@ -1263,6 +1279,11 @@
     };
     var calc = function () { tot.textContent = usd(sumaDeuda(leer(), 'cuota')); };
     c.addEventListener('input', calc); c.addEventListener('change', calc); calc();
+    c._ia = { lista: true, filas: function () { return Array.prototype.slice.call(lista.querySelectorAll('.d-row')); },
+      conDatos: function (el) { return Array.prototype.some.call(el.querySelectorAll('input[data-k]'), function (i) { return !!i.value.trim(); }); },
+      agregar: function () { lista.insertAdjacentHTML('beforeend', filaDeuda(p.deudas)); return lista.lastElementChild; },
+      campos: [{ k: 'tipo', l: 'Tipo de deuda', sel: p.deudas }, { k: 'saldo', l: 'Saldo pendiente', d: 'dólares' }, { k: 'cuota', l: 'Cuota al mes', d: 'dólares' },
+        { k: 'tasa', l: 'Tasa anual', d: 'porcentaje' }, { k: 'plazo', l: 'Meses que faltan', d: 'número de meses' }] };
     c.addEventListener('click', function (e) {
       var r;
       if (e.target.closest('.d-add')) { lista.insertAdjacentHTML('beforeend', filaDeuda(p.deudas)); lista.lastElementChild.querySelector('select').focus(); }
@@ -1271,7 +1292,7 @@
         if (lista.children.length > 1) r.remove(); else r.querySelectorAll('input').forEach(function (i) { i.value = ''; });
         calc();
       }
-      else if (e.target.closest('.d-no')) { c.remove(); responder([]); }
+      else if (e.target.closest('.d-no')) { c.remove(); delete porIA[p.id]; responder([]); }
       else if (e.target.closest('.f-igual')) { c.remove(); responder(previo[p.id]); }
       else if (e.target.closest('.f-ok')) {
         var v = leer();
@@ -1286,9 +1307,136 @@
     var c = p.ficha ? ficha(p, confirmar) : p.filas ? listaFilas(p, confirmar) : p.archivos ? archivos(p, confirmar) : deudas(p, confirmar);
     skipBtn.hidden = !p.opcional || confirmar;
     dudaBtn.hidden = !IA.url || !!p.archivos; llamarDuda();
+    if (c._ia && IA.url) {
+      c.querySelector('.f-acc').insertAdjacentHTML('beforebegin', '<button type="button" class="f-ayuda"><span aria-hidden="true">✦</span> No sé cómo llenarlo: ayúdame <i>IA</i></button>');
+      c.querySelector('.f-ayuda').addEventListener('click', function () { empezarAyuda(p); });
+    }
+    if (c._ia) {
+      // Lo que propuso la IA queda marcado hasta que el cliente lo cambia; los cambios que hace la web al llenar no cuentan
+      var quitar = function (e) { var i = e.target.closest('[data-k]'); if (e.isTrusted && i) desmarcar(i); };
+      c.addEventListener('input', quitar); c.addEventListener('change', quitar);
+      c.addEventListener('click', function (e) { if (e.target.closest('.f-ok')) notarIA(p, c); }, true);
+      if (previo[p.id] && porIA[p.id]) {
+        var filas = c._ia.filas();
+        porIA[p.id].forEach(function (m) { var i = filas[m.i] && filas[m.i].querySelector('[data-k="' + m.k + '"]'); if (i && i.value) marcar(i); });
+      }
+    }
     log.scrollTop += ancla.getBoundingClientRect().top - log.getBoundingClientRect().top - 12;
     if (dlg.open && window.matchMedia('(hover: hover)').matches) c.querySelector('input, select').focus({ preventScroll: true });
   }
+  // La IA llena las casillas: el cliente cuenta su caso, la IA pregunta lo que falte y propone los valores.
+  // Nunca inventa cifras; lo que propone queda marcado y el cliente lo cambia cuando quiera.
+  function unidad(t, anual) {
+    return t === 'pct' ? 'porcentaje' : t === 'meses' ? 'número de meses' : t === 'num' ? 'número' : t === 'anio' ? 'año, cuatro cifras' : t === 'txt' ? 'texto breve' : 'dólares' + (anual ? ', al año' : '');
+  }
+  // La marca «✦ IA» va dentro de la casilla; en las listas desplegables, junto a su nombre
+  function marcaDe(i) { var w = i.closest('.f-in'), l = i.closest('label[data-c]'); return w || (l && l.firstChild); }
+  function marcar(i) {
+    var w = i.closest('.f-in') || i, m = marcaDe(i);
+    w.classList.add('ia'); w.title = 'Lo propuso mi asistente; puedes cambiarlo';
+    if (m && !m.querySelector('.ia-marca')) m.insertAdjacentHTML('beforeend', '<i class="ia-marca" aria-hidden="true">✦ IA</i>');
+  }
+  function desmarcar(i) {
+    var w = i.closest('.f-in') || i, m = marcaDe(i), x = m && m.querySelector('.ia-marca');
+    w.classList.remove('ia'); w.removeAttribute('title'); if (x) x.remove();
+  }
+  function enFicha() { return log.querySelector('.msg.ficha'); }
+  function empezarAyuda(p) {
+    var c = enFicha();
+    if (actual !== p || !c || !c._ia || ayudando) return;
+    ayudando = p; modoDuda = false; pendiente = null; dudaBtn.hidden = true; errEl.textContent = '';
+    dudaBtn.classList.remove('llama');
+    var b = c.querySelector('.f-ayuda'); if (b) b.hidden = true;
+    var lista = ayudas[p.id] = ayudas[p.id] || [];
+    var m = lista.length ? 'Cuéntame qué quieres cambiar o completar, y lo ajusto.' :
+      'Cuéntame tu caso con tus palabras, como se lo contarías a un amigo. Con eso lleno las casillas por ti, y tú corriges lo que haga falta.';
+    lista.push({ quien: 'web', texto: m });
+    burbuja(m, 'yo', true);
+    abrirTexto(lista.length > 1 ? 'Escribe lo que quieras cambiar…' : 'Escribe con tus palabras; las cifras pueden ser aproximadas…', false);
+  }
+  // La conversación, en pares pregunta y respuesta, como la recibe el asistente
+  function pares(lista) {
+    var out = [], q = [];
+    lista.forEach(function (a) { if (a.quien === 'cliente') { out.push({ pregunta: q.join(' ') || 'Cuéntame tu caso.', respuesta: a.texto }); q = []; } else q.push(a.texto); });
+    return out.slice(-16);
+  }
+  function actuales(c) {
+    return c._ia.filas().filter(c._ia.conDatos).map(function (el) {
+      var o = {}; el.querySelectorAll('[data-k]').forEach(function (i) { if (i.value.trim() && !i.closest('[hidden]')) o[i.dataset.k] = i.value.trim(); }); return o;
+    }).filter(function (o) { return Object.keys(o).length; });
+  }
+  // Pone los valores que propone la IA: primero sobre las filas que ya tienen datos, luego en las vacías y, si faltan, en filas nuevas
+  function poner(c, filas) {
+    var hay = c._ia.filas(), destino = hay.filter(c._ia.conDatos).concat(hay.filter(function (el) { return !c._ia.conDatos(el); })), cambios = 0;
+    filas.slice(0, c._ia.lista ? 12 : 1).forEach(function (f, n) {
+      if (!f || typeof f !== 'object' || !Object.keys(f).length) return;
+      var el = destino[n] || (c._ia.agregar && c._ia.agregar()); if (!el) return;
+      var sel = function (k) { var i = el.querySelector('[data-k="' + k + '"]'); return !!i && i.tagName === 'SELECT'; };
+      var orden = Object.keys(f).filter(sel).concat(Object.keys(f).filter(function (k) { return !sel(k); }));   // el tipo primero: decide qué casillas se ven
+      orden.forEach(function (k) {
+        var i = el.querySelector('[data-k="' + k + '"]'); if (!i) return;
+        var v = String(f[k]);
+        if (i.tagName === 'SELECT') { if (!Array.prototype.some.call(i.options, function (o) { return o.value === v; }) || i.value === v) return; }
+        else if (i.dataset.t !== 'txt') { var n2 = monto(v); if (n2 == null || monto(i.value) === n2) return; v = String(n2); }
+        else if (i.value.trim() === v) return;
+        i.value = v; marcar(i); cambios++;
+        i.dispatchEvent(new Event(i.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+      });
+    });
+    return cambios;
+  }
+  function ayudar(t) {
+    var p = ayudando, c = enFicha(), lista = ayudas[p.id];
+    lista.push({ quien: 'cliente', texto: t });
+    burbuja(t, 'tu', true); row.hidden = true;
+    var espera = burbuja('• • •', 'yo escribe');
+    pedirIA({ modo: 'llenar', tema: resp.tema || '', pregunta: p.q, proposito: p.para || '', campos: c._ia.campos, lista: c._ia.lista,
+      actuales: actuales(c), aclaraciones: pares(lista), contexto: contexto(p.id) }).then(function (r) {
+      espera.remove();
+      if (actual !== p || ayudando !== p || !c.isConnected) return;
+      if (!r.mensaje || ['repreguntar', 'explicar', 'llenar'].indexOf(r.accion) < 0) {
+        ayudando = null;
+        burbuja('Ahora no pude ayudarte con mi asistente. Llena lo que sepas, con aproximados; lo que falte lo vemos en el informe.', 'yo', true);
+        var b = c.querySelector('.f-ayuda'); if (b) b.hidden = false;
+        log.appendChild(c); dudaBtn.hidden = false; log.scrollTop = log.scrollHeight;
+        return;
+      }
+      if (r.accion === 'llenar' && Array.isArray(r.filas)) poner(c, r.filas);
+      lista.push({ quien: 'ia', texto: r.mensaje });
+      burbuja(r.mensaje, 'yo ia', true);
+      if (r.accion === 'llenar') {
+        log.appendChild(c);   // la ficha llena queda al final, a la vista
+        abrirTexto('Si algo no cuadra, cuéntamelo o corrígelo en la casilla…', false);
+        log.scrollTop += c.previousElementSibling.getBoundingClientRect().top - log.getBoundingClientRect().top - 12;
+      } else abrirTexto('Escribe tu respuesta…', false);
+    });
+  }
+  // Al continuar: qué cifras siguen siendo las que propuso la IA, para que Carlo sepa de dónde salió cada una
+  function notarIA(p, c) {
+    var m = [], n = 0;
+    c._ia.filas().forEach(function (el) {
+      if (!c._ia.conDatos(el)) return;
+      var tipo = c._ia.lista ? (el.querySelector('select') || {}).value : '';
+      el.querySelectorAll('.ia [data-k], [data-k].ia').forEach(function (i) {
+        if (!i.value.trim() || i.closest('[hidden]')) return;
+        var f = c._ia.campos.filter(function (x) { return x.k === i.dataset.k; })[0];
+        m.push({ i: n, k: i.dataset.k, f: c._ia.lista ? tipo || 'Fila ' + (n + 1) : '', l: f ? f.l : i.dataset.k });
+      });
+      n++;
+    });
+    if (m.length) porIA[p.id] = m; else delete porIA[p.id];
+  }
+  // «Sueldo; Ingresos extra del año» o, en las listas, «Vivienda: valor, cuota; Vehículo: valor»
+  function textoIA(id) {
+    var g = [];
+    (porIA[id] || []).forEach(function (m) {
+      var x = g.filter(function (y) { return y.i === m.i; })[0];
+      if (!x) g.push(x = { i: m.i, f: m.f, ls: [] });
+      x.ls.push(m.f ? minus(m.l) : m.l);
+    });
+    return g.map(function (x) { return (x.f ? x.f + ': ' : '') + x.ls.join(x.f ? ', ' : '; '); }).join('; ');
+  }
+  function ayudo(id) { return (ayudas[id] || []).some(function (a) { return a.quien === 'cliente'; }); }
   // Barra de progreso con la sección: «Paso 3 de 9 · Gastos»
   var SEC = {};
   [['Tu consulta', 'tema partes'], ['Datos y pago', 'datos factura fdatos pago'],
@@ -1365,7 +1513,7 @@
   }
   function responder(v) {
     var p = actual; if (!p) return;
-    actual = null; modoDuda = false; resp[p.id] = v; camino.push(p.id);
+    actual = null; modoDuda = false; ayudando = null; resp[p.id] = v; camino.push(p.id);
     burbuja(textoResp(p, v), 'tu', true);
     chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
     if (p.id === 'extra') return cobrarExtra(v);
@@ -1373,7 +1521,7 @@
       aclar[p.id] = [{ pregunta: revisada[p.id], respuesta: JSON.stringify(v) === JSON.stringify(previo[p.id]) ? 'Confirmó las cifras.' : 'Ajustó las cifras.' }];
       return preguntar(true);
     }
-    if (IA.url && !p.op && !p.campos && !p.archivos && p.id !== 'fdatos' && !(v === '' || (p.ficha && !Object.keys(v).length) || (p.filas && !v.length))) return revisar(p);
+    if (IA.url && !p.op && !p.campos && !p.archivos && p.id !== 'fdatos' && !ayudo(p.id) && !(v === '' || (p.ficha && !Object.keys(v).length) || (p.filas && !v.length))) return revisar(p);
     preguntar(true);
   }
   function contexto(hasta) {
@@ -1383,7 +1531,7 @@
   }
   function pedirIA(datos) {
     var ctl = window.AbortController ? new AbortController() : null;
-    var reloj = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
+    var reloj = setTimeout(function () { if (ctl) ctl.abort(); }, datos.modo === 'llenar' ? 25000 : 15000);
     return fetch(IA.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos), signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.ok ? r.json() : { accion: 'seguir' }; })
       .catch(function () { return { accion: 'seguir' }; })
@@ -1447,6 +1595,7 @@
   function llamarDuda() { if (dudaBtn.hidden || dudaVista) return; dudaVista = true; dudaBtn.classList.add('llama'); }
   dudaBtn.addEventListener('click', function () {
     if (!actual || !IA.url) return;
+    if (!pendiente && enFicha() && enFicha()._ia) return empezarAyuda(actual);
     modoDuda = true; dudaBtn.hidden = true; errEl.textContent = '';
     dudaBtn.classList.remove('llama');
     abrirTexto('Escribe tu duda y mi asistente te responde…', false, 'Preguntar');
@@ -1513,7 +1662,8 @@
     resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota && !(cobro && id === 'partes'); }).map(function (id) {
       var p = aePaso(id), fijo = !cobro && CERRADOS.indexOf(id) > -1;
       var extra = (aclar[id] || []).filter(function (a) { return !/^(Confirmó|Ajustó) las cifras\.$/.test(a.respuesta); })
-        .map(function (a) { return '<i>Aclaraste: ' + esc(a.respuesta) + '</i>'; }).join('');
+        .map(function (a) { return '<i>Aclaraste: ' + esc(a.respuesta) + '</i>'; }).join('') +
+        (porIA[id] ? '<i class="res-ia">✦ Lo llenó mi asistente con lo que le contaste: ' + esc(textoIA(id)) + '.</i>' : '');
       var r = id === 'pago' ? dolares(pagado()) + ' USD, aprobado' : textoResp(p, resp[id]);
       return '<li><span class="res-q">' + esc(RES[id] || p.q) + '</span><span class="res-a">' + esc(r) + extra + '</span>' +
         (fijo ? '' : '<button type="button" class="back res-edit" data-id="' + id + '">Corregir</button>') + '</li>';
@@ -1545,7 +1695,7 @@
   }
   function corregir(id) {
     cerrarResumen();
-    editando = id; pendiente = null; modoDuda = false;
+    editando = id; pendiente = null; modoDuda = false; ayudando = null;
     respaldo = { v: resp[id], aclar: aclar[id], revisada: revisada[id], partes: resp.partes };
     previo[id] = resp[id]; delete resp[id]; delete aclar[id]; delete revisada[id];
     if (id === 'tema') { previo.partes = resp.partes; delete resp.partes; }   // las partes dependen del tema
@@ -1562,7 +1712,7 @@
       if (respaldo.revisada) revisada[id] = respaldo.revisada;
     }
     if (respaldo.partes && !resp.partes) resp.partes = respaldo.partes;
-    editando = null; respaldo = null; actual = null; pendiente = null; modoDuda = false;
+    editando = null; respaldo = null; actual = null; pendiente = null; modoDuda = false; ayudando = null;
     chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true; errEl.textContent = '';
     mostrarResumen();
   }
@@ -1588,7 +1738,10 @@
         if (p.nota) return 'Primer vistazo calculado en la web\n→ ' + resp[id];
         if (p.archivos) return 'Archivos adjuntos\n→ ' + textoResp(p, resp[id]);
         return p.q + '\n→ ' + textoResp(p, resp[id]).replace(/\n/g, '\n→ ') +
-          (aclar[id] || []).map(function (a) { return '\n  Asistente: ' + a.pregunta + '\n  → ' + a.respuesta; }).join('');
+          (aclar[id] || []).map(function (a) { return '\n  Asistente: ' + a.pregunta + '\n  → ' + a.respuesta; }).join('') +
+          (porIA[id] ? '\n  Datos propuestos por el asistente y confirmados por el cliente: ' + textoIA(id) + '.' : '') +
+          (ayudo(id) ? '\n  Conversación con el asistente para llenar esta parte:' + ayudas[id].filter(function (a) { return a.quien !== 'web'; })
+            .map(function (a) { return '\n  ' + (a.quien === 'ia' ? 'Asistente: ' : 'Cliente: ') + a.texto; }).join('') : '');
       }).join('\n\n') +
       (dudas.length ? '\n\nDudas que planteó\n' + dudas.map(function (d) { return '· ' + d.duda + ' (en «' + d.pregunta + '»)\n  Asistente: ' + d.respuesta; }).join('\n') : '') +
       '\n\n' + alcance() + '\nRevisó y confirmó sus respuestas el ' + fechaEC() + ', hora de Ecuador.';
@@ -1682,7 +1835,7 @@
   var CURSO = 'ae-curso', porConfirmar = null;
   function guardarCurso(cobro) {
     if ((!resp.pago && !cobro) || enviado || PRUEBA) return;
-    try { localStorage.setItem(CURSO, JSON.stringify({ resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ref: ref, cobros: cobros, compradas: compradas, aceptado: aceptado, camino: camino, cobro: cobro || null, t: Date.now() })); } catch (e) {}
+    try { localStorage.setItem(CURSO, JSON.stringify({ resp: resp, aclar: aclar, dudas: dudas, revisada: revisada, ayudas: ayudas, porIA: porIA, ref: ref, cobros: cobros, compradas: compradas, aceptado: aceptado, camino: camino, cobro: cobro || null, t: Date.now() })); } catch (e) {}
   }
   function borrarCurso() { try { localStorage.removeItem(CURSO); } catch (e) {} }
   function leerCurso() {
@@ -1692,9 +1845,9 @@
   }
   function retomar() {
     var g = PRUEBA ? null : leerCurso(); if (!g) return false;
-    resp = g.resp; aclar = g.aclar || {}; dudas = g.dudas || []; revisada = g.revisada || {}; ref = g.ref || '';
+    resp = g.resp; aclar = g.aclar || {}; dudas = g.dudas || []; revisada = g.revisada || {}; ayudas = g.ayudas || {}; porIA = g.porIA || {}; ref = g.ref || '';
     cobros = g.cobros || []; compradas = g.compradas || []; aceptado = g.aceptado || ''; porConfirmar = g.cobro || null;
-    previo = {}; enviado = false; editando = null; pendiente = null; modoDuda = false;
+    previo = {}; enviado = false; editando = null; pendiente = null; modoDuda = false; ayudando = null;
     if (Array.isArray(resp.adj) && resp.adj.length) delete resp.adj;
     camino = (g.camino || []).filter(function (id) { return id in resp; });
     return true;
@@ -1716,11 +1869,11 @@
   });
   inForm.addEventListener('submit', function (e) {
     e.preventDefault();
-    if (modoDuda || pendiente) {
+    if (modoDuda || pendiente || ayudando) {
       var t = txt.value.trim();
       if (!t) { errEl.textContent = modoDuda ? 'Escribe tu duda.' : 'Escríbeme aunque sea una frase.'; txt.focus(); return; }
       errEl.textContent = '';
-      return modoDuda ? enviarDuda(t) : aclarar(t);
+      return ayudando ? ayudar(t) : modoDuda ? enviarDuda(t) : aclarar(t);
     }
     if (!actual || actual.op || actual.ficha || actual.deudas || actual.filas || actual.archivos) return;
     if (actual.campos) {
@@ -1743,12 +1896,13 @@
     if (pendiente) return aclarar('Prefiero no responder');
     if (!actual || !actual.opcional) return;
     var c = log.querySelector('.msg.ficha'); if (c) c.remove();
+    delete porIA[actual.id];
     responder(actual.ficha ? {} : actual.filas || actual.archivos ? [] : '');
   });
   backBtn.addEventListener('click', function () {
     if (editando) return cancelarCorreccion();
     if (!camino.length || enviado) return;
-    pendiente = null; modoDuda = false;
+    pendiente = null; modoDuda = false; ayudando = null;
     if (actual) delete revisada[actual.id];
     var quitar = function () { var id = camino.pop(); previo[id] = resp[id]; delete resp[id]; delete aclar[id]; delete revisada[id]; };
     var esNota = function () { return camino.length && aePaso(camino[camino.length - 1]).nota; };
@@ -1759,7 +1913,7 @@
   });
   function abrir() {
     if (typeof dlg.showModal !== 'function') { location.hash = '#contacto'; return; }
-    if (enviado) { compradas = []; cobros = []; aceptado = ''; adjuntos = []; resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; pendiente = null; modoDuda = false; ref = ''; enviado = false; editando = null; log.innerHTML = ''; cerrarResumen(); }
+    if (enviado) { compradas = []; cobros = []; aceptado = ''; adjuntos = []; resp = {}; camino = []; previo = {}; aclar = {}; dudas = []; revisada = {}; ayudas = {}; porIA = {}; ayudando = null; pendiente = null; modoDuda = false; ref = ''; enviado = false; editando = null; log.innerHTML = ''; cerrarResumen(); }
     dlg.showModal(); document.documentElement.style.overflow = 'hidden';
     if (!log.children.length) {
       var sigue = retomar();
