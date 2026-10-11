@@ -1,5 +1,5 @@
 // Permite abrir la app sin conexión. Los datos no pasan por aquí: viven en el teléfono.
-const VERSION = 'fc-3';
+const VERSION = 'fc-4';
 const BASICO = ['./', './app.js?v=3', './app.css?v=3', './manifest.webmanifest', './icono-192.png', './icono-180.png'];
 
 self.addEventListener('install', (e) => {
@@ -14,7 +14,7 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
   const propio = url.origin === location.origin && url.pathname.startsWith(new URL('./', self.registration.scope).pathname);
-  const fuentes = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
+  const fuentes = url.origin === location.origin && url.pathname.startsWith('/assets/fuentes');
   if (!propio && !fuentes) return;
   // La página: primero la red (para recibir mejoras), si no hay conexión, la copia guardada.
   if (e.request.mode === 'navigate') {
