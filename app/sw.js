@@ -1,5 +1,5 @@
 // Permite abrir la app sin conexión. Los datos no pasan por aquí: viven en el teléfono.
-const VERSION = 'fc-6';
+const VERSION = 'fc-7';
 const BASICO = ['./', './app.js?v=5', './app.css?v=3', './manifest.webmanifest', './icono-192.png', './icono-180.png'];
 
 self.addEventListener('install', (e) => {
