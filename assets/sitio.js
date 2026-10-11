@@ -273,8 +273,10 @@
   }
   /* ---------- PayPal: cobro con monto exacto y confirmación inmediata ---------- */
   // clientId es el identificador público de la app «Live» en developer.paypal.com (no es la clave secreta). Vacío: apagado y se usa Deuna.
-  // El navegador crea y captura la orden; el número de orden queda en cada envío para cotejarlo. La verificación en el servidor llega con el Worker.
-  var PAYPAL = { clientId: 'BAAHPHYxpHokQA3PYUEiaYFXl32IAU8mMO-xXonNNzPgKvJHvtmyiMOBh-gI1SXRa9NoRBQVyrSMF_EWpE' };
+  // El navegador crea la orden y el cliente la aprueba; el cobro lo hace el Worker (PAYPAL.servidor, de data/asistente.json), que
+  // comprueba monto, moneda y referencia antes de cobrar y devuelve el texto del pago con el sello del servidor.
+  // Sin Worker de PayPal, el navegador captura la orden como antes y el registro dice que no tiene sello.
+  var PAYPAL = { clientId: 'BAAHPHYxpHokQA3PYUEiaYFXl32IAU8mMO-xXonNNzPgKvJHvtmyiMOBh-gI1SXRa9NoRBQVyrSMF_EWpE', servidor: '' };
   var ppCarga = null;
   function cargarPayPal() {
     if (window.paypal && window.paypal.Buttons) return Promise.resolve(window.paypal);
@@ -304,13 +306,16 @@
           });
         },
         onApprove: function (d, actions) {
-          return actions.order.capture().then(function (o) {
-            var cap = o && o.purchase_units && o.purchase_units[0] && o.purchase_units[0].payments && o.purchase_units[0].payments.captures && o.purchase_units[0].payments.captures[0];
-            if (!o || o.status !== 'COMPLETED' || !cap || cap.status !== 'COMPLETED' || cap.amount.value !== valor || cap.amount.currency_code !== 'USD') {
-              alError('PayPal no confirmó el pago completo. Si se te cobró algo, escríbeme y lo reviso.'); return;
-            }
-            var pagador = o.payer ? [o.payer.name && [o.payer.name.given_name, o.payer.name.surname].filter(Boolean).join(' '), o.payer.email_address].filter(Boolean).join(' · ') : '';
-            alPagar({ orden: o.id, captura: cap.id, monto: '$' + valor, pagador: pagador });
+          return serviciosWeb.then(function () {
+            if (PAYPAL.servidor) return cobroServidor(d.orderID, referencia, Math.round(monto * 100), valor, actions, alPagar, alError);
+            return actions.order.capture().then(function (o) {
+              var cap = o && o.purchase_units && o.purchase_units[0] && o.purchase_units[0].payments && o.purchase_units[0].payments.captures && o.purchase_units[0].payments.captures[0];
+              if (!o || o.status !== 'COMPLETED' || !cap || cap.status !== 'COMPLETED' || cap.amount.value !== valor || cap.amount.currency_code !== 'USD') {
+                alError('PayPal no confirmó el pago completo. Si se te cobró algo, escríbeme y lo reviso.'); return;
+              }
+              var pagador = o.payer ? [o.payer.name && [o.payer.name.given_name, o.payer.name.surname].filter(Boolean).join(' '), o.payer.email_address].filter(Boolean).join(' · ') : '';
+              alPagar({ orden: o.id, captura: cap.id, monto: '$' + valor, pagador: pagador });
+            });
           });
         },
         onCancel: function () { alError('Cancelaste el pago. Puedes intentarlo de nuevo cuando quieras.'); },
@@ -321,7 +326,22 @@
       alError('No pude cargar el pago de PayPal. Revisa tu conexión y vuelve a intentarlo.');
     });
   }
-  function textoPayPal(r) { return 'PayPal: pagado ' + r.monto + ' USD · orden ' + r.orden + ' · captura ' + r.captura + (r.pagador ? ' · ' + r.pagador : ''); }
+  // El Worker cobra la orden aprobada. Si la conexión falla, reintenta con la misma orden: PayPal nunca la cobra dos veces.
+  function cobroServidor(orden, referencia, centavos, valor, actions, alPagar, alError) {
+    var intento = function (n) {
+      return fetch(PAYPAL.servidor, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orden: orden, referencia: referencia, centavos: centavos }) })
+        .then(function (r) { if (r.status >= 500) throw new Error(r.status); return r.json(); })
+        .catch(function (e) { if (n > 1) throw e; return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return intento(n + 1); }); });
+    };
+    return intento(0).then(function (r) {
+      if (r.aprobado && r.centavos === centavos) return alPagar({ orden: r.orden, captura: r.captura, monto: '$' + valor, pagador: r.pagador, texto: r.pago });
+      if (r.reintentar) { alError(r.motivo); return actions.restart(); }
+      alError(r.motivo || 'PayPal no confirmó el pago completo. Si se te cobró algo, escríbeme y lo reviso.');
+    }, function () {
+      alError('No pude confirmar tu pago con PayPal. Inténtalo de nuevo en un momento; un mismo pago nunca se cobra dos veces.');
+    });
+  }
+  function textoPayPal(r) { return r.texto || 'PayPal: pagado ' + r.monto + ' USD · orden ' + r.orden + ' · captura ' + r.captura + (r.pagador ? ' · ' + r.pagador : '') + ' · sin sello del servidor'; }
 
   /* ---------- Payphone: cobro con tarjeta de cualquier banco del Ecuador ---------- */
   // Se activa cuando data/asistente.json trae «pago»: la dirección del Worker, que guarda el token de Payphone.
@@ -329,7 +349,10 @@
   // el Worker confirma el pago con Payphone y solo entonces se guardan los datos en Jotform.
   var PAYPHONE = { url: '' }, PPH = 'pph-cobro', CAJITA = 'https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box', cajitaCarga = null;
   var serviciosWeb = fetch('/data/asistente.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
-  serviciosWeb.then(function (j) { if (j && /^https:\/\//.test(j.pago || '')) PAYPHONE.url = j.pago; });
+  serviciosWeb.then(function (j) {
+    if (j && /^https:\/\//.test(j.pago || '')) PAYPHONE.url = j.pago;
+    if (j && /^https:\/\//.test(j.paypal || '')) PAYPAL.servidor = j.paypal;
+  });
   function cargarCajita() {
     if (window.PPaymentButtonBox) return Promise.resolve();
     if (cajitaCarga) return cajitaCarga;
@@ -1771,7 +1794,8 @@
             .map(function (a) { return '\n  ' + (a.quien === 'ia' ? 'Asistente: ' : 'Cliente: ') + a.texto; }).join('') : '');
       }).join('\n\n') +
       (dudas.length ? '\n\nDudas que planteó\n' + dudas.map(function (d) { return '· ' + d.duda + ' (en «' + d.pregunta + '»)\n  Asistente: ' + d.respuesta; }).join('\n') : '') +
-      '\n\n' + alcance() + '\nRevisó y confirmó sus respuestas el ' + fechaEC() + ', hora de Ecuador.';
+      '\n\n' + alcance() + '\nRevisó y confirmó sus respuestas el ' + fechaEC() + ', hora de Ecuador.' +
+      '\n\nPagos\n' + cobros.map(function (c) { return '· ' + c.texto; }).join('\n');
     return { referencia: ref, tema: resp.tema, respuestas: lineas, nombre: resp.datos.nombre, email: resp.datos.email,
       whatsapp: resp.datos.whatsapp, factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''),
       pago: cobros.map(function (c) { return c.texto; }).join(' | '), importe: dolares(pagado()) };
@@ -1781,7 +1805,7 @@
     if (PRUEBA) return;
     enviar(FORMS.analisis, { referencia: ref, tema: resp.tema, nombre: resp.datos.nombre, email: resp.datos.email, whatsapp: resp.datos.whatsapp,
       factura: resp.factura + (resp.fdatos ? ' · ' + resp.fdatos : ''), pago: r.texto,
-      respuestas: titulo + '. El cliente sigue respondiendo el cuestionario; sus respuestas llegan en otro envío con la misma referencia.\n\n' + alcance() }).catch(function () {});
+      respuestas: titulo + '. El cliente sigue respondiendo el cuestionario; sus respuestas llegan en otro envío con la misma referencia.\n\n' + alcance() + '\n\nPago: ' + r.texto }).catch(function () {});
   }
   // Pago al inicio: el monto sale de las partes elegidas y las preguntas del caso empiezan cuando la pasarela confirma el pago completo
   var ppEl = document.getElementById('ae-pp'), ppErr = document.getElementById('ae-pp-err');

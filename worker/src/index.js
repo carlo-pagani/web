@@ -251,9 +251,138 @@ async function confirmarPago(request, env, origen) {
     console.log(`Payphone: transacción ${id} (${tx}) no aprobada: ${corto(motivo, 200)}`);
     return json({ aprobado: false, motivo: corto(motivo, 200) }, 200, origen);
   }
+  const s = await sellar(env, { proveedor: "payphone", id: String(r.transactionId), ref: tx, centavos: r.amount });
+  if (s.error) return json({ aprobado: false, motivo: s.error }, 200, origen);
   const tarjeta = r.cardBrand ? ` · ${r.cardBrand} ${r.lastDigits || ""}`.trimEnd() : "";
-  const pago = `Payphone: pagado $${(r.amount / 100).toFixed(2)} USD · autorización ${r.authorizationCode} · transacción ${r.transactionId}${tarjeta} · ${r.date || new Date().toISOString()}`;
+  const pago = `Payphone: pagado $${(r.amount / 100).toFixed(2)} USD · autorización ${r.authorizationCode} · transacción ${r.transactionId}${tarjeta} · ${r.date || new Date().toISOString()} · ${s.sello}`;
   return json({ aprobado: true, centavos: r.amount, autorizacion: corto(r.authorizationCode, 40), transaccion: r.transactionId, pago }, 200, origen);
+}
+
+// Sello del servidor. Los registros de pago llegan a Jotform desde el navegador, así que cualquiera podría escribir uno
+// que diga «pagado». Por eso el Worker, después de comprobar el pago con PayPal o Payphone, lo firma con una clave
+// privada que solo existe aquí (se crea sola la primera vez y nunca sale del Durable Object). La clave pública queda en
+// data/sellos.json y scripts/verificar_sellos.mjs comprueba cada sello: un registro sin sello válido no es un pago.
+// Formato: «sello v1~proveedor~id del pago~referencia~centavos~clave~firma».
+const P256 = { name: "ECDSA", namedCurve: "P-256" };
+const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const ID_PAGO = /^[A-Za-z0-9-]{1,40}$/;
+
+export class Sello extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    ctx.blockConcurrencyWhile(async () => {
+      let k = await ctx.storage.get("clave");
+      if (!k) {
+        const par = await crypto.subtle.generateKey(P256, true, ["sign", "verify"]);
+        const privada = await crypto.subtle.exportKey("jwk", par.privateKey);
+        const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${privada.x}.${privada.y}`));
+        k = { privada, kid: [...new Uint8Array(h).slice(0, 4)].map((b) => b.toString(16).padStart(2, "0")).join(""), creada: new Date().toISOString() };
+        await ctx.storage.put("clave", k);
+      }
+      this.k = k;
+      this.firma = await crypto.subtle.importKey("jwk", k.privada, P256, false, ["sign"]);
+    });
+  }
+  publica() {
+    const { kty, crv, x, y } = this.k.privada;
+    return { kid: this.k.kid, kty, crv, x, y, creada: this.k.creada };
+  }
+  // Cada pago se sella una sola vez y para una sola referencia; si se vuelve a pedir igual, devuelve el mismo sello
+  async sellar({ proveedor, id, ref, centavos }) {
+    const llave = `pago|${proveedor}|${id}`, previo = await this.ctx.storage.get(llave);
+    if (previo) return previo.ref === ref && previo.centavos === centavos ? { sello: previo.sello } : { error: "Este pago ya se registró con otra referencia." };
+    const texto = ["v1", proveedor, id, ref, centavos].join("~");
+    const firma = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, this.firma, new TextEncoder().encode(texto));
+    const sello = `sello ${texto}~${this.k.kid}~${b64url(firma)}`;
+    await this.ctx.storage.put(llave, { ref, centavos, sello, t: new Date().toISOString() });
+    return { sello };
+  }
+}
+
+const selloDO = (env) => env.SELLO.get(env.SELLO.idFromName("sello"));
+async function sellar(env, p) {
+  if (!["paypal", "payphone"].includes(p.proveedor) || !ID_PAGO.test(p.id) || !ID_PAGO.test(p.ref) || !Number.isInteger(p.centavos) || p.centavos <= 0) {
+    return { error: "No pude sellar el pago." };
+  }
+  try {
+    return await selloDO(env).sellar(p);
+  } catch (e) {
+    console.error("No pude sellar el pago:", e && e.message);
+    return { error: "No pude registrar el pago. Escríbeme y lo reviso." };
+  }
+}
+
+// PayPal: el navegador crea la orden y el cliente la aprueba en la ventana de PayPal, pero el cobro lo hace el Worker.
+// Antes de cobrar comprueba que la orden sea de esta web, en dólares, por el monto esperado y con la referencia del caso;
+// si algo no cuadra, no cobra. Con el cobro completo, sella el pago. Necesita PAYPAL_CLIENT_ID (público) y PAYPAL_SECRET.
+const paypalListo = (env) => env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET;
+const centavosDe = (v) => (/^\d+(\.\d{1,2})?$/.test(String(v)) ? Math.round(Number(v) * 100) : NaN);
+async function paypal(env, metodo, ruta, token, extra) {
+  const res = await fetch(`${env.PAYPAL_URL || "https://api-m.paypal.com"}${ruta}`, {
+    method: metodo,
+    headers: { Authorization: token, "Content-Type": "application/json", ...(extra || {}) },
+    body: metodo === "POST" ? (ruta.includes("oauth2") ? "grant_type=client_credentials" : "{}") : undefined,
+  });
+  const datos = await res.json().catch(() => ({}));
+  return { ok: res.ok, estado: res.status, datos };
+}
+async function cobrarPayPal(request, env, origen) {
+  if (!paypalListo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
+  const cuerpo = await request.text();
+  if (cuerpo.length > 1000) return json({ error: "Demasiado largo" }, 413, origen);
+  let d;
+  try {
+    d = JSON.parse(cuerpo);
+  } catch {
+    return json({ error: "JSON no válido" }, 400, origen);
+  }
+  const orden = String(d.orden || ""), ref = String(d.referencia || ""), centavos = d.centavos;
+  if (!/^[A-Z0-9]{8,30}$/.test(orden) || !ID_PAGO.test(ref) || !Number.isInteger(centavos) || centavos <= 0 || centavos > 1e6) {
+    return json({ error: "Faltan datos" }, 400, origen);
+  }
+  const no = (motivo, extra) => json({ aprobado: false, motivo, ...(extra || {}) }, 200, origen);
+  try {
+    const t = await paypal(env, "POST", "/v1/oauth2/token", "Basic " + btoa(`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_SECRET}`), {
+      "Content-Type": "application/x-www-form-urlencoded",
+    });
+    if (!t.ok || !t.datos.access_token) throw new Error(`token ${t.estado}`);
+    const token = "Bearer " + t.datos.access_token;
+    let o = (await paypal(env, "GET", `/v2/checkout/orders/${orden}`, token)).datos;
+    const u = (x) => (x && x.purchase_units && x.purchase_units[0]) || {};
+    const cuadra = (x) => u(x).amount && u(x).amount.currency_code === "USD" && centavosDe(u(x).amount.value) === centavos && u(x).custom_id === ref;
+    if (!o.id) return no("No encontré tu orden de PayPal.");
+    if (!cuadra(o)) {
+      console.log(`PayPal: la orden ${orden} no cuadra con ${ref} por ${centavos} centavos; no se cobra`);
+      return no("La orden de PayPal no coincide con tu compra, así que no se cobró nada. Vuelve a intentarlo.");
+    }
+    if (o.status === "APPROVED") {
+      // Sin clave de idempotencia: si el banco rechaza la tarjeta, el cliente elige otra y la misma orden se vuelve a cobrar.
+      // Un reintento tras un corte no cobra dos veces: PayPal no captura una orden ya cobrada, y aquí se lee su estado antes.
+      const c = await paypal(env, "POST", `/v2/checkout/orders/${orden}/capture`, token, { Prefer: "return=representation" });
+      const yaCobrada = (c.datos.details || []).some((x) => x.issue === "ORDER_ALREADY_CAPTURED");
+      if (!c.ok && !yaCobrada) {
+        const rechazo = (c.datos.details || []).some((x) => x.issue === "INSTRUMENT_DECLINED");
+        console.log(`PayPal: no se pudo cobrar la orden ${orden}: ${c.estado} ${JSON.stringify(c.datos.details || c.datos.name || "")}`.slice(0, 300));
+        return no(rechazo ? "PayPal rechazó el medio de pago. Elige otro y vuelve a intentarlo." : "PayPal no pudo completar el cobro. Inténtalo de nuevo.", rechazo ? { reintentar: true } : null);
+      }
+      // La orden completa se vuelve a leer para comprobarla con todos sus datos
+      const g = await paypal(env, "GET", `/v2/checkout/orders/${orden}`, token);
+      o = g.ok && g.datos.id ? g.datos : c.datos;
+    }
+    const cap = u(o).payments && u(o).payments.captures && u(o).payments.captures[0];
+    if (o.status !== "COMPLETED" || !cuadra(o) || !cap || cap.status !== "COMPLETED" || cap.amount.currency_code !== "USD" || centavosDe(cap.amount.value) !== centavos) {
+      return no("PayPal no confirmó el pago completo. Si se te cobró algo, escríbeme y lo reviso.");
+    }
+    const s = await sellar(env, { proveedor: "paypal", id: orden, ref, centavos });
+    if (s.error) return no(s.error);
+    const p = o.payer || {}, nombre = p.name ? [p.name.given_name, p.name.surname].filter(Boolean).join(" ") : "";
+    const pagador = [nombre, p.email_address].filter(Boolean).map((x) => corto(x, 80)).join(" · ");
+    const pago = `PayPal: pagado $${(centavos / 100).toFixed(2)} USD · orden ${orden} · captura ${corto(cap.id, 30)}${pagador ? " · " + pagador : ""} · ${s.sello}`;
+    return json({ aprobado: true, centavos, orden, captura: cap.id, pagador, pago }, 200, origen);
+  } catch (e) {
+    console.error("PayPal no respondió:", e && e.message);
+    return json({ aprobado: false, motivo: "No pude confirmar el pago con PayPal. Inténtalo de nuevo en un momento; un mismo pago nunca se cobra dos veces." }, 502, origen);
+  }
 }
 
 // Deja pasar solo casillas que existen en la ficha y, en las de opciones, solo una opción válida.
@@ -287,6 +416,8 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origen) });
     if (ruta === "/pago" && request.method === "GET") return datosCajita(env, origen);
     if (ruta === "/pago/confirmar" && request.method === "POST") return confirmarPago(request, env, origen);
+    if (ruta === "/pago/paypal" && request.method === "POST") return cobrarPayPal(request, env, origen);
+    if (ruta === "/pago/clave" && request.method === "GET") return json(await selloDO(env).publica(), 200, origen);
     if (request.method !== "POST" || ruta !== "/guia") {
       return json({ error: "Ruta no válida" }, 404, origen);
     }
