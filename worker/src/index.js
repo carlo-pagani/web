@@ -471,7 +471,8 @@ async function confirmarPago(request, env, origen) {
   if (!id || !tx) return json({ error: "Faltan datos" }, 400, origen);
   const sello = selloDO(env), p = await sello.intento("payphone", tx);
   if (!p) return json({ aprobado: false, motivo: "No encontré tu pedido. Si se llegó a cobrar, Payphone anula el cargo en unos minutos." }, 200, origen);
-  if (p.recibo) return json(p.recibo, 200, origen);
+  // El recibo guardado solo se entrega a quien trae también el número de la transacción de Payphone
+  if (p.recibo) return json(String(p.recibo.transaccion) === String(id) ? p.recibo : { aprobado: false, motivo: "No encontré ese pago." }, 200, origen);
   if (p.agotado) return json({ aprobado: false, motivo: "Hubo demasiados intentos con este pago. Si se llegó a cobrar, Payphone anula el cargo en unos minutos." }, 200, origen);
 
   let r;

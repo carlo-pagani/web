@@ -15,8 +15,8 @@
 //               corte): es una sola compra y cuenta una vez, con el primero de esos envíos.
 //   REPETIDO    el mismo pago aparece en envíos distintos: un pago vale para un solo cupo o un solo informe. (La constancia
 //               que la Consulta Express envía al pagar no lleva el sello; el sello llega solo con las respuestas.)
-// El «texto» de cada envío debe ser solo lo que escribió el cliente, sin el número ni la fecha del envío, para que dos
-// reenvíos idénticos se reconozcan.
+// El «texto» de cada envío debe llevar todos los campos que llenó el cliente (respuestas, datos y adjuntos), no solo el del
+// pago, y nada que ponga Jotform, como el número o la fecha del envío: así solo dos reenvíos idénticos salen DUPLICADO.
 // Sale con 1 si hay algún sello FALSO o REPETIDO, con 2 si no hay ningún sello y con 0 si todo está verificado.
 import { readFileSync } from "node:fs";
 
