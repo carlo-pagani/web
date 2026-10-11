@@ -45,13 +45,15 @@ def buscar(grupo):
         fuente = (it.findtext("source") or "").strip()
         if fuente and titulo.endswith(" - " + fuente):
             titulo = titulo[: -len(" - " + fuente)]
-        if not titulo:
+        enlace = (it.findtext("link") or "").strip()
+        # solo enlaces https: la web los pone en la portada y un «javascript:» ejecutaría código
+        if not titulo or not enlace.startswith("https://"):
             continue
         try:
             fecha = parsedate_to_datetime(it.findtext("pubDate")).astimezone(timezone.utc).isoformat()
         except Exception:
             fecha = None
-        items.append({"region": grupo["region"], "titulo": titulo, "fuente": fuente, "url": it.findtext("link"), "fecha": fecha})
+        items.append({"region": grupo["region"], "titulo": titulo, "fuente": fuente, "url": enlace, "fecha": fecha})
     items.sort(key=lambda x: x["fecha"] or "", reverse=True)
     # primero los titulares que hablan de economía y de esa región; si no alcanzan, se completa con los de economía
     foco = re.compile(grupo["foco"], re.I)
