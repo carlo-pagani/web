@@ -2056,6 +2056,17 @@
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
     objetivos.forEach(function (n) { n.classList.add('r'); io.observe(n); });
     document.documentElement.classList.add('js-r');
+    // Red de seguridad: si el navegador no avisa (Safari a veces no lo hace al volver a una pestaña o con una copia
+    // guardada), todo lo que ya está a la vista o quedó arriba aparece igual; y ante cualquier error, se muestra todo.
+    var revisar = function () {
+      var h = window.innerHeight;
+      objetivos.forEach(function (n) { if (!n.classList.contains('in') && n.getBoundingClientRect().top < h) { n.classList.add('in'); io.unobserve(n); } });
+    };
+    var espera = null;
+    window.addEventListener('scroll', function () { if (!espera) espera = setTimeout(function () { espera = null; revisar(); }, 400); }, { passive: true });
+    window.addEventListener('load', function () { setTimeout(revisar, 1500); });
+    window.addEventListener('pageshow', function () { setTimeout(revisar, 300); });
+    window.addEventListener('error', function () { document.documentElement.classList.remove('js-r'); });
   }
 
   /* ---------- Brillo que sigue al cursor (solo con ratón) ---------- */
