@@ -485,7 +485,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .f-in input { width: 100%; font: inherit; font-size: 1rem; color: var(--on-navy); background: var(--navy); border: 1px solid rgba(238,242,247,.22); border-radius: 4px; padding: .5rem .6rem .5rem 1.45rem; text-align: right; font-variant-numeric: tabular-nums; color-scheme: dark; }
 .f-in input:focus-visible, .d-top select:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
 .f-in.usd::before, .f-in.pct::after, .f-in.meses::after { position: absolute; top: 50%; transform: translateY(-50%); color: var(--on-navy-soft); pointer-events: none; font-size: var(--t-s); }
-.f-in.usd::before { content: '$'; left: .6rem; }
+.f-in.usd::before { content: var(--mon, '$'); left: .6rem; }
 .f-in.pct input { padding-left: .6rem; padding-right: 1.7rem; }
 .f-in.pct::after { content: '%'; right: .6rem; }
 .f-in.num input { padding-left: .6rem; }
