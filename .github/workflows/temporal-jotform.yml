@@ -1,0 +1,16 @@
+# Temporal: lee el nombre del campo de archivos del formulario «Análisis exprés». Se borra después de usarlo.
+name: temporal-jotform
+on:
+  push:
+    branches: [claude/project-thread-bxckoi]
+    paths: [.github/workflows/temporal-jotform.yml]
+jobs:
+  campo:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sSL https://form.jotform.com/262794223035052 -o f.html
+          grep -o '<input[^>]*type="file"[^>]*>' f.html || echo "sin input file"
+          grep -o 'name="q[0-9]*_[A-Za-z0-9]*\(\[\]\)\?"' f.html | sort -u
+          grep -o '"file_[a-zA-Z]*"[^,]*' f.html | head -20
+          grep -o 'qq-uploader\|jfUpload\|data-file-[a-z]*="[^"]*"' f.html | sort | uniq -c | head
