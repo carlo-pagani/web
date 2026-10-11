@@ -1,6 +1,6 @@
 // Permite abrir la app sin conexión. Los datos no pasan por aquí: viven en el teléfono.
-const VERSION = 'fc-4';
-const BASICO = ['./', './app.js?v=3', './app.css?v=3', './manifest.webmanifest', './icono-192.png', './icono-180.png'];
+const VERSION = 'fc-5';
+const BASICO = ['./', './app.js?v=4', './app.css?v=3', './manifest.webmanifest', './icono-192.png', './icono-180.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(BASICO)).then(() => self.skipWaiting()));
@@ -17,8 +17,15 @@ self.addEventListener('fetch', (e) => {
   const fuentes = url.origin === location.origin && url.pathname.startsWith('/assets/fuentes');
   if (!propio && !fuentes) return;
   // La página: primero la red (para recibir mejoras), si no hay conexión, la copia guardada.
+  // Solo la portada de la app se guarda como './'; Ayuda y Privacidad se guardan aparte, para no pisar la app.
   if (e.request.mode === 'navigate') {
-    e.respondWith(fetch(e.request).then((r) => { const c = r.clone(); caches.open(VERSION).then((k) => k.put('./', c)); return r; }).catch(() => caches.match('./')));
+    const raiz = new URL('./', self.registration.scope).pathname;
+    const esApp = url.pathname === raiz || url.pathname === raiz + 'index.html';
+    const clave = esApp ? './' : url.origin + url.pathname;
+    e.respondWith(fetch(e.request).then((r) => {
+      if (r.ok) { const c = r.clone(); caches.open(VERSION).then((k) => k.put(clave, c)); }
+      return r;
+    }).catch(() => caches.match(clave).then((g) => g || (esApp ? undefined : caches.match('./').then((a) => a && Response.redirect(raiz, 302))))));
     return;
   }
   // Lo demás (código, lector de facturas, fuentes): la copia guardada si existe.
