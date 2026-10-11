@@ -51,7 +51,15 @@
   document.addEventListener('focusin', function (e) {
     if (e.target.matches && e.target.matches('input, textarea, select')) p.classList.add('escribiendo');
   });
-  document.addEventListener('focusout', function () { p.classList.remove('escribiendo'); });
+  // Vuelve con un respiro: si reapareciera al instante, el toque en «Enviar» caería sobre la barra
+  var volver;
+  document.addEventListener('focusout', function () {
+    clearTimeout(volver);
+    volver = setTimeout(function () {
+      var a = document.activeElement;
+      if (!(a && a.matches && a.matches('input, textarea, select'))) p.classList.remove('escribiendo');
+    }, 450);
+  });
 
   tab.addEventListener('click', function () {
     cerrada = false; abrir(true);

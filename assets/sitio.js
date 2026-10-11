@@ -52,7 +52,7 @@
   function anios(n) { return n + (n === 1 ? ' año' : ' años'); }
 
   function calcMeta() {
-    var m = modo(), monto = Math.max(num('monto'), 0), A = Math.max(num('aporte'), 0), r = num('retorno') / 100;
+    var m = modo(), monto = Math.max(num('monto'), 0), A = Math.max(num('aporte'), 0), r = Math.min(Math.max(num('retorno'), -90), 100) / 100;
     var n = Math.min(Math.max(Math.round(num('anios')), 1), 50);
     var infl = document.getElementById('inflacion').checked;
     var rr = (1 + r) / (infl ? 1.03 : 1) - 1;
@@ -65,7 +65,10 @@
     var tasa = ' Rendimiento ' + (infl ? 'real ' : '') + 'de ' + fmt1.format(rr * 100) + ' % anual.';
     var reparto = interes > 0
       ? 'Tú aportas ' + fmt0.format(last.ap) + ' y el interés compuesto genera ' + fmt0.format(interes) + ': el ' + fmt0.format(interes / last.v * 100) + ' % del total.' + tasa
-      : 'Con este rendimiento tu dinero pierde poder de compra frente a la inflación.';
+      : !last.ap ? 'Escribe cuánto inviertes hoy o cuánto sumas cada mes.'
+      : interes === 0 ? 'Sin rendimiento, al final tienes exactamente lo que aportaste.'
+      : infl && r >= 0 ? 'Con este rendimiento tu dinero pierde poder de compra frente a la inflación.'
+      : 'Con un rendimiento negativo terminas con menos de lo que aportaste.';
     document.getElementById('monto-label').firstChild.textContent = m === 'futuro' ? 'Capital que invierto hoy' : 'Monto que quiero reunir';
     if (m === 'futuro') {
       document.getElementById('res-label').textContent = 'En ' + anios(n) + hoyTxt + ' tendrás';
@@ -1464,7 +1467,7 @@
   function ayudo(id) { return (ayudas[id] || []).some(function (a) { return a.quien === 'cliente'; }); }
   // Barra de progreso con la sección: «Paso 3 de 9 · Gastos»
   var SEC = {};
-  [['Tu consulta', 'tema partes'], ['Datos y pago', 'datos factura fdatos pago'],
+  [['Tu consulta', 'tema pais pais2 partes'], ['Datos y pago', 'datos factura fdatos pago'],
     ['Lo que buscas', 'p1 p0 p0b'], ['Tu hogar', 'p2 p3 p2c p2p p3p p4'], ['Ingresos', 'p5'], ['Gastos', 'p6 p7 p6a'], ['Bienes', 'p12 p12b'],
     ['Préstamos y tarjetas', 'p8s p8 p5s p5b p5t p5u p5c p5g p5f p5fm p5d p10'], ['Ahorros e inversiones', 'p11 p11b'], ['Protección', 'p13i p13ip p13s p13x'],
     ['Hábitos y metas', 'p14 p14p p15 p15b'], ['Tu plan', 'pinv pcom'],
@@ -1551,17 +1554,21 @@
     preguntar(true);
   }
   function contexto(hasta) {
-    var t = camino.filter(function (id) { return id !== hasta && !aePaso(id).nota; })
+    // Sin datos personales: a la IA le basta el caso, no el nombre, el correo, la cédula ni el pago
+    var privados = ['datos', 'factura', 'fdatos', 'pago'];
+    var t = camino.filter(function (id) { return id !== hasta && !aePaso(id).nota && privados.indexOf(id) < 0; })
       .map(function (id) { var p = aePaso(id); return p.q + '\n' + textoResp(p, resp[id]); }).join('\n\n');
     return t.slice(-8000);
   }
+  // Si el asistente falla una vez, el resto del cuestionario sigue sin él, sin volver a esperar en cada paso
   function pedirIA(datos) {
+    if (IA.caida) return Promise.resolve({ accion: 'seguir' });
     var m = mon(); datos.pais = m.pais; datos.moneda = m.moneda;
     var ctl = window.AbortController ? new AbortController() : null;
     var reloj = setTimeout(function () { if (ctl) ctl.abort(); }, datos.modo === 'llenar' ? 25000 : 15000);
     return fetch(IA.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos), signal: ctl ? ctl.signal : undefined })
-      .then(function (r) { return r.ok ? r.json() : { accion: 'seguir' }; })
-      .catch(function () { return { accion: 'seguir' }; })
+      .then(function (r) { if (!r.ok) IA.caida = true; return r.ok ? r.json() : { accion: 'seguir' }; })
+      .catch(function () { IA.caida = true; return { accion: 'seguir' }; })
       .then(function (r) { clearTimeout(reloj); return r || { accion: 'seguir' }; });
   }
   function abrirTexto(ph, conSkip, boton) {

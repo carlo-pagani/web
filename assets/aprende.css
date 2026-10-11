@@ -126,3 +126,9 @@ body.ap.sin-barra .ap-lateral { display: none; }
 /* La barra propia de Aprende cede su lugar a la barra común con los dos servicios (sitio.css, .pest) */
 .ap-lateral { display: none; }
 body.ap { padding-bottom: 0; }
+
+/* Teléfono: la cifra de una barra larga se escribe dentro de la barra, para que no se salga de la pantalla */
+@media (max-width: 60rem) {
+  .hbar .val.larga { left: auto !important; right: calc(100% - var(--w)); padding: 0 .45rem 0 0; color: var(--ink); }
+  .hbar.hi .val.larga { color: #fff; }
+}
