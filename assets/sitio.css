@@ -163,6 +163,10 @@ footer .wrap { padding-block: 1.4rem; display: flex; flex-wrap: wrap; gap: .5rem
   .topbar nav::-webkit-scrollbar { display: none; }
   .topbar nav ul { flex-wrap: nowrap; padding-right: 2.5rem; }
   .topbar nav li { flex: none; }
+  /* Zona de toque cómoda en el teléfono (al menos 44 px de alto) sin cambiar el aspecto */
+  .topbar nav a { display: inline-block; padding-block: .75rem; }
+  .topbar nav ul { gap: 0 1.4rem; }
+  .topbar .wrap { row-gap: 0; }
   .head { margin-bottom: 1.75rem; }
   .pains li { padding-block: .75rem; }
   .pains span { display: none; }
@@ -676,13 +680,19 @@ label[data-c] > span .ia-marca { margin-left: .35rem; vertical-align: .1em; }
   .pest-op:first-of-type { background: var(--brass); border-color: var(--brass); color: #10151C; }
   .pest-op:first-of-type span, .pest-op:first-of-type i { color: #10151C; opacity: .8; }
 }
-/* Pantallas de computadora más angostas: el recuadro se compacta en vez de plegarse */
-@media (min-width: 60.01rem) and (max-width: 75rem) {
+/* En computadora el recuadro va compacto y el contenido le deja su espacio a la derecha, para que nunca tape campos ni botones */
+@media (min-width: 60.01rem) {
   .pest-caja { width: 18rem; padding: 1.1rem 1.1rem 1rem; }
   .pest-t { font-size: var(--t-s); }
   .pest-op { padding: .75rem .85rem; margin-top: .55rem; }
   .pest-op b { font-size: 1rem; }
   .pest-op span { font-size: var(--t-xs); }
+  body.con-pest .wrap {
+    margin-right: max((100vw - 72rem) / 2, 19.5rem);
+    margin-left: max(0px, min((100vw - 72rem) / 2, 100vw - 72rem - 19.5rem));
+  }
+  /* El menú queda por encima del recuadro, y junto a la foto el recuadro espera fuera de la pantalla: ahí no hace falta el espacio */
+  body.con-pest .topbar .wrap, body.con-pest .hero:has(img) .wrap { margin-inline: auto; }
 }
 @media (max-width: 60rem) {
   .pest { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; }

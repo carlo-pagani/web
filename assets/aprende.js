@@ -2,8 +2,8 @@
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
-  var f0 = new Intl.NumberFormat('es', { maximumFractionDigits: 0 });
-  var f1 = new Intl.NumberFormat('es', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  var f0 = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 0 });
+  var f1 = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
   var fFecha = new Intl.DateTimeFormat('es', { month: 'short', year: 'numeric', timeZone: 'UTC' });
   var fFechaL = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
   function usd(v) { return (v < 0 ? '−$' : '$') + f0.format(Math.abs(Math.round(v))); }
