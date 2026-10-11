@@ -1087,7 +1087,7 @@
   }
   function autoAlto() { txt.style.height = 'auto'; txt.style.height = Math.min(txt.scrollHeight + 2, 144) + 'px'; }
   function campo(k, val, t, etiqueta) {
-    return '<span class="f-in ' + (t || 'usd') + '"><input inputmode="decimal" autocomplete="off" data-k="' + k + '" value="' + (val != null ? val : '') + '" aria-label="' + esc(etiqueta) + '"></span>';
+    return '<span class="f-in ' + (t || 'usd') + '"><input inputmode="decimal" autocomplete="off" data-k="' + k + '" value="' + (val != null ? esc(val) : '') + '" aria-label="' + esc(etiqueta) + '"></span>';
   }
   function enterAvanza(c) {
     c.addEventListener('keydown', function (e) {
