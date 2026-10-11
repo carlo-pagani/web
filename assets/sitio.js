@@ -1,9 +1,9 @@
 (function () {
   var NS = 'http://www.w3.org/2000/svg';
   var CANAL = 'https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A';
-  var fmt0 = new Intl.NumberFormat('es', { maximumFractionDigits: 0 });
+  var fmt0 = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 0 });
   var fmtC = new Intl.NumberFormat('es', { notation: 'compact', maximumFractionDigits: 1 });
-  var fmt1 = new Intl.NumberFormat('es', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  var fmt1 = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
   var fmtFecha = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' });
   var fmtFechaLarga = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -260,6 +260,8 @@
       referencia: 'q2_textbox0', tema: 'q3_textbox1', respuestas: 'q4_textarea2', nombre: 'q5_textbox3',
       email: 'q6_email4', whatsapp: 'q7_textbox5', factura: 'q8_textbox6', pago: 'q9_textbox7', archivos: 'q11_archivosAdjuntos[]' } }
   };
+  // El navegador acepta «ana@ejemplo»; para escribir de vuelta hace falta un dominio completo
+  function correoOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v).trim()); }
   var LINKEDIN = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>';
   function enviar(cfg, datos, archivos) {
     var fd = new FormData();
@@ -531,7 +533,7 @@
   cf.addEventListener('submit', function (e) {
     e.preventDefault();
     var invalid = Array.prototype.filter.call(cf.querySelectorAll('.step[data-step="4"] [required]'), function (f) {
-      var bad = !f.checkValidity(); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
+      var bad = !f.checkValidity() || (f.type === 'email' && !correoOk(f.value)); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
     });
     if (invalid.length) { cs.className = 'cstatus'; cs.textContent = 'Necesito tu nombre y un correo válido.'; invalid[0].focus(); return; }
     var tam = +document.getElementById('w-tamano').value, plazo = +document.getElementById('w-plazo').value;
@@ -564,7 +566,7 @@
   mf.addEventListener('submit', function (e) {
     e.preventDefault();
     var invalid = Array.prototype.filter.call(mf.querySelectorAll('[required]'), function (f) {
-      var bad = !f.checkValidity(); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
+      var bad = !f.checkValidity() || (f.type === 'email' && !correoOk(f.value)); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
     });
     if (invalid.length) { ms.className = 'cstatus'; ms.textContent = 'Necesito tu nombre y un correo válido.'; invalid[0].focus(); return; }
     if (!FORMS.masterclass.url) { ms.className = 'cstatus'; ms.innerHTML = 'El registro se activa en los próximos días. Mientras tanto, puedes apartar tu lugar escribiéndome por ' + LINKEDIN + '.'; return; }
@@ -621,7 +623,13 @@
         '<p class="pp-ayuda pp-nota">Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso. Si tu banco la rechaza, activa en su app las compras por internet y en el exterior.</p>') +
       (pp ? '<div class="pp-btns" id="m-pp"></div>' : '') + '<p class="cstatus" id="m-status2" role="status"></p>';
     var st = document.getElementById('m-status2');
-    var alError = function (msg) { st.className = 'cstatus'; st.textContent = msg; };
+    // Si el pago no carga o falla, se ofrece volver a intentarlo con los mismos datos y la misma referencia
+    var alError = function (msg) {
+      st.className = 'cstatus'; st.textContent = msg + ' ';
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'back'; b.textContent = 'Volver a intentar';
+      b.addEventListener('click', function () { pagoMCPayPal(datos, ref, intereses, nombre); });
+      st.appendChild(b);
+    };
     if (tarjeta) cajitaPayphone(document.getElementById('m-pph'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, datos.email, {
       form: 'masterclass', anexo: 'intereses', volver: '/#masterclass',
       datos: Object.assign({}, datos, { intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' }),
@@ -640,7 +648,7 @@
         });
       };
       guardar();
-    }, function (msg) { st.className = 'cstatus'; st.textContent = msg; }, { producto: 'masterclass' });
+    }, alError, { producto: 'masterclass' });
   }
   // Cuenta regresiva hasta la masterclass
   document.querySelectorAll('[data-faltan]').forEach(function (n) {

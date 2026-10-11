@@ -15,6 +15,8 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Figtree","Helvetica Neue",Arial,sans-serif}
 header{background:var(--navy);padding:18px 16px}
 header a{color:#EEF2F7;text-decoration:none;font-family:"Libre Bodoni",Georgia,serif;font-size:20px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+header a.volver{font-family:inherit;font-size:15px;font-weight:600;color:#EEF2F7;padding:10px 0}
 main{max-width:680px;margin:0 auto;padding:32px 16px 64px}
 .eyebrow{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#7A5A1E;font-weight:600;margin:0}
 h1{font-family:"Libre Bodoni",Georgia,serif;font-weight:600;font-size:clamp(30px,6vw,40px);line-height:1.15;margin:.3em 0 .6em;text-wrap:balance}
@@ -26,7 +28,7 @@ a{color:var(--accent)}
 </style>
 </head>
 <body>
-<header><a href="/">Carlo Pagani</a></header>
+<header><a href="/">Carlo Pagani</a><a class="volver" href="/app/">← Volver a la app</a></header>
 <main>
 <p class="eyebrow">Organizo mis Finanzas · app de finanzas personales</p>
 <h1>Política de privacidad</h1>
