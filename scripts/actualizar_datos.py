@@ -27,7 +27,7 @@ GRUPOS = [
 ]
 ECONOMIA = re.compile(r"econom|inflaci|\btasas?\b|interés|\bFed\b|Reserva Federal|banc|bolsa|Wall Street|d[oó]lar|\bPIB\b|empleo|desempleo|arancel|petr[oó]leo|crudo|deuda|bonos?\b|riesgo pa[ií]s|\bFMI\b|impuest|\bIVA\b|\bSRI\b|export|import|cr[eé]dito|inversi|mercado|precio|salari|presupuest|fiscal|recesi[oó]n|crecimiento|\bBID\b|CEPAL|comercio|remesas|miner[ií]a|financ|recaudaci", re.I)
 # Fuera del carrete: crónica roja y sucesos, aunque mencionen dinero o finanzas
-SUCESOS = re.compile(r"coca[ií]na|droga|narco|asesin|homicid|crimen|criminal|sicari|secuestr|extorsi|masacre|cad[aá]ver|muert[oe]s?\b|balacera|ataque armado|c[aá]rcel|reos?\b|violaci[oó]n|terroris|incauta", re.I)
+SUCESOS = re.compile(r"coca[ií]na|droga|narco|asesin|homicid|crimen|criminal|sicari|secuestr|extorsi|masacre|cad[aá]ver|muert[oe]s?\b|balacera|ataque armado|c[aá]rcel|\breos?\b|violaci[oó]n|terroris|incauta", re.I)
 # Solo fuentes con nombre en alfabeto latino (descarta medios cuyo nombre no podría leer el visitante)
 NO_LATINA = re.compile(r"[^\x00-\u024F\u2018-\u201D]")
 MAX_VIDEOS = 12
