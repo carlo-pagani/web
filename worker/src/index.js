@@ -302,7 +302,7 @@ export default {
     const cupo = env.CUPO ? env.CUPO.get(env.CUPO.idFromName("asistente")) : null;
     const quien = await visitante(request);
     if (cupo) {
-      const topes = { diario: num(env.TOPE_DIARIO_USD, 3), visitante: num(env.TOPE_VISITANTE_USD, 1), porHora: num(env.LLAMADAS_POR_HORA, 40) };
+      const topes = { diario: num(env.TOPE_DIARIO_USD, 3), visitante: num(env.TOPE_VISITANTE_USD, 1), porHora: num(env.LLAMADAS_POR_HORA, 80) };
       let motivo = "";
       try {
         motivo = await cupo.pedir(quien, topes);
