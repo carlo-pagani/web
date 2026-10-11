@@ -386,7 +386,7 @@
         .then(function (r) { return r.json(); });
     }).then(function (r) {
       limpiar(); guardarPph(null);
-      if (!r.aprobado) return mal(r.motivo || 'El pago no se completó.');
+      if (!r.aprobado) return mal(r.motivo ? esc(r.motivo) : 'El pago no se completó.');
       if (r.centavos !== g.centavos) return mal('Payphone confirmó un monto distinto al de tu compra. Escríbeme por ' + LINKEDIN_PAGO + ' y lo reviso.');
       ok({ monto: g.centavos / 100, texto: r.pago, autorizacion: r.autorizacion, cobro: g });
     }, function () {
