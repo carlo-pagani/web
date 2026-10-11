@@ -210,62 +210,41 @@ function mensajeUsuario(d) {
     .join("\n");
 }
 
-// La Cajita necesita el token en el navegador: así la diseñó Payphone, que lo limita al dominio registrado en su aplicación
-const listo = (env) => env.PAYPHONE_TOKEN && env.PAYPHONE_STORE_ID;
-function datosCajita(env, origen) {
-  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
-  return json({ token: env.PAYPHONE_TOKEN, storeId: env.PAYPHONE_STORE_ID }, 200, origen);
+// ---------- Cobro: el Worker fija el precio, crea el pedido, comprueba el pago y lo sella ----------
+// Los registros de pago llegan a Jotform desde el navegador, así que cualquiera podría escribir uno que diga «pagado».
+// Por eso el precio lo calcula el Worker, el pedido (la orden de PayPal o la transacción de Payphone) lo crea el Worker,
+// y solo un pedido creado aquí y pagado por su monto completo recibe el sello: una firma con una clave privada que solo
+// existe en el Durable Object Sello. La clave pública queda en data/sellos.json y scripts/verificar_sellos.mjs la comprueba.
+// Formato: «sello v2~proveedor~id del pago~referencia~centavos~detalle~clave~firma»; el detalle dice qué se compró.
+
+// Precios. Deben coincidir con los de assets/sitio.js (MC.precio; BASE, PARTE, IVA y CATALOGO de la Consulta Express).
+const PRECIOS = {
+  masterclass: 1500, // centavos, IVA incluido
+  iva: 0.15,
+  parte: 5, // dólares sin IVA por cada parte que se suma
+  consulta: {
+    // por tema: lo esencial en dólares sin IVA y las partes que se pueden sumar
+    empresa: { base: 35, partes: ["capital", "deudas", "atrasos"] },
+    personal: { base: 35, partes: ["deudas", "tarjetas", "inversiones", "invertir", "compra", "colchon"] },
+    inversion: { base: 35, partes: ["encaje", "comparar"] },
+    otra: { base: 35, partes: ["numeros", "escenarios"] },
+  },
+};
+// Devuelve { centavos, detalle } o null si el pedido no corresponde a nada que se venda
+function precioDe(d, ref) {
+  if (d.producto === "masterclass") return /^MC-[A-Z0-9]{4,12}$/.test(ref) ? { centavos: PRECIOS.masterclass, detalle: "masterclass" } : null;
+  if (d.producto !== "consulta") return null;
+  const t = Object.prototype.hasOwnProperty.call(PRECIOS.consulta, d.tema) ? PRECIOS.consulta[d.tema] : null;
+  const extra = d.extra === true, partes = Array.isArray(d.partes) ? [...new Set(d.partes)] : [];
+  if (!t || partes.length > t.partes.length || partes.some((p) => !t.partes.includes(p))) return null;
+  if (!(extra ? /^AE-[A-Z0-9]{4,12}-\d{1,2}$/ : /^AE-[A-Z0-9]{4,12}$/).test(ref) || (extra && !partes.length)) return null;
+  const neto = (extra ? 0 : t.base) + PRECIOS.parte * partes.length;
+  return { centavos: Math.round(neto * (1 + PRECIOS.iva) * 100), detalle: [extra ? "extra" : "", d.tema, ...partes].filter(Boolean).join(".") };
 }
 
-// Confirma con Payphone que el pago está aprobado y devuelve el monto en centavos; la web lo compara con lo que cobró.
-// Sin esta confirmación en cinco minutos, Payphone anula el cobro por su cuenta.
-async function confirmarPago(request, env, origen) {
-  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
-  const cuerpo = await request.text();
-  if (cuerpo.length > 2000) return json({ error: "Demasiado largo" }, 413, origen);
-  let d;
-  try {
-    d = JSON.parse(cuerpo);
-  } catch {
-    return json({ error: "JSON no válido" }, 400, origen);
-  }
-  const id = parseInt(d.id, 10), tx = corto(d.clientTxId, 50);
-  if (!id || !tx) return json({ error: "Faltan datos" }, 400, origen);
-
-  let r;
-  try {
-    const res = await fetch(`${env.PAYPHONE_URL || "https://paymentbox.payphonetodoesposible.com"}/api/confirm`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.PAYPHONE_TOKEN}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ id, clientTxId: tx }),
-    });
-    r = await res.json();
-  } catch (e) {
-    console.error("Payphone no respondió:", e && e.message);
-    return json({ aprobado: false, motivo: "No pude comprobar el pago con Payphone." }, 502, origen);
-  }
-  const aprobado = r && r.statusCode === 3 && r.transactionStatus === "Approved" && r.clientTransactionId === tx &&
-    Number.isInteger(r.amount) && r.amount > 0 && (!r.currency || r.currency === "USD");
-  if (!aprobado) {
-    const motivo = r && r.statusCode === 2 ? "El pago fue cancelado." : (r && r.message) || "El pago no fue aprobado.";
-    console.log(`Payphone: transacción ${id} (${tx}) no aprobada: ${corto(motivo, 200)}`);
-    return json({ aprobado: false, motivo: corto(motivo, 200) }, 200, origen);
-  }
-  const s = await sellar(env, { proveedor: "payphone", id: String(r.transactionId), ref: tx, centavos: r.amount });
-  if (s.error) return json({ aprobado: false, motivo: s.error }, 200, origen);
-  const tarjeta = r.cardBrand ? ` · ${r.cardBrand} ${r.lastDigits || ""}`.trimEnd() : "";
-  const pago = `Payphone: pagado $${(r.amount / 100).toFixed(2)} USD · autorización ${r.authorizationCode} · transacción ${r.transactionId}${tarjeta} · ${r.date || new Date().toISOString()} · ${s.sello}`;
-  return json({ aprobado: true, centavos: r.amount, autorizacion: corto(r.authorizationCode, 40), transaccion: r.transactionId, pago }, 200, origen);
-}
-
-// Sello del servidor. Los registros de pago llegan a Jotform desde el navegador, así que cualquiera podría escribir uno
-// que diga «pagado». Por eso el Worker, después de comprobar el pago con PayPal o Payphone, lo firma con una clave
-// privada que solo existe aquí (se crea sola la primera vez y nunca sale del Durable Object). La clave pública queda en
-// data/sellos.json y scripts/verificar_sellos.mjs comprueba cada sello: un registro sin sello válido no es un pago.
-// Formato: «sello v1~proveedor~id del pago~referencia~centavos~clave~firma».
 const P256 = { name: "ECDSA", namedCurve: "P-256" };
 const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-const ID_PAGO = /^[A-Za-z0-9-]{1,40}$/;
+const POR_HORA_VISITANTE = 30, POR_HORA_TOTAL = 600; // pedidos y cobros por hora: de sobra para clientes, poco para martillar PayPal
 
 export class Sello extends DurableObject {
   constructor(ctx, env) {
@@ -287,78 +266,145 @@ export class Sello extends DurableObject {
     const { kty, crv, x, y } = this.k.privada;
     return { kid: this.k.kid, kty, crv, x, y, creada: this.k.creada };
   }
-  // Cada pago se sella una sola vez y para una sola referencia; si se vuelve a pedir igual, devuelve el mismo sello
-  async sellar({ proveedor, id, ref, centavos }) {
-    const llave = `pago|${proveedor}|${id}`, previo = await this.ctx.storage.get(llave);
-    if (previo) return previo.ref === ref && previo.centavos === centavos ? { sello: previo.sello } : { error: "Este pago ya se registró con otra referencia." };
-    const texto = ["v1", proveedor, id, ref, centavos].join("~");
+  // Tope de pedidos y cobros por hora, por visitante y en total
+  async permitir(quien) {
+    const hora = new Date().toISOString().slice(0, 13), s = this.ctx.storage;
+    if (this.hora !== hora) {
+      const viejas = [...(await s.list({ prefix: "hora|", limit: 500 })).keys()].filter((x) => !x.startsWith(`hora|${hora}|`));
+      if (viejas.length) await s.delete(viejas.slice(0, 128));
+      this.hora = hora;
+    }
+    const [suyo, total] = await Promise.all([s.get(`hora|${hora}|${quien}`), s.get(`hora|${hora}|total`)]);
+    if ((suyo || 0) >= POR_HORA_VISITANTE || (total || 0) >= POR_HORA_TOTAL) return false;
+    await s.put({ [`hora|${hora}|${quien}`]: (suyo || 0) + 1, [`hora|${hora}|total`]: (total || 0) + 1 });
+    return true;
+  }
+  // Anota un pedido creado por el Worker: solo estos pedidos pueden sellarse
+  async registrar(proveedor, id, datos) {
+    const llave = `pedido|${proveedor}|${id}`;
+    if (await this.ctx.storage.get(llave)) return false;
+    await this.ctx.storage.put(llave, { ...datos, t: new Date().toISOString() });
+    return true;
+  }
+  pedido(proveedor, id) {
+    return this.ctx.storage.get(`pedido|${proveedor}|${id}`);
+  }
+  // Sella el pago `pago` de un pedido anotado, con la referencia, el monto y el detalle del pedido.
+  // Un pedido recibe un solo sello y un pago sirve para un solo pedido; si se vuelve a pedir igual, devuelve el mismo sello.
+  async sellar(proveedor, pedidoId, pago) {
+    const s = this.ctx.storage, llave = `pedido|${proveedor}|${pedidoId}`, p = await s.get(llave);
+    if (!p) return { error: "No encontré tu pedido." };
+    if (p.sello) return p.pago === pago ? { sello: p.sello, pedido: p } : { error: "Este pedido ya se pagó." };
+    const usado = await s.get(`pago|${proveedor}|${pago}`);
+    if (usado && usado !== pedidoId) return { error: "Este pago ya se registró en otro pedido." };
+    const texto = ["v2", proveedor, pago, p.ref, p.centavos, p.detalle].join("~");
     const firma = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, this.firma, new TextEncoder().encode(texto));
     const sello = `sello ${texto}~${this.k.kid}~${b64url(firma)}`;
-    await this.ctx.storage.put(llave, { ref, centavos, sello, t: new Date().toISOString() });
-    return { sello };
+    await s.put({ [llave]: { ...p, pago, sello }, [`pago|${proveedor}|${pago}`]: pedidoId });
+    return { sello, pedido: p };
   }
 }
-
 const selloDO = (env) => env.SELLO.get(env.SELLO.idFromName("sello"));
-async function sellar(env, p) {
-  if (!["paypal", "payphone"].includes(p.proveedor) || !ID_PAGO.test(p.id) || !ID_PAGO.test(p.ref) || !Number.isInteger(p.centavos) || p.centavos <= 0) {
-    return { error: "No pude sellar el pago." };
-  }
+
+// Lee el cuerpo JSON de un pedido, con límite de tamaño
+async function cuerpoJSON(request, max) {
+  const cuerpo = await request.text();
+  if (cuerpo.length > max) return { error: ["Demasiado largo", 413] };
   try {
-    return await selloDO(env).sellar(p);
-  } catch (e) {
-    console.error("No pude sellar el pago:", e && e.message);
-    return { error: "No pude registrar el pago. Escríbeme y lo reviso." };
+    const d = JSON.parse(cuerpo);
+    return d && typeof d === "object" ? { d } : { error: ["JSON no válido", 400] };
+  } catch {
+    return { error: ["JSON no válido", 400] };
   }
 }
+const muchos = (origen) => json({ aprobado: false, motivo: "Hubo demasiados intentos de pago desde tu conexión. Espera un rato y vuelve a intentarlo." }, 429, origen);
 
-// PayPal: el navegador crea la orden y el cliente la aprueba en la ventana de PayPal, pero el cobro lo hace el Worker.
-// Antes de cobrar comprueba que la orden sea de esta web, en dólares, por el monto esperado y con la referencia del caso;
-// si algo no cuadra, no cobra. Con el cobro completo, sella el pago. Necesita PAYPAL_CLIENT_ID (público) y PAYPAL_SECRET.
+// La Cajita de Payphone necesita el token en el navegador: así la diseñó Payphone, que lo limita al dominio de su aplicación
+const listo = (env) => env.PAYPHONE_TOKEN && env.PAYPHONE_STORE_ID;
+function datosCajita(env, origen) {
+  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
+  return json({ token: env.PAYPHONE_TOKEN, storeId: env.PAYPHONE_STORE_ID }, 200, origen);
+}
+
+// PayPal: el token de acceso dura horas; se guarda mientras viva este Worker para no pedir uno en cada cobro
 const paypalListo = (env) => env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET;
 const centavosDe = (v) => (/^\d+(\.\d{1,2})?$/.test(String(v)) ? Math.round(Number(v) * 100) : NaN);
-async function paypal(env, metodo, ruta, token, extra) {
+let tokenPP = { valor: "", vence: 0 };
+async function paypal(env, metodo, ruta, cuerpo, extra) {
+  if (!tokenPP.valor || Date.now() > tokenPP.vence) {
+    const res = await fetch(`${env.PAYPAL_URL || "https://api-m.paypal.com"}/v1/oauth2/token`, {
+      method: "POST",
+      headers: { Authorization: "Basic " + btoa(`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_SECRET}`), "Content-Type": "application/x-www-form-urlencoded" },
+      body: "grant_type=client_credentials",
+    });
+    const t = await res.json().catch(() => ({}));
+    if (!res.ok || !t.access_token) throw new Error(`token ${res.status}`);
+    tokenPP = { valor: t.access_token, vence: Date.now() + Math.max(60, (t.expires_in || 600) - 300) * 1000 };
+  }
   const res = await fetch(`${env.PAYPAL_URL || "https://api-m.paypal.com"}${ruta}`, {
     method: metodo,
-    headers: { Authorization: token, "Content-Type": "application/json", ...(extra || {}) },
-    body: metodo === "POST" ? (ruta.includes("oauth2") ? "grant_type=client_credentials" : "{}") : undefined,
+    headers: { Authorization: "Bearer " + tokenPP.valor, "Content-Type": "application/json", ...(extra || {}) },
+    body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
   });
-  const datos = await res.json().catch(() => ({}));
-  return { ok: res.ok, estado: res.status, datos };
+  if (res.status === 401) tokenPP = { valor: "", vence: 0 };
+  return { ok: res.ok, estado: res.status, datos: await res.json().catch(() => ({})) };
 }
+
+// Crea el pedido con el precio que fija el Worker. PayPal: crea la orden (la web solo la muestra para que el cliente la
+// apruebe). Payphone: anota la transacción que la Cajita cobrará. Devuelve el id del pedido y el monto en centavos.
+async function crearPedido(request, env, origen) {
+  const { d, error } = await cuerpoJSON(request, 1500);
+  if (error) return json({ error: error[0] }, error[1], origen);
+  const ref = String(d.referencia || ""), precio = precioDe(d, ref);
+  if (!precio) return json({ error: "Pedido no válido" }, 400, origen);
+  if (d.proveedor === "paypal" ? !paypalListo(env) : d.proveedor === "payphone" ? !listo(env) : true) return json({ error: "Cobro no configurado" }, 503, origen);
+  if (!(await selloDO(env).permitir(await visitante(request)))) return muchos(origen);
+  const datos = { ref, centavos: precio.centavos, detalle: precio.detalle };
+  if (d.proveedor === "payphone") {
+    const tx = `${ref}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36).toUpperCase().slice(-5)}`;
+    if (!(await selloDO(env).registrar("payphone", tx, datos))) return json({ error: "Inténtalo de nuevo" }, 409, origen);
+    return json({ tx, centavos: precio.centavos }, 200, origen);
+  }
+  try {
+    const o = await paypal(env, "POST", "/v2/checkout/orders", {
+      intent: "CAPTURE",
+      purchase_units: [{ amount: { currency_code: "USD", value: (precio.centavos / 100).toFixed(2) }, description: corto(d.descripcion, 120) || "Carlo Pagani",
+        custom_id: ref, invoice_id: `${ref}-${Date.now().toString(36).toUpperCase()}` }],
+      application_context: { brand_name: "Carlo Pagani", shipping_preference: "NO_SHIPPING", user_action: "PAY_NOW" },
+    });
+    if (!o.ok || !/^[A-Z0-9]{8,30}$/.test(o.datos.id || "")) throw new Error(`orden ${o.estado}`);
+    await selloDO(env).registrar("paypal", o.datos.id, datos);
+    return json({ id: o.datos.id, centavos: precio.centavos }, 200, origen);
+  } catch (e) {
+    console.error("No pude crear la orden de PayPal:", e && e.message);
+    return json({ error: "No pude preparar el pago con PayPal. Inténtalo de nuevo en un momento." }, 502, origen);
+  }
+}
+
+// PayPal: cobra una orden creada por el Worker y aprobada por el cliente, comprueba el cobro completo y lo sella
 async function cobrarPayPal(request, env, origen) {
   if (!paypalListo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
-  const cuerpo = await request.text();
-  if (cuerpo.length > 1000) return json({ error: "Demasiado largo" }, 413, origen);
-  let d;
-  try {
-    d = JSON.parse(cuerpo);
-  } catch {
-    return json({ error: "JSON no válido" }, 400, origen);
-  }
-  const orden = String(d.orden || ""), ref = String(d.referencia || ""), centavos = d.centavos;
-  if (!/^[A-Z0-9]{8,30}$/.test(orden) || !ID_PAGO.test(ref) || !Number.isInteger(centavos) || centavos <= 0 || centavos > 1e6) {
-    return json({ error: "Faltan datos" }, 400, origen);
-  }
+  const { d, error } = await cuerpoJSON(request, 500);
+  if (error) return json({ error: error[0] }, error[1], origen);
+  const orden = String(d.orden || "");
+  if (!/^[A-Z0-9]{8,30}$/.test(orden)) return json({ error: "Faltan datos" }, 400, origen);
   const no = (motivo, extra) => json({ aprobado: false, motivo, ...(extra || {}) }, 200, origen);
+  const sello = selloDO(env);
+  if (!(await sello.permitir(await visitante(request)))) return muchos(origen);
+  const p = await sello.pedido("paypal", orden);
+  if (!p) return no("No encontré tu orden de PayPal.");
   try {
-    const t = await paypal(env, "POST", "/v1/oauth2/token", "Basic " + btoa(`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_SECRET}`), {
-      "Content-Type": "application/x-www-form-urlencoded",
-    });
-    if (!t.ok || !t.datos.access_token) throw new Error(`token ${t.estado}`);
-    const token = "Bearer " + t.datos.access_token;
-    let o = (await paypal(env, "GET", `/v2/checkout/orders/${orden}`, token)).datos;
     const u = (x) => (x && x.purchase_units && x.purchase_units[0]) || {};
-    const cuadra = (x) => u(x).amount && u(x).amount.currency_code === "USD" && centavosDe(u(x).amount.value) === centavos && u(x).custom_id === ref;
-    if (!o.id) return no("No encontré tu orden de PayPal.");
-    if (!cuadra(o)) {
-      console.log(`PayPal: la orden ${orden} no cuadra con ${ref} por ${centavos} centavos; no se cobra`);
+    const cuadra = (x) => u(x).amount && u(x).amount.currency_code === "USD" && centavosDe(u(x).amount.value) === p.centavos && u(x).custom_id === p.ref;
+    let o = (await paypal(env, "GET", `/v2/checkout/orders/${orden}`)).datos;
+    if (!o.id || !cuadra(o)) {
+      console.log(`PayPal: la orden ${orden} no cuadra con su pedido; no se cobra`);
       return no("La orden de PayPal no coincide con tu compra, así que no se cobró nada. Vuelve a intentarlo.");
     }
     if (o.status === "APPROVED") {
       // Sin clave de idempotencia: si el banco rechaza la tarjeta, el cliente elige otra y la misma orden se vuelve a cobrar.
       // Un reintento tras un corte no cobra dos veces: PayPal no captura una orden ya cobrada, y aquí se lee su estado antes.
-      const c = await paypal(env, "POST", `/v2/checkout/orders/${orden}/capture`, token, { Prefer: "return=representation" });
+      const c = await paypal(env, "POST", `/v2/checkout/orders/${orden}/capture`, {}, { Prefer: "return=representation" });
       const yaCobrada = (c.datos.details || []).some((x) => x.issue === "ORDER_ALREADY_CAPTURED");
       if (!c.ok && !yaCobrada) {
         const rechazo = (c.datos.details || []).some((x) => x.issue === "INSTRUMENT_DECLINED");
@@ -366,23 +412,64 @@ async function cobrarPayPal(request, env, origen) {
         return no(rechazo ? "PayPal rechazó el medio de pago. Elige otro y vuelve a intentarlo." : "PayPal no pudo completar el cobro. Inténtalo de nuevo.", rechazo ? { reintentar: true } : null);
       }
       // La orden completa se vuelve a leer para comprobarla con todos sus datos
-      const g = await paypal(env, "GET", `/v2/checkout/orders/${orden}`, token);
+      const g = await paypal(env, "GET", `/v2/checkout/orders/${orden}`);
       o = g.ok && g.datos.id ? g.datos : c.datos;
     }
     const cap = u(o).payments && u(o).payments.captures && u(o).payments.captures[0];
-    if (o.status !== "COMPLETED" || !cuadra(o) || !cap || cap.status !== "COMPLETED" || cap.amount.currency_code !== "USD" || centavosDe(cap.amount.value) !== centavos) {
+    if (o.status !== "COMPLETED" || !cuadra(o) || !cap || cap.status !== "COMPLETED" || cap.amount.currency_code !== "USD" || centavosDe(cap.amount.value) !== p.centavos) {
       return no("PayPal no confirmó el pago completo. Si se te cobró algo, escríbeme y lo reviso.");
     }
-    const s = await sellar(env, { proveedor: "paypal", id: orden, ref, centavos });
+    const s = await sello.sellar("paypal", orden, orden);
     if (s.error) return no(s.error);
-    const p = o.payer || {}, nombre = p.name ? [p.name.given_name, p.name.surname].filter(Boolean).join(" ") : "";
-    const pagador = [nombre, p.email_address].filter(Boolean).map((x) => corto(x, 80)).join(" · ");
-    const pago = `PayPal: pagado $${(centavos / 100).toFixed(2)} USD · orden ${orden} · captura ${corto(cap.id, 30)}${pagador ? " · " + pagador : ""} · ${s.sello}`;
-    return json({ aprobado: true, centavos, orden, captura: cap.id, pagador, pago }, 200, origen);
+    const q = o.payer || {}, nombre = q.name ? [q.name.given_name, q.name.surname].filter(Boolean).join(" ") : "";
+    const pagador = [nombre, q.email_address].filter(Boolean).map((x) => corto(x, 80)).join(" · ");
+    const pago = `PayPal: pagado $${(p.centavos / 100).toFixed(2)} USD · orden ${orden} · captura ${corto(cap.id, 30)}${pagador ? " · " + pagador : ""} · ${s.sello}`;
+    return json({ aprobado: true, centavos: p.centavos, referencia: p.ref, orden, captura: cap.id, pagador, pago }, 200, origen);
   } catch (e) {
     console.error("PayPal no respondió:", e && e.message);
     return json({ aprobado: false, motivo: "No pude confirmar el pago con PayPal. Inténtalo de nuevo en un momento; un mismo pago nunca se cobra dos veces." }, 502, origen);
   }
+}
+
+// Payphone: confirma que la transacción de un pedido anotado está aprobada por su monto completo y la sella.
+// Sin esta confirmación en cinco minutos, Payphone anula el cobro por su cuenta; un pedido que no es de aquí no se confirma.
+async function confirmarPago(request, env, origen) {
+  if (!listo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
+  const { d, error } = await cuerpoJSON(request, 2000);
+  if (error) return json({ error: error[0] }, error[1], origen);
+  const id = parseInt(d.id, 10), tx = corto(d.clientTxId, 50);
+  if (!id || !tx) return json({ error: "Faltan datos" }, 400, origen);
+  const sello = selloDO(env), p = await sello.pedido("payphone", tx);
+  if (!p) return json({ aprobado: false, motivo: "No encontré tu pedido. Si se llegó a cobrar, Payphone anula el cargo en unos minutos." }, 200, origen);
+
+  let r;
+  try {
+    const res = await fetch(`${env.PAYPHONE_URL || "https://paymentbox.payphonetodoesposible.com"}/api/confirm`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.PAYPHONE_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ id, clientTxId: tx }),
+    });
+    r = await res.json();
+  } catch (e) {
+    console.error("Payphone no respondió:", e && e.message);
+    return json({ aprobado: false, motivo: "No pude comprobar el pago con Payphone." }, 502, origen);
+  }
+  const aprobado = r && r.statusCode === 3 && r.transactionStatus === "Approved" && r.clientTransactionId === tx &&
+    Number.isInteger(r.amount) && r.amount > 0 && (!r.currency || r.currency === "USD");
+  if (!aprobado) {
+    const motivo = r && r.statusCode === 2 ? "El pago fue cancelado." : (r && r.message) || "El pago no fue aprobado.";
+    console.log(`Payphone: transacción ${id} (${tx}) no aprobada: ${corto(motivo, 200)}`);
+    return json({ aprobado: false, motivo: corto(motivo, 200) }, 200, origen);
+  }
+  if (r.amount !== p.centavos) {
+    console.log(`Payphone: transacción ${id} (${tx}) por ${r.amount} centavos; el pedido era de ${p.centavos}. No se sella.`);
+    return json({ aprobado: false, centavos: r.amount, motivo: "Payphone confirmó un monto distinto al de tu compra." }, 200, origen);
+  }
+  const s = await sello.sellar("payphone", tx, String(r.transactionId));
+  if (s.error) return json({ aprobado: false, motivo: s.error }, 200, origen);
+  const tarjeta = r.cardBrand ? ` · ${r.cardBrand} ${r.lastDigits || ""}`.trimEnd() : "";
+  const pago = `Payphone: pagado $${(r.amount / 100).toFixed(2)} USD · autorización ${r.authorizationCode} · transacción ${r.transactionId}${tarjeta} · ${r.date || new Date().toISOString()} · ${s.sello}`;
+  return json({ aprobado: true, centavos: r.amount, autorizacion: corto(r.authorizationCode, 40), transaccion: r.transactionId, pago }, 200, origen);
 }
 
 // Deja pasar solo casillas que existen en la ficha y, en las de opciones, solo una opción válida.
@@ -416,6 +503,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origen) });
     if (ruta === "/pago" && request.method === "GET") return datosCajita(env, origen);
     if (ruta === "/pago/confirmar" && request.method === "POST") return confirmarPago(request, env, origen);
+    if (ruta === "/pago/orden" && request.method === "POST") return crearPedido(request, env, origen);
     if (ruta === "/pago/paypal" && request.method === "POST") return cobrarPayPal(request, env, origen);
     if (ruta === "/pago/clave" && request.method === "GET") return json(await selloDO(env).publica(), 200, origen);
     if (request.method !== "POST" || ruta !== "/guia") {

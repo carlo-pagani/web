@@ -273,9 +273,9 @@
   }
   /* ---------- PayPal: cobro con monto exacto y confirmación inmediata ---------- */
   // clientId es el identificador público de la app «Live» en developer.paypal.com (no es la clave secreta). Vacío: apagado y se usa Deuna.
-  // El navegador crea la orden y el cliente la aprueba; el cobro lo hace el Worker (PAYPAL.servidor, de data/asistente.json), que
-  // comprueba monto, moneda y referencia antes de cobrar y devuelve el texto del pago con el sello del servidor.
-  // Sin Worker de PayPal, el navegador captura la orden como antes y el registro dice que no tiene sello.
+  // Con el Worker de PayPal (PAYPAL.servidor, de data/asistente.json), el Worker fija el precio y crea la orden, el cliente la
+  // aprueba en PayPal y el Worker la cobra y devuelve el texto del pago con el sello del servidor.
+  // Sin Worker de PayPal, el navegador crea y captura la orden como antes y el registro dice que no tiene sello.
   var PAYPAL = { clientId: 'BAAHPHYxpHokQA3PYUEiaYFXl32IAU8mMO-xXonNNzPgKvJHvtmyiMOBh-gI1SXRa9NoRBQVyrSMF_EWpE', servidor: '' };
   var ppCarga = null;
   function cargarPayPal() {
@@ -291,14 +291,18 @@
     return ppCarga;
   }
   // Pinta los botones de PayPal en `caja` por `monto` (número). alPagar recibe {orden, captura, monto, pagador} solo con el pago completo.
-  function botonesPayPal(caja, monto, descripcion, referencia, alPagar, alError) {
-    var valor = monto.toFixed(2);
+  // `pedido` dice qué se compra, para que el Worker fije el precio: { producto: 'masterclass' } o
+  // { producto: 'consulta', tema, partes, extra }.
+  function botonesPayPal(caja, monto, descripcion, referencia, alPagar, alError, pedido) {
+    var valor = monto.toFixed(2), motivo = '';
     caja.innerHTML = '<p class="pp-cargando">Cargando el pago seguro…</p>';
     return cargarPayPal().then(function (pp) {
       caja.innerHTML = '';
       return pp.Buttons({
         style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay', height: 45 },
         createOrder: function (d, actions) {
+          motivo = '';
+          if (PAYPAL.servidor) return crearPedido('paypal', referencia, descripcion, monto, pedido).then(function (r) { return r.id; }, function (e) { motivo = e.message; throw e; });
           return actions.order.create({
             intent: 'CAPTURE',
             purchase_units: [{ amount: { currency_code: 'USD', value: valor }, description: descripcion, custom_id: referencia, invoice_id: referencia + '-' + Date.now().toString(36).toUpperCase() }],
@@ -307,7 +311,7 @@
         },
         onApprove: function (d, actions) {
           return serviciosWeb.then(function () {
-            if (PAYPAL.servidor) return cobroServidor(d.orderID, referencia, Math.round(monto * 100), valor, actions, alPagar, alError);
+            if (PAYPAL.servidor) return cobroServidor(d.orderID, Math.round(monto * 100), valor, actions, alPagar, alError);
             return actions.order.capture().then(function (o) {
               var cap = o && o.purchase_units && o.purchase_units[0] && o.purchase_units[0].payments && o.purchase_units[0].payments.captures && o.purchase_units[0].payments.captures[0];
               if (!o || o.status !== 'COMPLETED' || !cap || cap.status !== 'COMPLETED' || cap.amount.value !== valor || cap.amount.currency_code !== 'USD') {
@@ -319,17 +323,30 @@
           });
         },
         onCancel: function () { alError('Cancelaste el pago. Puedes intentarlo de nuevo cuando quieras.'); },
-        onError: function () { alError('PayPal no pudo procesar el pago. Revisa los datos de tu tarjeta o inténtalo de nuevo.'); }
+        onError: function () { alError(motivo || 'PayPal no pudo procesar el pago. Revisa los datos de tu tarjeta o inténtalo de nuevo.'); }
       }).render(caja);
     }).catch(function () {
       caja.innerHTML = '';
       alError('No pude cargar el pago de PayPal. Revisa tu conexión y vuelve a intentarlo.');
     });
   }
+  // Pide al Worker el pedido con su precio (PayPal: crea la orden; Payphone: anota la transacción). Si el precio del Worker
+  // no es el que muestra la página, no sigue: así nadie paga un monto distinto del que vio.
+  function crearPedido(proveedor, referencia, descripcion, monto, pedido) {
+    var url = (proveedor === 'paypal' ? PAYPAL.servidor.replace(/\/paypal$/, '') : PAYPHONE.url) + '/orden';
+    return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({}, pedido, { proveedor: proveedor, referencia: referencia, descripcion: descripcion })) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }, function () { return { ok: false, j: {} }; })
+      .then(function (x) {
+        if (!x.ok || !(x.j.id || x.j.tx)) throw new Error(x.j.motivo || 'No pude preparar el pago. Inténtalo de nuevo en un momento.');
+        if (x.j.centavos !== Math.round(monto * 100)) throw new Error('El precio no coincide con el de la página. Recárgala e inténtalo de nuevo; si sigue igual, escríbeme por LinkedIn.');
+        return x.j;
+      });
+  }
   // El Worker cobra la orden aprobada. Si la conexión falla, reintenta con la misma orden: PayPal nunca la cobra dos veces.
-  function cobroServidor(orden, referencia, centavos, valor, actions, alPagar, alError) {
+  function cobroServidor(orden, centavos, valor, actions, alPagar, alError) {
     var intento = function (n) {
-      return fetch(PAYPAL.servidor, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orden: orden, referencia: referencia, centavos: centavos }) })
+      return fetch(PAYPAL.servidor, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orden: orden }) })
         .then(function (r) { if (r.status >= 500) throw new Error(r.status); return r.json(); })
         .catch(function (e) { if (n > 1) throw e; return new Promise(function (ok) { setTimeout(ok, 1500); }).then(function () { return intento(n + 1); }); });
     };
@@ -375,14 +392,15 @@
   //   { form: 'analisis' | 'masterclass', datos, anexo, listo, volver } → /pago/ confirma y guarda `datos` en ese formulario
   //     (con el texto del pago en `pago` y, si hay `anexo`, también al final de ese campo) y muestra `listo`;
   //   { retoma: true, volver } → /pago/ devuelve al cliente a `volver`, que retoma su recorrido con confirmarPayphone().
-  function cajitaPayphone(caja, monto, descripcion, referencia, email, cobro, alError) {
-    var centavos = Math.round(monto * 100), base = Math.round(centavos / 1.15);
-    var tx = referencia + '-' + Date.now().toString(36).toUpperCase().slice(-5);
-    if (!guardarPph(Object.assign({ tx: tx, centavos: centavos, t: Date.now() }, cobro))) {
+  // `pedido` dice qué se compra, como en botonesPayPal; el Worker fija el precio y crea la transacción (clientTransactionId).
+  function cajitaPayphone(caja, monto, descripcion, referencia, email, cobro, alError, pedido) {
+    var centavos = Math.round(monto * 100), base = Math.round(centavos / 1.15), tx = '';
+    if (!guardarPph({ prueba: 1 })) {
       return alError('Tu navegador no deja guardar tus datos mientras pagas. Prueba sin navegación privada o con otro navegador.');
     }
     caja.innerHTML = '<div class="pph-caja"><p class="pp-cargando">Cargando el pago con tarjeta…</p></div>';
-    Promise.all([fetch(PAYPHONE.url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }), cargarCajita()])
+    Promise.all([fetch(PAYPHONE.url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }), cargarCajita(),
+      crearPedido('payphone', referencia, descripcion, monto, pedido).then(function (r) { tx = r.tx; guardarPph(Object.assign({ tx: tx, centavos: centavos, t: Date.now() }, cobro)); })])
       .then(function (x) {
         var id = 'pph-' + Date.now().toString(36);
         caja.innerHTML = '<div class="pph-caja"><div id="' + id + '"></div></div>';
@@ -392,9 +410,9 @@
         if (email) op.email = email;
         new window.PPaymentButtonBox(op).render(id);
       })
-      .catch(function () {
+      .catch(function (e) {
         guardarPph(null); caja.innerHTML = '';
-        alError('No pude abrir el pago con tarjeta. Inténtalo de nuevo en unos minutos.');
+        alError(e && /precio/.test(e.message) ? e.message : 'No pude abrir el pago con tarjeta. Inténtalo de nuevo en unos minutos.');
       });
   }
   // De vuelta de Payphone: el Worker confirma el pago. ok({ monto, texto, autorizacion, cobro }) solo si está aprobado por el monto que se cobró.
@@ -593,7 +611,7 @@
       form: 'masterclass', anexo: 'intereses', volver: '/#masterclass',
       datos: Object.assign({}, datos, { intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' }),
       listo: 'Listo, ' + datos.nombre.split(' ')[0] + '. Tu cupo en la masterclass está confirmado. Te escribo a ' + datos.email + ' con la hora y el enlace. Si la masterclass no llegara a abrirse, te devuelvo el valor completo.'
-    }, alError);
+    }, alError, { producto: 'masterclass' });
     if (pp) botonesPayPal(document.getElementById('m-pp'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, function (r) {
       var pago = textoPayPal(r);
       var d2 = Object.assign({}, datos, { pago: pago, intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' + pago });
@@ -607,7 +625,7 @@
         });
       };
       guardar();
-    }, function (msg) { st.className = 'cstatus'; st.textContent = msg; });
+    }, function (msg) { st.className = 'cstatus'; st.textContent = msg; }, { producto: 'masterclass' });
   }
   // Cuenta regresiva hasta la masterclass
   document.querySelectorAll('[data-faltan]').forEach(function (n) {
@@ -641,6 +659,8 @@
   // al final se le ofrecen las que no eligió («por» dice qué gana su informe con cada una) y paga la diferencia antes de responderlas.
   var BASE = 35, PARTE = 5, IVA = 0.15, SOLO_BASE = 'Solo lo básico', NO_EXTRA = 'No, gracias';
   var CATALOGO = {};
+  // Clave de cada tema para el Worker, que fija el precio con su propia copia del catálogo (PRECIOS en worker/src/index.js)
+  var TEMAS = { 'Mi empresa': 'empresa', 'Mis finanzas personales': 'personal', 'Una inversión': 'inversion', 'Otra decisión de dinero': 'otra' };
   CATALOGO['Mi empresa'] = { base: 'Diagnóstico de rentabilidad y punto de equilibrio, con recomendaciones concretas', partes: [
     { k: 'capital', l: 'Capital de trabajo y ciclo de caja', por: 'mide cuánto dinero inmoviliza tu operación entre lo que te deben, el inventario y lo que debes a proveedores.' },
     { k: 'deudas', l: 'Deudas de la empresa', por: 'calcula el costo real de cada deuda y en qué orden conviene pagarlas.' },
@@ -989,10 +1009,10 @@
     { activa: function () { return !!PAYPHONE.url; }, sale: true,
       nota: 'Pagas con tarjeta de crédito o débito de cualquier banco, con el monto exacto y confirmación inmediata.',
       ayuda: 'Paga con tarjeta de crédito o débito de cualquier banco. El monto ya está fijado y la confirmación es inmediata.',
-      pintar: function (caja, monto, desc, referencia, ok, mal) {
+      pintar: function (caja, monto, desc, referencia, ok, mal, pedido) {
         caja.innerHTML = '<div></div>' + (PAYPAL.clientId ? '<p class="pp-ayuda pp-o">¿Prefieres PayPal? También puedes pagar con tu cuenta:</p><div class="pp-btns"></div>' : '');
-        cajitaPayphone(caja.firstChild, monto, desc, referencia, resp.datos.email, { retoma: true, volver: '/consulta-express/' }, mal);
-        if (PAYPAL.clientId) botonesPayPal(caja.lastChild, monto, desc, referencia, function (r) { ok({ monto: monto, texto: textoPayPal(r) }); }, mal);
+        cajitaPayphone(caja.firstChild, monto, desc, referencia, resp.datos.email, { retoma: true, volver: '/consulta-express/' }, mal, pedido);
+        if (PAYPAL.clientId) botonesPayPal(caja.lastChild, monto, desc, referencia, function (r) { ok({ monto: monto, texto: textoPayPal(r) }); }, mal, pedido);
       },
       volvio: function () { var q = new URLSearchParams(location.search); return !!(q.get('id') && q.get('clientTransactionId')); },
       vuelta: function (cobro, ok, mal) {
@@ -1000,8 +1020,8 @@
       } },
     { activa: function () { return !!PAYPAL.clientId; }, nota: 'Pagas con PayPal o con tarjeta de crédito o débito, con el monto exacto y confirmación inmediata.',
       ayuda: 'Paga con tu cuenta PayPal o con tarjeta de crédito o débito. El monto ya está fijado y la confirmación es inmediata. Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso; si tu banco la rechaza, activa en su app las compras por internet y en el exterior.',
-      pintar: function (caja, monto, desc, referencia, ok, mal) {
-        botonesPayPal(caja, monto, desc, referencia, function (r) { ok({ monto: monto, texto: textoPayPal(r) }); }, mal);
+      pintar: function (caja, monto, desc, referencia, ok, mal, pedido) {
+        botonesPayPal(caja, monto, desc, referencia, function (r) { ok({ monto: monto, texto: textoPayPal(r) }); }, mal, pedido);
       } }
   ];
   if (window.AE_PASARELA) PASARELAS.unshift(window.AE_PASARELA);
@@ -1012,7 +1032,9 @@
     if (!p) { caja.innerHTML = ''; return alError('El pago en línea no está disponible en este momento. Escríbeme por LinkedIn y lo resolvemos.'); }
     var cobro = { tipo: tipo, datos: datos, monto: monto, desc: desc, referencia: referencia };
     if (p.sale) guardarCurso(cobro);
-    p.pintar(caja, monto, desc, referencia, function (r) { pagoAprobado(cobro, r); }, alError);
+    // Lo que se compra, para que el Worker fije el precio: el tema y las claves de las partes del catálogo
+    var pedido = { producto: 'consulta', tema: TEMAS[resp.tema], partes: datos, extra: tipo === 'extra' };
+    p.pintar(caja, monto, desc, referencia, function (r) { pagoAprobado(cobro, r); }, alError, pedido);
   }
   var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {}, editando = null, respaldo = null;
   var resEl = document.getElementById('ae-res'), resLista = document.getElementById('ae-res-list'), acepto = document.getElementById('ae-acepto');
