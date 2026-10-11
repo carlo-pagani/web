@@ -26,6 +26,10 @@ GRUPOS = [
      "foco": r"Ecuador|ecuatorian|Quito|Guayaquil|\bSRI\b|Noboa"},
 ]
 ECONOMIA = re.compile(r"econom|inflaci|\btasas?\b|interés|\bFed\b|Reserva Federal|banc|bolsa|Wall Street|d[oó]lar|\bPIB\b|empleo|desempleo|arancel|petr[oó]leo|crudo|deuda|bonos?\b|riesgo pa[ií]s|\bFMI\b|impuest|\bIVA\b|\bSRI\b|export|import|cr[eé]dito|inversi|mercado|precio|salari|presupuest|fiscal|recesi[oó]n|crecimiento|\bBID\b|CEPAL|comercio|remesas|miner[ií]a|financ|recaudaci", re.I)
+# Fuera del carrete: crónica roja y sucesos, aunque mencionen dinero o finanzas
+SUCESOS = re.compile(r"coca[ií]na|droga|narco|asesin|homicid|crimen|criminal|sicari|secuestr|extorsi|masacre|cad[aá]ver|muert[oe]s?\b|balacera|ataque armado|c[aá]rcel|reos?\b|violaci[oó]n|terroris|incauta", re.I)
+# Solo fuentes con nombre en alfabeto latino (descarta medios cuyo nombre no podría leer el visitante)
+NO_LATINA = re.compile(r"[^\x00-\u024F\u2018-\u201D]")
 MAX_VIDEOS = 12
 
 
@@ -57,6 +61,7 @@ def buscar(grupo):
     items.sort(key=lambda x: x["fecha"] or "", reverse=True)
     # primero los titulares que hablan de economía y de esa región; si no alcanzan, se completa con los de economía
     foco = re.compile(grupo["foco"], re.I)
+    items = [i for i in items if not SUCESOS.search(i["titulo"]) and not NO_LATINA.search(i["fuente"] or "")]
     mejores = [i for i in items if ECONOMIA.search(i["titulo"]) and foco.search(i["titulo"])]
     return mejores + [i for i in items if ECONOMIA.search(i["titulo"]) and i not in mejores]
 
@@ -72,7 +77,7 @@ def noticias():
             print(f"noticias {grupo['region']}: error {exc!r}")
             candidatos = []
         # si una región no trae nada, se conservan sus titulares anteriores
-        candidatos += [i for i in anteriores if i.get("region") == grupo["region"]]
+        candidatos += [i for i in anteriores if i.get("region") == grupo["region"] and not SUCESOS.search(i.get("titulo", "")) and not NO_LATINA.search(i.get("fuente", ""))]
         tomados = 0
         for i in candidatos:
             clave = i["titulo"].lower()[:60]
