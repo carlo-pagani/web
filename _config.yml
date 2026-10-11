@@ -1,0 +1,6 @@
+# GitHub Pages: no publica en la web el código del asistente, los scripts ni el README.
+exclude:
+  - worker
+  - scripts
+  - README.md
+  - LICENSE
