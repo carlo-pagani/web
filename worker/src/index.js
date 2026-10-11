@@ -296,11 +296,12 @@ export class Sello extends DurableObject {
   pedido(proveedor, id) {
     return this.ctx.storage.get(`pedido|${proveedor}|${id}`);
   }
-  // Cuenta un intento de cobro de un pedido; devuelve el pedido, o null si no existe o ya agotó sus intentos sin sellarse
+  // Cuenta un intento de cobro de un pedido; devuelve el pedido, o null si no existe. Un pedido ya cobrado devuelve su
+  // recibo guardado sin contar ni consultar al proveedor; sin recibo, cada consulta cuenta, aunque ya esté sellado.
   async intento(proveedor, id) {
     const llave = `pedido|${proveedor}|${id}`, p = await this.ctx.storage.get(llave);
     if (!p) return null;
-    if (p.sello) return p;
+    if (p.recibo) return p;
     if ((p.intentos || 0) >= INTENTOS_POR_PEDIDO) return { ...p, agotado: true };
     await this.ctx.storage.put(llave, { ...p, intentos: (p.intentos || 0) + 1 });
     return p;
@@ -318,6 +319,11 @@ export class Sello extends DurableObject {
     const sello = `sello ${texto}~${this.k.kid}~${b64url(firma)}`;
     await s.put({ [llave]: { ...p, pago, sello }, [`pago|${proveedor}|${pago}`]: pedidoId });
     return { sello, pedido: p };
+  }
+  // Guarda la respuesta de un pedido ya sellado: un reintento la recibe igual, sin volver a consultar al proveedor
+  async guardarRecibo(proveedor, id, recibo) {
+    const llave = `pedido|${proveedor}|${id}`, p = await this.ctx.storage.get(llave);
+    if (p && p.sello && !p.recibo) await this.ctx.storage.put(llave, { ...p, recibo });
   }
 }
 const selloDO = (env) => env.SELLO.get(env.SELLO.idFromName("sello"));
@@ -389,9 +395,12 @@ async function crearPedido(request, env, origen) {
       application_context: { brand_name: "Carlo Pagani", shipping_preference: "NO_SHIPPING", user_action: "PAY_NOW" },
     }, { Prefer: "return=representation" });
     if (!o.ok || !/^[A-Z0-9]{8,30}$/.test(o.datos.id || "")) throw new Error(`orden ${o.estado}`);
-    // Quién recibe el dinero: la cuenta de Carlo, que PayPal pone al crear la orden con sus credenciales
+    // Quién recibe el dinero: la cuenta de Carlo, que PayPal pone al crear la orden con sus credenciales.
+    // Sin esa cuenta no se registra la orden, porque luego no habría con qué comprobar a quién se pagó.
     const payee = (o.datos.purchase_units && o.datos.purchase_units[0] && o.datos.purchase_units[0].payee) || {};
-    await selloDO(env).registrar("paypal", o.datos.id, { ...datos, payee: corto(payee.merchant_id || env.PAYPAL_MERCHANT_ID, 40) });
+    const cuenta = corto(env.PAYPAL_MERCHANT_ID || payee.merchant_id, 40);
+    if (!cuenta) throw new Error("la orden no dice quién recibe el pago");
+    await selloDO(env).registrar("paypal", o.datos.id, { ...datos, payee: cuenta });
     return json({ id: o.datos.id, centavos: precio.centavos }, 200, origen);
   } catch (e) {
     console.error("No pude crear la orden de PayPal:", e && e.message);
@@ -409,11 +418,12 @@ async function cobrarPayPal(request, env, origen) {
   const no = (motivo, extra) => json({ aprobado: false, motivo, ...(extra || {}) }, 200, origen);
   const sello = selloDO(env), p = await sello.intento("paypal", orden);
   if (!p) return no("No encontré tu orden de PayPal.");
+  if (p.recibo) return json(p.recibo, 200, origen);
   if (p.agotado) return no("Hubo demasiados intentos con esta orden. Vuelve a empezar el pago.");
   try {
     const u = (x) => (x && x.purchase_units && x.purchase_units[0]) || {};
     const cuadra = (x) => u(x).amount && u(x).amount.currency_code === "USD" && centavosDe(u(x).amount.value) === p.centavos && u(x).custom_id === p.ref &&
-      (!p.payee || (u(x).payee && u(x).payee.merchant_id === p.payee));
+      !!p.payee && !!u(x).payee && u(x).payee.merchant_id === p.payee;
     let o = (await paypal(env, "GET", `/v2/checkout/orders/${orden}`)).datos;
     if (!o.id || !cuadra(o)) {
       console.log(`PayPal: la orden ${orden} no cuadra con su pedido; no se cobra`);
@@ -442,7 +452,9 @@ async function cobrarPayPal(request, env, origen) {
     const q = o.payer || {}, nombre = q.name ? [q.name.given_name, q.name.surname].filter(Boolean).join(" ") : "";
     const pagador = [nombre, q.email_address].filter(Boolean).map((x) => corto(x, 80)).join(" · ");
     const pago = `PayPal: pagado $${(p.centavos / 100).toFixed(2)} USD · orden ${orden} · captura ${corto(cap.id, 30)}${pagador ? " · " + pagador : ""} · ${s.sello}`;
-    return json({ aprobado: true, centavos: p.centavos, referencia: p.ref, orden, captura: cap.id, pagador, pago }, 200, origen);
+    const recibo = { aprobado: true, centavos: p.centavos, referencia: p.ref, orden, captura: cap.id, pagador, pago };
+    await sello.guardarRecibo("paypal", orden, recibo);
+    return json(recibo, 200, origen);
   } catch (e) {
     console.error("PayPal no respondió:", e && e.message);
     return json({ aprobado: false, motivo: "No pude confirmar el pago con PayPal. Inténtalo de nuevo en un momento; un mismo pago nunca se cobra dos veces." }, 502, origen);
@@ -457,8 +469,10 @@ async function confirmarPago(request, env, origen) {
   if (error) return json({ error: error[0] }, error[1], origen);
   const id = parseInt(d.id, 10), tx = corto(d.clientTxId, 50);
   if (!id || !tx) return json({ error: "Faltan datos" }, 400, origen);
-  const sello = selloDO(env), p = await sello.pedido("payphone", tx);
+  const sello = selloDO(env), p = await sello.intento("payphone", tx);
   if (!p) return json({ aprobado: false, motivo: "No encontré tu pedido. Si se llegó a cobrar, Payphone anula el cargo en unos minutos." }, 200, origen);
+  if (p.recibo) return json(p.recibo, 200, origen);
+  if (p.agotado) return json({ aprobado: false, motivo: "Hubo demasiados intentos con este pago. Si se llegó a cobrar, Payphone anula el cargo en unos minutos." }, 200, origen);
 
   let r;
   try {
@@ -487,7 +501,9 @@ async function confirmarPago(request, env, origen) {
   if (s.error) return json({ aprobado: false, motivo: s.error }, 200, origen);
   const tarjeta = r.cardBrand ? ` · ${r.cardBrand} ${r.lastDigits || ""}`.trimEnd() : "";
   const pago = `Payphone: pagado $${(r.amount / 100).toFixed(2)} USD · autorización ${r.authorizationCode} · transacción ${r.transactionId}${tarjeta} · ${r.date || new Date().toISOString()} · ${s.sello}`;
-  return json({ aprobado: true, centavos: r.amount, autorizacion: corto(r.authorizationCode, 40), transaccion: r.transactionId, pago }, 200, origen);
+  const recibo = { aprobado: true, centavos: r.amount, autorizacion: corto(r.authorizationCode, 40), transaccion: r.transactionId, pago };
+  await sello.guardarRecibo("payphone", tx, recibo);
+  return json(recibo, 200, origen);
 }
 
 // Deja pasar solo casillas que existen en la ficha y, en las de opciones, solo una opción válida.

@@ -11,8 +11,12 @@
 //   VERIFICADO  la firma es válida y el pago aparece en un solo envío. Compara el detalle (tema y partes) con lo que dice
 //               el registro: si el registro dice más partes de las que se pagaron, no cuadra.
 //   FALSO       la firma no es válida o la clave es desconocida.
-//   REPETIDO    el mismo pago aparece en más de un envío: un pago vale para un solo cupo o un solo informe. (La constancia
+//   DUPLICADO   la firma es válida y el pago aparece en varios envíos con exactamente el mismo texto (un reenvío tras un
+//               corte): es una sola compra y cuenta una vez, con el primero de esos envíos.
+//   REPETIDO    el mismo pago aparece en envíos distintos: un pago vale para un solo cupo o un solo informe. (La constancia
 //               que la Consulta Express envía al pagar no lleva el sello; el sello llega solo con las respuestas.)
+// El «texto» de cada envío debe ser solo lo que escribió el cliente, sin el número ni la fecha del envío, para que dos
+// reenvíos idénticos se reconozcan.
 // Sale con 1 si hay algún sello FALSO o REPETIDO, con 2 si no hay ningún sello y con 0 si todo está verificado.
 import { readFileSync } from "node:fs";
 
@@ -45,10 +49,11 @@ for (const e of envios) {
     const [, firmado, proveedor, id, ref, centavos, det, kid, firma] = m, llave = `${proveedor}|${id}`;
     if (vistos.has(llave)) continue;
     vistos.add(llave);
-    if (!pagos.has(llave)) pagos.set(llave, { proveedor, id, ref, centavos: Number(centavos), det, kid, firma, firmado, envios: [], otros: [] });
+    if (!pagos.has(llave)) pagos.set(llave, { proveedor, id, ref, centavos: Number(centavos), det, kid, firma, firmado, envios: [], textos: new Set(), otros: [] });
     const p = pagos.get(llave);
     if (p.firmado !== firmado || p.firma !== firma) p.otros.push({ firmado, kid, firma, envio: e.id });
     p.envios.push(e.id);
+    p.textos.add(e.texto.trim());
   }
 }
 
@@ -67,6 +72,11 @@ for (const p of pagos.values()) {
   if (!buena || p.otros.length) {
     malos++;
     console.log(`FALSO      ${resumen} · ${donde}${claves.some((k) => k.kid === p.kid) ? "" : " (clave desconocida)"}${p.otros.length ? " (el mismo pago aparece con datos distintos)" : ""}`);
+    continue;
+  }
+  if (p.envios.length > 1 && p.textos.size === 1) {
+    const copias = p.envios.slice(1), una = copias.length === 1;
+    console.log(`DUPLICADO  ${resumen} · envío ${p.envios[0]} (${una ? "el envío" : "los envíos"} ${copias.join(", ")} ${una ? "es copia idéntica" : "son copias idénticas"}; cuenta una vez)`);
     continue;
   }
   if (p.envios.length > 1) {
