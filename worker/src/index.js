@@ -6,6 +6,7 @@
 //        GET /pago entrega a la web los datos para mostrar la Cajita; POST /pago/confirmar confirma con Payphone
 //        que el pago está aprobado y devuelve el monto cobrado. La web guarda los datos en Jotform solo con esa confirmación.
 import Anthropic from "@anthropic-ai/sdk";
+import { DurableObject } from "cloudflare:workers";
 
 const ORIGENES = [
   "https://carlo-pagani.com",
@@ -115,6 +116,54 @@ function json(datos, estado, origen) {
     status: estado,
     headers: { "Content-Type": "application/json; charset=utf-8", ...cors(origen) },
   });
+}
+
+// Tope de gasto del asistente. Cualquiera puede llamar a /guia fingiendo venir de la web (el Origin se falsifica fuera
+// del navegador), así que el Worker lleva la cuenta: llamadas por hora y dólares por día de cada visitante, y dólares
+// por día en total. Al llegar al tope el asistente se calla («seguir») y el cuestionario sigue sin IA.
+// Los precios se cuentan como los del modelo de respaldo más caro posible, para no quedarse cortos.
+const USD_ENTRADA = 4 / 1e6, USD_SALIDA = 20 / 1e6;
+const num = (v, def) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : def);
+
+export class Cupo extends DurableObject {
+  // Devuelve "" si puede llamar a la IA, o el motivo por el que no
+  async pedir(quien, topes) {
+    const dia = new Date().toISOString().slice(0, 10), hora = new Date().toISOString().slice(0, 13);
+    await this.limpiar(dia);
+    const s = this.ctx.storage;
+    const [total, delDia, enHora] = await Promise.all([s.get(`${dia}|total`), s.get(`${dia}|usd|${quien}`), s.get(`${dia}|n|${hora}|${quien}`)]);
+    if ((total || 0) >= topes.diario) return "tope diario";
+    if ((delDia || 0) >= topes.visitante) return "tope del visitante";
+    if ((enHora || 0) >= topes.porHora) return "llamadas por hora";
+    await s.put(`${dia}|n|${hora}|${quien}`, (enHora || 0) + 1);
+    return "";
+  }
+  async gastar(quien, usd) {
+    const dia = new Date().toISOString().slice(0, 10), s = this.ctx.storage;
+    const [total, delDia] = await Promise.all([s.get(`${dia}|total`), s.get(`${dia}|usd|${quien}`)]);
+    await s.put({ [`${dia}|total`]: (total || 0) + usd, [`${dia}|usd|${quien}`]: (delDia || 0) + usd });
+  }
+  // Una vez al día borra las cuentas de días anteriores
+  async limpiar(dia) {
+    if (this.hoy === dia) return;
+    const s = this.ctx.storage;
+    if ((await s.get("dia")) !== dia) {
+      for (;;) {
+        const viejas = [...(await s.list({ limit: 128 })).keys()].filter((k) => k !== "dia" && !k.startsWith(dia + "|"));
+        if (!viejas.length) break;
+        await s.delete(viejas);
+      }
+      await s.put("dia", dia);
+    }
+    this.hoy = dia;
+  }
+}
+
+// Identifica al visitante por su IP sin guardarla tal cual
+async function visitante(request) {
+  const ip = request.headers.get("CF-Connecting-IP") || "sin-ip";
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("carlo-pagani|" + ip));
+  return [...new Uint8Array(h).slice(0, 12)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 const corto = (x, n) => String(x ?? "").slice(0, n);
@@ -250,6 +299,23 @@ export default {
       return json({ error: "JSON no válido" }, 400, origen);
     }
 
+    const cupo = env.CUPO ? env.CUPO.get(env.CUPO.idFromName("asistente")) : null;
+    const quien = await visitante(request);
+    if (cupo) {
+      const topes = { diario: num(env.TOPE_DIARIO_USD, 3), visitante: num(env.TOPE_VISITANTE_USD, 1), porHora: num(env.LLAMADAS_POR_HORA, 40) };
+      let motivo = "";
+      try {
+        motivo = await cupo.pedir(quien, topes);
+      } catch (e) {
+        console.error("No pude revisar el tope de gasto:", e && e.message);
+        motivo = "sin cuenta"; // ante la duda, no se gasta
+      }
+      if (motivo) {
+        console.log(`Asistente en pausa para ${quien.slice(0, 8)}: ${motivo}`);
+        return json(SEGUIR, 200, origen);
+      }
+    }
+
     const client = new Anthropic({
       apiKey: env.ANTHROPIC_API_KEY,
       baseURL: env.ANTHROPIC_BASE_URL || undefined, // solo para pruebas locales
@@ -267,6 +333,11 @@ export default {
         output_config: { effort: "low", format: { type: "json_schema", schema: llenar ? FORMATO_LLENAR : FORMATO } },
         messages: [{ role: "user", content: mensajeUsuario(datos) }],
       });
+      if (cupo && r.usage) {
+        const u = r.usage;
+        const usd = ((u.input_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0)) * USD_ENTRADA + (u.output_tokens || 0) * USD_SALIDA;
+        await cupo.gastar(quien, usd).catch((e) => console.error("No pude anotar el gasto:", e && e.message));
+      }
       if (r.stop_reason !== "end_turn") return json(SEGUIR, 200, origen);
       const texto = r.content.filter((b) => b.type === "text").map((b) => b.text).join("");
       const o = JSON.parse(texto);

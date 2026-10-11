@@ -4,3 +4,17 @@ main = "src/index.js"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
+
+# Tope de gasto del asistente con IA (ver la clase Cupo en src/index.js). Al llegar a un tope, el cuestionario sigue sin IA.
+[vars]
+TOPE_DIARIO_USD = "3"       # dólares por día entre todos los visitantes
+TOPE_VISITANTE_USD = "1"    # dólares por día de un mismo visitante (una consulta completa cuesta de 0,10 a 0,50)
+LLAMADAS_POR_HORA = "40"    # llamadas por hora de un mismo visitante
+
+[[durable_objects.bindings]]
+name = "CUPO"
+class_name = "Cupo"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Cupo"]
