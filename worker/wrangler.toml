@@ -9,7 +9,7 @@ workers_dev = true
 [vars]
 TOPE_DIARIO_USD = "3"       # dólares por día entre todos los visitantes
 TOPE_VISITANTE_USD = "1"    # dólares por día de un mismo visitante (una consulta completa cuesta de 0,10 a 0,50)
-LLAMADAS_POR_HORA = "40"    # llamadas por hora de un mismo visitante
+LLAMADAS_POR_HORA = "80"    # llamadas por hora de un mismo visitante (con la IA que llena las casillas, una consulta puede pasar de 40)
 
 [[durable_objects.bindings]]
 name = "CUPO"
