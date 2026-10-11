@@ -258,7 +258,7 @@
       nombre: 'q2_textbox0', email: 'q3_email1', whatsapp: 'q4_textbox2', intereses: 'q5_textarea3', referencia: 'q7_textbox5', pago: 'q8_textbox6' } },
     analisis: { url: 'https://submit.jotform.com/submit/262794223035052', campos: {
       referencia: 'q2_textbox0', tema: 'q3_textbox1', respuestas: 'q4_textarea2', nombre: 'q5_textbox3',
-      email: 'q6_email4', whatsapp: 'q7_textbox5', factura: 'q8_textbox6', pago: 'q9_textbox7' } }
+      email: 'q6_email4', whatsapp: 'q7_textbox5', factura: 'q8_textbox6', pago: 'q9_textbox7', archivos: 'q11_archivosAdjuntos[]' } }
   };
   var LINKEDIN = '<a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--brass)">LinkedIn</a>';
   function enviar(cfg, datos, archivos) {
@@ -701,7 +701,8 @@
   function etiqueta(x) { return x.l + ' · +$' + PARTE; }
   function elegida(k) { return compradas.indexOf(k) > -1 || catalogo().partes.some(function (x) { return x.k === k && tiene('partes', etiqueta(x)); }); }
   function elegidas() { return catalogo().partes.filter(function (x) { return elegida(x.k); }); }
-  function pendientes() { return catalogo().partes.filter(function (x) { return !elegida(x.k); }); }
+  // Partes que se ofrecen al final: solo las no elegidas que tienen preguntas propias, porque al sumarlas se le hacen sus preguntas
+  function pendientes() { return catalogo().partes.filter(function (x) { return !elegida(x.k) && AE.some(function (p) { return p.parte === x.k; }); }); }
   // País y moneda del cliente: la moneda rige las cifras de las fichas y lo que usa la IA; el cobro sigue en dólares.
   // El país queda guardado para el IVA de los clientes del exterior y para adaptar los términos (IESS, SRI, décimos).
   var OTRO_PAIS = 'Otro país';
@@ -720,6 +721,20 @@
     return MONEDAS[resp.pais] || MONEDAS['Ecuador · dólares'];
   }
   function ec() { return mon().pais === 'Ecuador'; }
+  // Montos de ejemplo en la escala de la moneda del cliente, redondeados a dos cifras (¤ marca un monto dentro de un texto)
+  var SUPERVISOR = { 'Ecuador': 'controlada por alguna superintendencia (de Bancos, de Compañías o de Economía Popular y Solidaria)',
+    'México': 'supervisada por la CNBV (Comisión Nacional Bancaria y de Valores)', 'Chile': 'supervisada por la CMF (Comisión para el Mercado Financiero)',
+    'Colombia': 'vigilada por la Superintendencia Financiera de Colombia', 'Perú': 'supervisada por la SBS o por la SMV' };
+  var ESCALA = { 'México': 20, 'Chile': 1000, 'Colombia': 4000, 'Perú': 4 };
+  function ejemplo(n) {
+    var x = +String(n).replace(/\./g, '') * (ESCALA[mon().pais] || 1), p = Math.pow(10, Math.max(0, Math.floor(Math.log10(x)) - 1));
+    return (Math.round(x / p) * p).toLocaleString('de-DE');
+  }
+  function ej(t, dinero) {
+    t = String(t || '').replace(/¤([\d.]+)/g, function (_, n) { return ejemplo(n); });
+    return dinero ? t.replace(/ej\.: ([\d.]+)/g, function (_, n) { return 'ej.: ' + ejemplo(n); }) : t;
+  }
+  function dinero(f) { return !f.t || f.t === 'usd'; }
   function USD() { return ec() ? '' : ' USD'; }
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
@@ -883,12 +898,12 @@
     { id: 'p14', si: P, q: '¿Llevas un registro de tus gastos?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
     { id: 'p14p', si: P, cond: conPareja, q: '¿Y tu pareja?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
     { id: 'p15', si: P, q: '¿Ya tienes en mente una meta concreta para los próximos doce meses? Si no, la propongo yo en el informe.', op: ['Sí, la tengo clara', 'No, que salga del informe'] },
-    { id: 'p15b', si: P, cond: function () { return resp.p15 === 'Sí, la tengo clara'; }, para: 'Una meta medible, con monto y plazo.', q: 'Escríbela con monto y fecha, si puedes.', ph: 'Por ejemplo: pagar la tarjeta de 2.400 antes de junio' },
+    { id: 'p15b', si: P, cond: function () { return resp.p15 === 'Sí, la tengo clara'; }, para: 'Una meta medible, con monto y plazo.', q: 'Escríbela con monto y fecha, si puedes.', ph: 'Por ejemplo: pagar la tarjeta de ¤2.400 antes de junio' },
     { id: 'pinv', si: P, parte: 'invertir', para: 'Objetivo, horizonte, monto y tolerancia al riesgo del plan de inversión o de jubilación.',
-      q: 'Vamos a tu plan para invertir. Cuéntame para qué es ese dinero, en cuánto tiempo lo necesitarías y cuánto podrías apartar cada mes o de una vez.', ph: 'Por ejemplo: quiero jubilarme a los 60 y podría apartar 200 al mes',
+      q: 'Vamos a tu plan para invertir. Cuéntame para qué es ese dinero, en cuánto tiempo lo necesitarías y cuánto podrías apartar cada mes o de una vez.', ph: 'Por ejemplo: quiero jubilarme a los 60 y podría apartar ¤200 al mes',
       conversa: 'Entender el plan de inversión o de jubilación: para qué es el dinero, en cuántos años lo necesitaría, cuánto podría invertir al mes o de una vez, qué haría si su inversión cayera 20 % en un año (su tolerancia al riesgo), si ya aporta a algún fondo de jubilación además del IESS y, si el objetivo es jubilarse, a qué edad quisiera hacerlo.' },
     { id: 'pcom', si: P, parte: 'compra', para: 'Bien, precio, plazo, entrada y financiamiento del plan de compra.',
-      q: 'Ahora tu plan de compra. Cuéntame qué quieres comprar, cuánto cuesta más o menos, para cuándo y cuánto tienes para la entrada.', ph: 'Por ejemplo: un departamento de 90.000 en dos años; tengo 10.000 ahorrados',
+      q: 'Ahora tu plan de compra. Cuéntame qué quieres comprar, cuánto cuesta más o menos, para cuándo y cuánto tienes para la entrada.', ph: 'Por ejemplo: un departamento de ¤90.000 en dos años; tengo ¤10.000 ahorrados',
       conversa: 'Entender el plan de compra: qué bien (vivienda o vehículo, nuevo o usado), su precio aproximado, para cuándo, cuánto tiene para la entrada, si piensa financiarlo y con quién (banco, BIESS, cooperativa o concesionario) y si vendería algún bien actual para pagarlo.' },
     { id: 'p16', si: P, nota: lecturaPersonal },
 
@@ -904,7 +919,7 @@
     { id: 'i7', si: 'Una inversión', q: 'Si en un año esa inversión valiera 20 % menos, ¿qué harías?', op: ['Vendería para no perder más', 'Esperaría a que se recupere', 'Aprovecharía para invertir más'] },
     { id: 'i8', si: 'Una inversión', q: '¿En qué has invertido antes? Puedes marcar varias.', op: ['Pólizas o depósitos a plazo', 'Fondos de inversión', 'Acciones o ETF', 'Bienes raíces', 'Criptomonedas', 'Nunca he invertido'], multi: true, solo: ['Nunca he invertido'] },
     { id: 'i9', si: 'Una inversión', q: '¿Conoces sus costos, sus comisiones y las condiciones para retirar el dinero?', op: ['Sí, los tengo claros', 'Más o menos', 'No'] },
-    { id: 'i10', si: 'Una inversión', q: '¿La entidad que la ofrece está controlada por alguna superintendencia (de Bancos, de Compañías o de Economía Popular y Solidaria)?', op: ['Sí', 'No', 'No lo sé'] },
+    { id: 'i10', si: 'Una inversión', get q() { return '¿La entidad que la ofrece está ' + (SUPERVISOR[mon().pais] || 'regulada y supervisada por el organismo de control financiero de tu país') + '?'; }, op: ['Sí', 'No', 'No lo sé'] },
     { id: 'i11', si: 'Una inversión', parte: 'encaje', para: 'Situación financiera general de quien invierte.', q: 'Para ubicar la inversión en tu situación general:', opcional: true, ficha: [
       { k: 'ingreso', l: 'Ingreso mensual neto' },
       { k: 'gastos', l: 'Gastos mensuales', d: 'incluidas las cuotas de deudas' },
@@ -1191,7 +1206,7 @@
     var prev = previo[p.id] || {}, dos = p.dos && conPareja();
     var c = burbuja((dos ? '<p class="f f2 f-cab"><span></span><b>' + esc(p.dos[0]) + '</b><b>' + esc(p.dos[1]) + '</b></p>' : '') +
       '<div class="f-list">' + p.ficha.map(function (f) {
-        return '<label class="f' + (dos ? ' f2' : '') + '"><span class="f-l">' + esc(f.l) + (f.d ? '<small>' + esc(f.d) + '</small>' : '') + '</span>' + campo(f.k, prev[f.k], f.t, f.l + (dos ? ', ' + p.dos[0] : '')) +
+        return '<label class="f' + (dos ? ' f2' : '') + '"><span class="f-l">' + esc(f.l) + (f.d ? '<small>' + esc(ej(f.d, dinero(f))) + '</small>' : '') + '</span>' + campo(f.k, prev[f.k], f.t, f.l + (dos ? ', ' + p.dos[0] : '')) +
           (dos ? campo(f.k + '_p', prev[f.k + '_p'], f.t, f.l + ', ' + p.dos[1]) : '') + '</label>';
       }).join('') + '</div>' +
       (p.total ? '<p class="f-tot"><span>' + esc(p.total) + '</span><b></b></p>' : '') +
@@ -1205,7 +1220,7 @@
     c.addEventListener('input', calc); calc();
     c._ia = { lista: false, filas: function () { return [c]; }, conDatos: function () { return true; },
       campos: p.ficha.reduce(function (a, f) {
-        var d = [f.d, unidad(f.t, f.anual || p.todoAnual)].filter(Boolean).join('; ');
+        var d = [ej(f.d, dinero(f)), unidad(f.t, f.anual || p.todoAnual)].filter(Boolean).join('; ');
         a.push({ k: f.k, l: f.l + (dos ? ' (' + p.dos[0] + ')' : ''), d: d });
         if (dos) a.push({ k: f.k + '_p', l: f.l + ' (' + p.dos[1] + ')', d: d });
         return a;
@@ -1595,7 +1610,7 @@
         txt.hidden = !!p.campos; camposEl.hidden = !p.campos;
         okBtn.textContent = p.campos ? 'Continuar' : 'Enviar';
         if (p.campos) document.getElementById('ae-nombre').focus();
-        else { txt.value = typeof previo[p.id] === 'string' ? previo[p.id] : ''; txt.placeholder = (typeof p.ph === 'function' ? p.ph() : p.ph) || 'Escribe tu respuesta…'; autoAlto(); txt.focus(); skipBtn.hidden = !p.opcional; }
+        else { txt.value = typeof previo[p.id] === 'string' ? previo[p.id] : ''; txt.placeholder = ej(typeof p.ph === 'function' ? p.ph() : p.ph) || 'Escribe tu respuesta…'; autoAlto(); txt.focus(); skipBtn.hidden = !p.opcional; }
       }
       log.scrollTop = log.scrollHeight;
     };
@@ -1693,7 +1708,7 @@
       var m = r.mensaje || 'Ahora no pude responderte. Responde como mejor puedas; si algo no queda claro, lo vemos en el informe.';
       burbuja(m, r.mensaje ? 'yo ia' : 'yo', true); dudas.push({ pregunta: p.q, duda: d, respuesta: m });
       var c = log.querySelector('.msg.ficha'); if (c) log.appendChild(c);   // la ficha queda al final, a la vista
-      if (!p.op && !p.ficha && !p.deudas && !p.filas && !p.archivos) abrirTexto(p.ph || 'Escribe tu respuesta…', p.opcional);
+      if (!p.op && !p.ficha && !p.deudas && !p.filas && !p.archivos) abrirTexto(ej(p.ph) || 'Escribe tu respuesta…', p.opcional);
       dudaBtn.hidden = false; log.scrollTop = log.scrollHeight;
     });
   }
