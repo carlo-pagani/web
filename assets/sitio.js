@@ -469,6 +469,18 @@
   }
   var cfoCard = document.querySelector('.service[data-cfo]');
   if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a:not([data-cita])')) agendar('CFO fraccional', e); });
+  // Desde la Consulta Express de empresas: «Prefiero agendar una cita»
+  function citaEmpresa() {
+    if (location.hash !== '#cita-empresa') return;
+    history.replaceState(null, '', location.pathname + '#contacto');
+    var bajar = function () {
+      agendar('Consultoría financiera');
+      // Al llegar desde otra página, lo de arriba aún se acomoda mientras baja: se corrige al final
+      setTimeout(function () { document.getElementById('contacto').scrollIntoView({ block: 'start' }); }, 1200);
+    };
+    if (document.readyState === 'complete') bajar(); else window.addEventListener('load', bajar);
+  }
+  window.addEventListener('hashchange', citaEmpresa); citaEmpresa();
   document.querySelectorAll('[data-agendar]').forEach(function (a) {
     a.addEventListener('click', function (e) { agendar(a.dataset.agendar, e); });
   });
@@ -614,11 +626,11 @@
   var OT = { deuda: 'Refinanciar una deuda o seguir igual', prepago: 'Pagar antes una deuda con dinero que tengo', compra: 'Comprar vivienda o seguir arrendando',
     credito: 'Comprar algo al contado o a crédito', trabajo: 'Cambiar de trabajo o emprender', venta: 'Vender un bien o un negocio', otra: 'Otra decisión' };
   var DIAS = ['De contado', 'Hasta 30 días', 'De 31 a 60 días', 'De 61 a 90 días', 'Más de 90 días'];
-  // Partes del análisis: la base siempre va incluida y cada parte adicional suma $5 + IVA. El cliente las elige y paga antes de responder;
+  // Partes del análisis: la base siempre va incluida (desde $35 + IVA; para empresas, $100 + IVA) y cada parte adicional suma $5 + IVA. El cliente las elige y paga antes de responder;
   // al final se le ofrecen las que no eligió («por» dice qué gana su informe con cada una) y paga la diferencia antes de responderlas.
-  var BASE = 35, PARTE = 5, IVA = 0.15, SOLO_BASE = 'Solo lo básico', NO_EXTRA = 'No, gracias';
+  var BASE = 35, BASE_EMPRESA = 100, PARTE = 5, IVA = 0.15, SOLO_BASE = 'Solo lo básico', NO_EXTRA = 'No, gracias';
   var CATALOGO = {};
-  CATALOGO['Mi empresa'] = { base: 'Diagnóstico de rentabilidad y punto de equilibrio, con recomendaciones concretas', partes: [
+  CATALOGO['Mi empresa'] = { precio: BASE_EMPRESA, base: 'Diagnóstico de rentabilidad y punto de equilibrio, con recomendaciones concretas', partes: [
     { k: 'capital', l: 'Capital de trabajo y ciclo de caja', por: 'mide cuánto dinero inmoviliza tu operación entre lo que te deben, el inventario y lo que debes a proveedores.' },
     { k: 'deudas', l: 'Deudas de la empresa', por: 'calcula el costo real de cada deuda y en qué orden conviene pagarlas.' },
     { k: 'atrasos', l: 'Plan para ponerse al día', get por() { return 'ordena las obligaciones atrasadas con ' + (ec() ? 'el SRI, el IESS' : 'el ente de impuestos, la seguridad social') + ', los bancos o los proveedores.'; } }] };
@@ -637,6 +649,9 @@
     { k: 'escenarios', l: 'Escenarios', por: 'muestra qué pasa si cambian la tasa, tus ingresos o los plazos.' }] };
   var compradas = [], cobros = [], aceptado = '';   // partes sumadas al final, pagos aprobados y fecha en que aceptó las condiciones
   function catalogo() { return CATALOGO[resp.tema] || { base: '', partes: [] }; }
+  function base() { return catalogo().precio || BASE; }
+  // A las empresas se les recomienda la cita para un análisis detallado; la Consulta Express queda para casos puntuales
+  var SEGUIR = 'Seguir con la Consulta Express', CITA = 'Prefiero agendar una cita';
   function etiqueta(x) { return x.l + ' · +$' + PARTE; }
   function elegida(k) { return compradas.indexOf(k) > -1 || catalogo().partes.some(function (x) { return x.k === k && tiene('partes', etiqueta(x)); }); }
   function elegidas() { return catalogo().partes.filter(function (x) { return elegida(x.k); }); }
@@ -664,7 +679,9 @@
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
     { id: 'pais', q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país.', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
     { id: 'pais2', cond: function () { return resp.pais === OTRO_PAIS; }, q: '¿En qué país vives y en qué moneda manejas tus finanzas?', ph: 'Por ejemplo: Argentina, pesos argentinos' },
-    { id: 'partes', get q() { var b = catalogo().base; return 'Tu análisis incluye siempre lo esencial: ' + b.charAt(0).toLowerCase() + b.slice(1) + ', por $' + BASE + USD() + ' + IVA. ¿Quieres sumar alguna de estas partes? Cada una cuesta $' + PARTE + ' más; si no estás seguro, al final te muestro qué gana tu informe con cada una.'; },
+    { id: 'cita', si: 'Mi empresa', get q() { return 'Para empresas, la Consulta Express cuesta desde $' + BASE_EMPRESA + USD() + ' + IVA y está pensada para casos puntuales: una duda, una decisión o un problema concreto. Si lo que buscas es un análisis detallado de tu empresa, te recomiendo agendar una cita para el servicio presencial y personalizado, que puede tomar hasta ocho semanas, según el tamaño de la empresa. ¿Cómo prefieres seguir?'; },
+      op: [SEGUIR, CITA] },
+    { id: 'partes', get q() { var b = catalogo().base; return 'Tu análisis incluye siempre lo esencial: ' + b.charAt(0).toLowerCase() + b.slice(1) + ', por $' + base() + USD() + ' + IVA. ¿Quieres sumar alguna de estas partes? Cada una cuesta $' + PARTE + ' más; si no estás seguro, al final te muestro qué gana tu informe con cada una.'; },
       op: function () { return catalogo().partes.map(etiqueta).concat([SOLO_BASE]); }, multi: true, solo: [SOLO_BASE] },
     { id: 'datos', q: '¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
     { id: 'factura', q: '¿Necesitas factura?', op: ['Sí', 'No'] },
@@ -934,7 +951,7 @@
   };
   var CONDICIONES = 'versión del 11 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría; te tomarán entre diez y veinte minutos, según tu caso. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles.';
-  var INTRO_PRECIO = 'Primero eliges el tema y las partes que quieres analizar, y pagas: $' + BASE + ' + IVA por lo esencial y $' + PARTE + ' más por cada parte adicional. Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
+  var INTRO_PRECIO = 'Primero eliges el tema y las partes que quieres analizar, y pagas: $' + BASE + ' + IVA por lo esencial ($' + BASE_EMPRESA + ' + IVA si es sobre tu empresa) y $' + PARTE + ' más por cada parte adicional. Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
   var BORRADO = 'Cuando ya no los necesito para tu informe y su seguimiento, borro tus respuestas y los archivos que adjuntaste. Solo conservo lo que la ley me obliga a guardar, como los datos de tu factura. Si más adelante quieres profundizar o revisar cómo evolucionaste, compárteme el informe que recibiste y partimos de ahí.';
   function intro() { return INTRO + '\n\n' + INTRO_PRECIO + (IA.url ? '\n\n' + INTRO_IA : ''); }
@@ -1543,12 +1560,23 @@
     burbuja(textoResp(p, v), 'tu', true);
     chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
     if (p.id === 'extra') return cobrarExtra(v);
+    if (p.id === 'cita' && v === CITA) return irACita();
     if (revisada[p.id] && !aclar[p.id]) {
       aclar[p.id] = [{ pregunta: revisada[p.id], respuesta: JSON.stringify(v) === JSON.stringify(previo[p.id]) ? 'Confirmó las cifras.' : 'Ajustó las cifras.' }];
       return preguntar(true);
     }
     if (IA.url && !p.op && !p.campos && !p.archivos && p.id !== 'fdatos' && !ayudo(p.id) && !(v === '' || (p.ficha && !Object.keys(v).length) || (p.filas && !v.length))) return revisar(p);
     preguntar(true);
+  }
+  // Elige la cita: la pregunta queda abierta por si vuelve, y lo llevo al formulario de contacto con el servicio ya elegido
+  function irACita() {
+    delete resp.cita; camino.pop();
+    burbuja('Perfecto. Te llevo al formulario para agendar la cita; si cambias de idea, aquí te espera tu Consulta Express.', 'yo', true);
+    preguntar(false);
+    setTimeout(function () {
+      dlg.close();
+      if (document.getElementById('cform')) location.hash = '#cita-empresa'; else location.href = '/#cita-empresa';
+    }, sinMov ? 0 : 1400);
   }
   function contexto(hasta) {
     var t = camino.filter(function (id) { return id !== hasta && !aePaso(id).nota; })
@@ -1651,21 +1679,21 @@
   function tiene(id, v) { return Array.isArray(resp[id]) && resp[id].indexOf(v) > -1; }
   function dolares(n) { return '$' + n.toFixed(2); }
   function conIVA(n) { return Math.round(n * (1 + IVA) * 100) / 100; }
-  function precio() { var neto = BASE + PARTE * elegidas().length; return { neto: neto, total: conIVA(neto) }; }
+  function precio() { var neto = base() + PARTE * elegidas().length; return { neto: neto, total: conIVA(neto) }; }
   function pagado() { return Math.round(cobros.reduce(function (t, c) { return t + c.monto; }, 0) * 100) / 100; }
   function minus(t) { return t.charAt(0).toLowerCase() + t.slice(1); }
   function lista(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1]; }
   function fechaEC() { return new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'long', timeStyle: 'short' }); }
   function pintarPrecio() {
     var c = catalogo(), pr = precio(), el = elegidas();
-    document.getElementById('ae-mods').innerHTML = '<li><label><input type="checkbox" checked disabled><span>' + esc(c.base) + '</span><b>$' + BASE + '</b></label></li>' +
+    document.getElementById('ae-mods').innerHTML = '<li><label><input type="checkbox" checked disabled><span>' + esc(c.base) + '</span><b>$' + base() + '</b></label></li>' +
       c.partes.map(function (x) {
         return '<li><label><input type="checkbox" data-mod="' + x.k + '"' + (elegida(x.k) ? ' checked' : '') + '><span>' + esc(x.l) + '</span><b>+ $' + PARTE + '</b></label></li>';
       }).join('');
     document.getElementById('ae-sub').textContent = '$' + pr.neto + ' + IVA (15 %)';
     // Por qué cuesta lo que cuesta: la suma a la vista, junto al botón de pagar
     document.getElementById('ae-porque').innerHTML = el.length ?
-      'Base $' + BASE + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + ' + IVA.' :
+      'Base $' + base() + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + ' + IVA.' :
       'Precio base del análisis. <a href="#ae-mods" data-ir-mods>¿Quieres sumar alguna parte?</a>';
     document.getElementById('ae-total').textContent = dolares(pr.total) + ' USD';
   }
@@ -1682,11 +1710,11 @@
     pintarPrecio();
   });
   // Resumen en dos momentos: antes del pago (lo elegido, condiciones y consentimiento) y al final (todas las respuestas, para enviarlas)
-  var CERRADOS = ['tema', 'pais', 'pais2', 'partes', 'pago', 'extra'];
+  var CERRADOS = ['tema', 'pais', 'pais2', 'cita', 'partes', 'pago', 'extra'];
   function mostrarResumen() {
     camino = enOrden();
     var cobro = !resp.pago;
-    resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota && !(cobro && id === 'partes'); }).map(function (id) {
+    resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota && id !== 'cita' && !(cobro && id === 'partes'); }).map(function (id) {
       var p = aePaso(id), fijo = !cobro && CERRADOS.indexOf(id) > -1;
       var extra = (aclar[id] || []).filter(function (a) { return !/^(Confirmó|Ajustó) las cifras\.$/.test(a.respuesta); })
         .map(function (a) { return '<i>Aclaraste: ' + esc(a.respuesta) + '</i>'; }).join('') +
@@ -1752,14 +1780,14 @@
   // Lo que se guarda en Jotform: la transcripción completa, el alcance pagado y los datos de contacto
   function alcance() {
     var c = catalogo();
-    return 'Alcance del análisis\n✓ ' + c.base + ' ($' + BASE + ')\n' + c.partes.map(function (x) {
+    return 'Alcance del análisis\n✓ ' + c.base + ' ($' + base() + ')\n' + c.partes.map(function (x) {
       return elegida(x.k) ? '✓ ' + x.l + ' ($' + PARTE + (compradas.indexOf(x.k) > -1 ? ', sumada al final' : '') + ')' : '✗ No eligió: ' + x.l;
     }).join('\n') + '\nPagado: ' + dolares(pagado()) + ' con IVA' +
       (aceptado ? '\n\nAceptó las condiciones (' + CONDICIONES + ') y dio su consentimiento expreso el ' + aceptado + ', hora de Ecuador, antes de pagar.' : '');
   }
   function paquete() {
     camino = enOrden();
-    var lineas = camino.filter(function (id) { return ['partes', 'pago', 'extra', 'datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
+    var lineas = camino.filter(function (id) { return ['cita', 'partes', 'pago', 'extra', 'datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
       .map(function (id) {
         var p = aePaso(id);
         if (p.nota) return 'Primer vistazo calculado en la web\n→ ' + resp[id];
