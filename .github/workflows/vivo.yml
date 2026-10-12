@@ -1,0 +1,45 @@
+name: Prueba en vivo de PayPal y la Cajita
+on: push
+jobs:
+  vivo:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          npm i playwright@1.56.1 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+          cat > t.js <<'JS'
+          const pw = require('playwright');
+          (async () => {
+            for (const motor of ['chromium']) {
+              const b = await pw[motor].launch(); const ctx = await b.newContext(motor === 'webkit' ? pw.devices['iPhone 15 Pro'] : {}); const p = await ctx.newPage();
+              const errs = [], red = [];
+              p.on('pageerror', e => errs.push(e.message));
+              p.on('console', m => { if (m.type() === 'error') errs.push('consola: ' + m.text().slice(0, 200)); });
+              p.on('response', r => { const u = r.url(); if (/payphone/i.test(u) && !/\.(css|js|png|svg|woff2?)(\?|$)/.test(u)) red.push(r.status() + ' ' + r.request().method() + ' ' + u.replace(/[?#].*/, '')); });
+              await p.goto('https://carlo-pagani.com/?nc=' + Date.now(), { waitUntil: 'networkidle' });
+              const r = await p.evaluate(async () => {
+                const a = await (await fetch('/data/asistente.json', { cache: 'no-store' })).json();
+                const k = await (await fetch(a.pago, { cache: 'no-store' })).json();
+                const out = { pago: a.pago, tokenLargo: (k.token || '').length, store: (k.storeId || '').slice(0, 8) };
+                const o = await fetch(a.paypal.replace(/\/paypal$/, '') + '/orden', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ proveedor: 'paypal', producto: 'masterclass', referencia: 'MC-PRUEBA' + Date.now().toString(36).toUpperCase().slice(-4), descripcion: 'Prueba de Claude (sin cobro)' }) });
+                const oj = await o.json(); out.paypal = { estado: o.status, orden: !!oj.id, centavos: oj.centavos, error: oj.error || '' };
+                await new Promise((ok, mal) => { const s = document.createElement('script'); s.type = 'module'; s.src = 'https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box.js'; s.onload = ok; s.onerror = mal; document.head.appendChild(s);
+                  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box.css'; document.head.appendChild(l); });
+                for (let i = 0; i < 50 && !window.PPaymentButtonBox; i++) await new Promise(r => setTimeout(r, 100));
+                const d = document.createElement('div'); d.id = 'caja-prueba'; d.style.cssText = 'position:relative;z-index:99999;background:#fff;width:400px'; document.body.prepend(d);
+                new window.PPaymentButtonBox({ token: k.token, storeId: k.storeId, clientTransactionId: 'prueba-claude-' + Date.now(), reference: 'Prueba de carga (sin cobro)',
+                  amount: 1500, amountWithTax: 1304, tax: 196, amountWithoutTax: 0, service: 0, tip: 0, currency: 'USD', lang: 'es', defaultMethod: 'card', timeZone: -5 }).render('caja-prueba');
+                return out;
+              });
+              await p.waitForTimeout(8000);
+              const texto = await p.evaluate(() => (document.getElementById('caja-prueba').innerText || '').replace(/\s+/g, ' ').slice(0, 400));
+              const campos = await p.evaluate(() => document.querySelectorAll('#caja-prueba input, #caja-prueba iframe, #caja-prueba button').length);
+              console.log(`::notice::${motor} servicio ${JSON.stringify(r)} | campos ${campos} | texto: ${texto}`);
+              console.log(`::notice::${motor} red ${JSON.stringify(red.slice(0, 12))}`);
+              console.log(`::notice::${motor} errores ${JSON.stringify(errs.slice(0, 6))}`);
+              await p.screenshot({ path: motor + '.png', clip: { x: 0, y: 0, width: 420, height: 700 } });
+              await b.close();
+            }
+          })();
+          JS
+          node t.js
