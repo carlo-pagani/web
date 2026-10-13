@@ -1,0 +1,72 @@
+name: Monitoreo del sitio
+
+# Cada 8 días (contando desde el 13 de octubre de 2026) a las 10:23 UTC,
+# 5:23 en Ecuador. El informe queda en la rama «monitoreo», fuera del sitio.
+on:
+  schedule:
+    - cron: "23 10 * * *"
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-y1smji]
+    paths: [scripts/monitoreo.py, .github/workflows/monitoreo.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  monitoreo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ¿Toca hoy?
+        id: toca
+        run: |
+          dias=$(( ( $(date -u +%s) - $(date -u -d 2026-10-13 +%s) ) / 86400 ))
+          if [ "${{ github.event_name }}" != "schedule" ] || [ $(( dias % 8 )) -eq 0 ]; then
+            echo "si=1" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.toca.outputs.si
+      - uses: actions/setup-python@v5
+        if: steps.toca.outputs.si
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        if: steps.toca.outputs.si
+        with:
+          node-version: "20"
+      - name: Lighthouse
+        if: steps.toca.outputs.si
+        run: |
+          mkdir -p lighthouse
+          for ruta in "" consulta-express/ aprende/; do
+            nombre=$(echo "${ruta:-portada}" | tr -d /)
+            npx -y lighthouse@12 "https://carlo-pagani.com/$ruta" --quiet --output=json \
+              --output-path="lighthouse/$nombre-telefono.json" --chrome-flags="--headless=new --no-sandbox" || true
+            npx -y lighthouse@12 "https://carlo-pagani.com/$ruta" --quiet --output=json --preset=desktop \
+              --output-path="lighthouse/$nombre-computadora.json" --chrome-flags="--headless=new --no-sandbox" || true
+          done
+      - name: Informe
+        if: steps.toca.outputs.si
+        env:
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+        run: |
+          pip install --quiet google-auth requests
+          python scripts/monitoreo.py
+      - name: Guardar en la rama monitoreo
+        if: steps.toca.outputs.si
+        run: |
+          mv informes /tmp/informes
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin monitoreo; then
+            git checkout -B monitoreo origin/monitoreo
+          else
+            git checkout --orphan monitoreo
+            git rm -rfq .
+            git clean -fdq
+          fi
+          mkdir -p informes
+          cp /tmp/informes/* informes/
+          git add informes
+          git commit -m "Informe de monitoreo $(date -u +%F)" || exit 0
+          git push origin monitoreo
