@@ -6,9 +6,6 @@ on:
   schedule:
     - cron: "23 10 * * *"
   workflow_dispatch:
-  push:
-    branches: [claude/project-thread-y1smji]
-    paths: [scripts/monitoreo.py, .github/workflows/monitoreo.yml]
 
 permissions:
   contents: write
