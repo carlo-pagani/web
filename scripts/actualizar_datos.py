@@ -77,7 +77,7 @@ def noticias():
             print(f"noticias {grupo['region']}: error {exc!r}")
             candidatos = []
         # si una región no trae nada, se conservan sus titulares anteriores
-        candidatos += [i for i in anteriores if i.get("region") == grupo["region"] and not SUCESOS.search(i.get("titulo", "")) and not NO_LATINA.search(i.get("fuente", ""))]
+        candidatos += [i for i in anteriores if i.get("region") == grupo["region"] and not SUCESOS.search(i.get("titulo", "")) and not NO_LATINA.search(i.get("fuente", "")) and str(i.get("url", "")).startswith("https://")]
         tomados = 0
         for i in candidatos:
             clave = i["titulo"].lower()[:60]

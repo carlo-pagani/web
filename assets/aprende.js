@@ -200,8 +200,8 @@
       F.out.innerHTML = tarjetas([
         { k: 'Capital necesario al jubilarte', v: usd(necesita), s: 'valor presente detallado, en dinero de hoy; unos ' + usd(necesita * Math.pow(1 + inf, n)) + ' de ese año' },
         { k: 'Lo que tu ahorro actual alcanzará', v: usd(sFut), s: 'en dinero de hoy' },
-        { k: 'Ahorro mensual necesario', v: brecha ? usd(aporte) : '$0', c: brecha ? '' : 'pos', s: brecha ? 'en dinero de hoy, subiéndolo con la inflación' : 'tu ahorro actual ya alcanza' }
-      ]) + '<p class="small-note">Con los otros dos métodos del video: multiplicador (12 veces el gasto anual), ' + usd(falta * 12 * 12) + '; regla del 4 %, ' + usd(falta * 12 / 0.04) + '.</p><p class="veredicto">' + (brecha ? 'Con ' + usd(aporte) + ' al mes desde hoy, a los ' + j + ' años tendrías lo necesario para retirar ' + usd(falta) + ' al mes (en dinero de hoy) durante ' + A + ' años.' : 'Con lo que ya tienes invertido llegarías a tu meta si mantienes ese rendimiento.') + '</p>';
+        M <= 0 ? { k: 'Lo que te falta hoy', v: brecha ? usd(brecha) : '$0', c: brecha ? '' : 'pos', s: brecha ? 'ya estás en la edad de jubilarte' : 'tu ahorro actual ya alcanza' } : { k: 'Ahorro mensual necesario', v: brecha ? usd(aporte) : '$0', c: brecha ? '' : 'pos', s: brecha ? 'en dinero de hoy, subiéndolo con la inflación' : 'tu ahorro actual ya alcanza' }
+      ]) + '<p class="small-note">Con los otros dos métodos del video: multiplicador (12 veces el gasto anual), ' + usd(falta * 12 * 12) + '; regla del 4 %, ' + usd(falta * 12 / 0.04) + '.</p><p class="veredicto">' + (brecha && M <= 0 ? 'Con la edad que indicas ya no hay meses para ahorrar: te faltarían ' + usd(brecha) + ' hoy para retirar ' + usd(falta) + ' al mes durante ' + A + ' años.' : brecha ? 'Con ' + usd(aporte) + ' al mes desde hoy, a los ' + j + ' años tendrías lo necesario para retirar ' + usd(falta) + ' al mes (en dinero de hoy) durante ' + A + ' años.' : 'Con lo que ya tienes invertido llegarías a tu meta si mantienes ese rendimiento.') + '</p>';
       var pts = [], v = s;
       for (var k = 0; k <= M + N; k++) {
         if (k % 12 === 0) pts.push([e + k / 12, Math.max(0, v)]);
@@ -248,7 +248,7 @@
         { k: 'Sin préstamo: pones ' + usd(K), v: usd(S.neta), c: S.neta < 0 ? 'neg' : 'pos', s: pct(S.roi * 100) + ' sobre tu capital' },
         { k: 'Impuesto a la plusvalía', v: usd(A.imps) + ' / ' + usd(S.imps), s: 'con préstamo / sin préstamo; los intereses se deducen' }
       ]) + '<p class="veredicto ' + (A.neta < 0 ? 'bad' : 'ok') + '">' +
-        (A.neta < 0 ? 'Con la venta ' + f0.format(-x * 100) + ' % por debajo de lo esperado, el préstamo convierte la operación en una pérdida de ' + usd(-A.neta) + ': el ' + pct(-A.roi * 100) + ' de tu capital. Sin préstamo, el resultado sería ' + usd(S.neta) + '.'
+        (A.neta < 0 ? (x < 0 ? 'Con la venta ' + f0.format(-x * 100) + ' % por debajo de lo esperado, el préstamo' : 'Con estos supuestos, el préstamo') + ' convierte la operación en una pérdida de ' + usd(-A.neta) + ': el ' + pct(-A.roi * 100) + ' de tu capital. Sin préstamo, el resultado sería ' + usd(S.neta) + '.'
           : 'En ' + (anios % 1 ? f1 : f0).format(anios) + ' años, el apalancamiento te deja ' + pct(A.roi * 100) + ' sobre tu capital frente a ' + pct(S.roi * 100) + ' sin préstamo, y te quedan ' + usd(K - A.propio) + ' libres para otras oportunidades. Al vender cancelas un saldo de ' + usd(A.saldo) + '.') + '</p>';
       var a = [], b = [];
       for (var y = -30; y <= 15; y += 1) { a.push([y, caso(K, 0, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); b.push([y, caso(K, fin, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); }
