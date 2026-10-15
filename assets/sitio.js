@@ -607,11 +607,17 @@
       ok.disabled = true; st.className = 'cstatus'; st.textContent = 'Enviando…';
       enviar(FORMS.masterclass, d2).then(function () {
         mf.innerHTML = '<p class="q">Listo, ' + nombre + '. Tu cupo queda separado.</p><p style="color:var(--on-navy-soft);margin:0">Verifico tu pago y te escribo a ' + esc(datos.email) + ' con la hora y el enlace. Si la masterclass no llegara a abrirse, te devuelvo el valor completo.</p>';
+        verMF();
       }).catch(function () {
         ok.disabled = false; st.className = 'cstatus'; st.textContent = 'No se pudo enviar. Inténtalo de nuevo en unos minutos.';
       });
     });
     comp.focus();
+  }
+  // Al cambiar el contenido del formulario, la página sube a su inicio para que no quede viendo lo que está debajo
+  function verMF() {
+    var quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    mf.scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' });
   }
   function pagoMCPayPal(datos, ref, intereses, nombre) {
     var tarjeta = !!PAYPHONE.url, pp = !!PAYPAL.clientId;
@@ -622,6 +628,7 @@
         '<p class="pp-ayuda">Paga con tu cuenta PayPal o con tarjeta de crédito o débito. Tu cupo queda confirmado en cuanto se aprueba el pago.</p>' +
         '<p class="pp-ayuda pp-nota">Si pagas con tarjeta, el «CSC» que pide PayPal es el código de seguridad (CVV) de tres dígitos del reverso. Si tu banco la rechaza, activa en su app las compras por internet y en el exterior.</p>') +
       (pp ? '<div class="pp-btns" id="m-pp"></div>' : '') + '<p class="cstatus" id="m-status2" role="status"></p>';
+    verMF();
     var st = document.getElementById('m-status2');
     // Si el pago no carga o falla, se ofrece volver a intentarlo con los mismos datos y la misma referencia
     var alError = function (msg) {
@@ -642,6 +649,7 @@
       var guardar = function () {
         return enviar(FORMS.masterclass, d2).then(function () {
           mf.innerHTML = '<p class="q">Listo, ' + nombre + '. Tu cupo está confirmado.</p><p style="color:var(--on-navy-soft);margin:0">Recibí tu pago de ' + MC.precio + ' (orden de PayPal ' + esc(r.orden) + '). Te escribo a ' + esc(datos.email) + ' con la hora y el enlace. Si la masterclass no llegara a abrirse, te devuelvo el valor completo.</p>';
+          verMF();
         }).catch(function () {
           st.innerHTML = 'Tu pago se aprobó (orden ' + esc(r.orden) + '), pero no pude guardar tu cupo. <button type="button" class="back" id="m-reintentar">Reintentar</button>';
           document.getElementById('m-reintentar').addEventListener('click', guardar);

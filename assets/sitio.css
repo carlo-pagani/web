@@ -647,6 +647,7 @@ label[data-c] > span .ia-marca { margin-left: .35rem; vertical-align: .1em; }
 .pp-cargando { margin: 0 0 .6rem; color: #536176; font-size: var(--t-s); text-align: center; }
 
 .pp-ayuda.pp-nota { font-size: var(--t-xs); opacity: .85; margin-top: -.25rem; }
+#mform { scroll-margin-top: 1rem; }
 .pph-caja { background: #fff; color: #10151C; border-radius: 6px; padding: .9rem; min-height: 3.2rem; margin-bottom: 1rem; }
 .pph-caja .pp-cargando { margin: 0; }
 .pp-ayuda.pp-o { margin-top: .25rem; }

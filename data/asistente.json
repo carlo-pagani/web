@@ -1,5 +1,5 @@
 {
  "url": "https://asistente-analisis.carlo-pagani.workers.dev/guia",
- "pago": "",
- "paypal": ""
+ "pago": "https://asistente-analisis.carlo-pagani.workers.dev/pago",
+ "paypal": "https://asistente-analisis.carlo-pagani.workers.dev/pago/paypal"
 }
