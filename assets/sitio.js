@@ -752,8 +752,33 @@
   }
   function dinero(f) { return !f.t || f.t === 'usd'; }
   function USD() { return ec() ? '' : ' USD'; }
+  // Lámina de bienvenida: el proceso en cuatro pasos, al estilo de las miniaturas, justo después de elegir el tema
+  var LAMINAS = {
+    'Mi empresa': { pasos: ['Me cuentas tu empresa y tus cifras; si no sabes cómo, la IA las llena contigo.', 'Sumas en el camino las partes que te interesen.', 'Recibes tu informe en tres días hábiles.'], tiempo: 'Te tomará unos 20 minutos; con todas las partes, hasta 40.' },
+    'Una inversión': { pasos: ['Me cuentas qué inversión es, quién la ofrece y cuánto pondrías.', 'Si quieres, vemos cómo encaja en tus finanzas y con qué compararla.', 'Recibes tu informe en tres días hábiles.'], tiempo: 'Te tomará unos 10 a 12 minutos.' }
+  };
+  function lamina(p, viva) {
+    var l = LAMINAS[resp.tema] || (resp.tema === P ? { pasos: ['Me cuentas tu pregunta, tus ingresos, gastos y deudas.', 'Sumas partes como tarjetas, inversiones o vivienda.', 'Recibes tu informe en tres días hábiles.'], tiempo: 'Te tomará unos 20 a 25 minutos.' }
+      : { pasos: ['Me cuentas la decisión y sus opciones.', 'Anotas las cifras de cada opción.', 'Recibes una recomendación clara en tres días hábiles.'], tiempo: 'Te tomará unos 8 a 12 minutos.' });
+    var pasos = ['Pagas lo esencial: $' + base() + USD() + ' + IVA.'].concat(l.pasos);
+    var html = '<p class="lam-eyebrow">' + esc(resp.tema) + '</p><p class="lam-t">Así funciona <b>en 4 pasos</b></p>' +
+      '<div class="lam-foto"><img src="/assets/carlo-recorte-420.webp" alt="" width="420" height="547"></div>' +
+      '<ol class="lam-pasos">' + pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
+      '<p class="lam-tiempo">' + esc(l.tiempo) + ' Puedes saltar lo que no sepas: con más información, el informe es más útil.</p>' +
+      '<div class="lam-botones"><button type="button" class="btn btn-navy" data-empezar>Empezar</button><button type="button" class="back" data-otro>Elegir otro tema</button></div>';
+    var d = burbuja(html, 'lamina' + (viva ? ' nuevo' : ' hecha'), viva, true);
+    if (!viva) return d;
+    d.querySelector('[data-empezar]').addEventListener('click', function () {
+      if (actual !== p) return;
+      actual = null; resp[p.id] = 'Empezar'; camino.push(p.id); d.classList.add('hecha');
+      preguntar(true);
+    });
+    d.querySelector('[data-otro]').addEventListener('click', function () { if (actual === p) backBtn.click(); });
+    return d;
+  }
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
+    { id: 'intro', lamina: true },
     { id: 'pais', q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país.', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
     { id: 'pais2', cond: function () { return resp.pais === OTRO_PAIS; }, q: '¿En qué país vives y en qué moneda manejas tus finanzas?', ph: 'Por ejemplo: Argentina, pesos argentinos' },
     { id: 'cita', si: 'Mi empresa', get q() { return 'Para empresas, la Consulta Express cuesta desde $' + BASE_EMPRESA + USD() + ' + IVA y está pensada para casos puntuales: una duda, una decisión o un problema concreto. Si lo que buscas es un análisis detallado de tu empresa, te recomiendo agendar una cita para el servicio presencial y personalizado, que puede tomar hasta ocho semanas, según el tamaño de la empresa. ¿Cómo prefieres seguir?'; },
@@ -1199,6 +1224,7 @@
     camino.forEach(function (id) {
       var p = aePaso(id);
       if (p.nota) { if (resp[id]) burbuja(resp[id], 'yo'); return; }
+      if (p.lamina) { lamina(p, false); return; }
       if (p.cobro) { burbuja('Pago aprobado: ' + dolares(pagado()) + ' USD.', 'yo'); return; }
       burbuja(p.q, 'yo');
       (ayudas[id] || []).forEach(function (a) { burbuja(a.texto, a.quien === 'cliente' ? 'tu' : a.quien === 'ia' ? 'yo ia' : 'yo'); });
@@ -1570,7 +1596,7 @@
   ].forEach(function (x) { x[1].split(' ').forEach(function (id) { SEC[id] = x[0]; }); });
   function seccion(id) { return SEC[id] || (/^o/.test(id) ? 'Tu decisión' : 'Tu caso'); }
   function progreso(p) {
-    var lista = AE.filter(function (x) { return !x.nota && aplica(x); }), secs = [];
+    var lista = AE.filter(function (x) { return !x.nota && !x.lamina && aplica(x); }), secs = [];
     lista.forEach(function (x) { var n = seccion(x.id); if (secs.indexOf(n) < 0) secs.push(n); });
     document.getElementById('ae-bar').style.width = Math.round(100 * camino.length / (AE.filter(aplica).length + 1)) + '%';
     var el = document.getElementById('ae-paso'); if (!el) return;
@@ -1586,7 +1612,7 @@
     if (editando && editando in resp) depurar();
     guardarCurso();
     actual = siguiente(); errEl.textContent = '';
-    progreso(actual && !actual.nota && !actual.cobro ? actual : null);
+    progreso(actual && !actual.nota && !actual.cobro && !actual.lamina ? actual : null);
     dlg.style.setProperty('--mon', JSON.stringify(mon().s));
     backBtn.hidden = !camino.length || enviado || (editando && editando in resp) || (!editando && bloqueado());
     backBtn.textContent = editando ? '↶ Volver al resumen' : '↶ Corregir la anterior';
@@ -1607,6 +1633,12 @@
       var decir = function () { burbuja(t, 'yo', true); preguntar(true); };
       if (conPausa && !sinMov) { var e0 = burbuja('• • •', 'yo escribe'); setTimeout(function () { e0.remove(); decir(); }, 700); }
       else decir();
+      return;
+    }
+    if (p.lamina) {
+      backBtn.hidden = true;
+      if (conPausa && !sinMov) { var e1 = burbuja('• • •', 'yo escribe'); setTimeout(function () { e1.remove(); lamina(p, true); }, 550); }
+      else lamina(p, true);
       return;
     }
     var mostrar = function () {
@@ -1660,7 +1692,7 @@
   function contexto(hasta) {
     // Sin datos personales: a la IA le basta el caso, no el nombre, el correo, la cédula ni el pago
     var privados = ['datos', 'factura', 'fdatos', 'pago'];
-    var t = camino.filter(function (id) { return id !== hasta && !aePaso(id).nota && privados.indexOf(id) < 0; })
+    var t = camino.filter(function (id) { return id !== hasta && !aePaso(id).nota && !aePaso(id).lamina && privados.indexOf(id) < 0; })
       .map(function (id) { var p = aePaso(id); return p.q + '\n' + textoResp(p, resp[id]); }).join('\n\n');
     return t.slice(-8000);
   }
@@ -1793,11 +1825,11 @@
     pintarPrecio();
   });
   // Resumen en dos momentos: antes del pago (lo elegido, condiciones y consentimiento) y al final (todas las respuestas, para enviarlas)
-  var CERRADOS = ['tema', 'pais', 'pais2', 'cita', 'partes', 'pago', 'extra'];
+  var CERRADOS = ['tema', 'intro', 'pais', 'pais2', 'cita', 'partes', 'pago', 'extra'];
   function mostrarResumen() {
     camino = enOrden();
     var cobro = !resp.pago;
-    resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota && id !== 'cita' && !(cobro && id === 'partes'); }).map(function (id) {
+    resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota && !aePaso(id).lamina && id !== 'cita' && !(cobro && id === 'partes'); }).map(function (id) {
       var p = aePaso(id), fijo = !cobro && CERRADOS.indexOf(id) > -1;
       var extra = (aclar[id] || []).filter(function (a) { return !/^(Confirmó|Ajustó) las cifras\.$/.test(a.respuesta); })
         .map(function (a) { return '<i>Aclaraste: ' + esc(a.respuesta) + '</i>'; }).join('') +
@@ -1870,7 +1902,7 @@
   }
   function paquete() {
     camino = enOrden();
-    var lineas = camino.filter(function (id) { return ['cita', 'partes', 'pago', 'extra', 'datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
+    var lineas = camino.filter(function (id) { return ['intro', 'cita', 'partes', 'pago', 'extra', 'datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
       .map(function (id) {
         var p = aePaso(id);
         if (p.nota) return 'Primer vistazo calculado en la web\n→ ' + resp[id];
