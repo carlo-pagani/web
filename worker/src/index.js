@@ -231,7 +231,7 @@ const PRECIOS = {
   parte: 5, // dólares sin IVA por cada parte que se suma
   consulta: {
     // por tema: lo esencial en dólares sin IVA y las partes que se pueden sumar
-    empresa: { base: 35, partes: ["capital", "deudas", "atrasos"] },
+    empresa: { base: 100, partes: ["capital", "deudas", "atrasos"] },
     personal: { base: 35, partes: ["deudas", "tarjetas", "inversiones", "invertir", "compra", "colchon"] },
     inversion: { base: 35, partes: ["encaje", "comparar"] },
     otra: { base: 35, partes: ["numeros", "escenarios"] },
