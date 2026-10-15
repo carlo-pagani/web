@@ -258,7 +258,7 @@
       nombre: 'q2_textbox0', email: 'q3_email1', whatsapp: 'q4_textbox2', intereses: 'q5_textarea3', referencia: 'q7_textbox5', pago: 'q8_textbox6' } },
     analisis: { url: 'https://submit.jotform.com/submit/262794223035052', campos: {
       referencia: 'q2_textbox0', tema: 'q3_textbox1', respuestas: 'q4_textarea2', nombre: 'q5_textbox3',
-      email: 'q6_email4', whatsapp: 'q7_textbox5', factura: 'q8_textbox6', pago: 'q9_textbox7' } }
+      email: 'q6_email4', whatsapp: 'q7_textbox5', factura: 'q8_textbox6', pago: 'q9_textbox7', archivos: 'q11_archivosAdjuntos[]' } }
   };
   // El navegador acepta «ana@ejemplo»; para escribir de vuelta hace falta un dominio completo
   function correoOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v).trim()); }
@@ -515,6 +515,18 @@
   }
   var cfoCard = document.querySelector('.service[data-cfo]');
   if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a:not([data-cita])')) agendar('CFO fraccional', e); });
+  // Desde la Consulta Express de empresas: «Prefiero agendar una cita»
+  function citaEmpresa() {
+    if (location.hash !== '#cita-empresa') return;
+    history.replaceState(null, '', location.pathname + '#contacto');
+    var bajar = function () {
+      agendar('Consultoría financiera');
+      // Al llegar desde otra página, lo de arriba aún se acomoda mientras baja: se corrige al final
+      setTimeout(function () { document.getElementById('contacto').scrollIntoView({ block: 'start' }); }, 1200);
+    };
+    if (document.readyState === 'complete') bajar(); else window.addEventListener('load', bajar);
+  }
+  window.addEventListener('hashchange', citaEmpresa); citaEmpresa();
   document.querySelectorAll('[data-agendar]').forEach(function (a) {
     a.addEventListener('click', function (e) { agendar(a.dataset.agendar, e); });
   });
@@ -674,13 +686,13 @@
   var OT = { deuda: 'Refinanciar una deuda o seguir igual', prepago: 'Pagar antes una deuda con dinero que tengo', compra: 'Comprar vivienda o seguir arrendando',
     credito: 'Comprar algo al contado o a crédito', trabajo: 'Cambiar de trabajo o emprender', venta: 'Vender un bien o un negocio', otra: 'Otra decisión' };
   var DIAS = ['De contado', 'Hasta 30 días', 'De 31 a 60 días', 'De 61 a 90 días', 'Más de 90 días'];
-  // Partes del análisis: la base siempre va incluida y cada parte adicional suma $5 + IVA. El cliente las elige y paga antes de responder;
+  // Partes del análisis: la base siempre va incluida (desde $35 + IVA; para empresas, $100 + IVA) y cada parte adicional suma $5 + IVA. El cliente las elige y paga antes de responder;
   // al final se le ofrecen las que no eligió («por» dice qué gana su informe con cada una) y paga la diferencia antes de responderlas.
-  var BASE = 35, PARTE = 5, IVA = 0.15, SOLO_BASE = 'Solo lo básico', NO_EXTRA = 'No, gracias';
+  var BASE = 35, BASE_EMPRESA = 100, PARTE = 5, IVA = 0.15, SOLO_BASE = 'Solo lo básico', NO_EXTRA = 'No, gracias';
   var CATALOGO = {};
   // Clave de cada tema para el Worker, que fija el precio con su propia copia del catálogo (PRECIOS en worker/src/index.js)
   var TEMAS = { 'Mi empresa': 'empresa', 'Mis finanzas personales': 'personal', 'Una inversión': 'inversion', 'Otra decisión de dinero': 'otra' };
-  CATALOGO['Mi empresa'] = { base: 'Diagnóstico de rentabilidad y punto de equilibrio, con recomendaciones concretas', partes: [
+  CATALOGO['Mi empresa'] = { precio: BASE_EMPRESA, base: 'Diagnóstico de rentabilidad y punto de equilibrio, con recomendaciones concretas', partes: [
     { k: 'capital', l: 'Capital de trabajo y ciclo de caja', por: 'mide cuánto dinero inmoviliza tu operación entre lo que te deben, el inventario y lo que debes a proveedores.' },
     { k: 'deudas', l: 'Deudas de la empresa', por: 'calcula el costo real de cada deuda y en qué orden conviene pagarlas.' },
     { k: 'atrasos', l: 'Plan para ponerse al día', get por() { return 'ordena las obligaciones atrasadas con ' + (ec() ? 'el SRI, el IESS' : 'el ente de impuestos, la seguridad social') + ', los bancos o los proveedores.'; } }] };
@@ -699,10 +711,14 @@
     { k: 'escenarios', l: 'Escenarios', por: 'muestra qué pasa si cambian la tasa, tus ingresos o los plazos.' }] };
   var compradas = [], cobros = [], aceptado = '';   // partes sumadas al final, pagos aprobados y fecha en que aceptó las condiciones
   function catalogo() { return CATALOGO[resp.tema] || { base: '', partes: [] }; }
+  function base() { return catalogo().precio || BASE; }
+  // A las empresas se les recomienda la cita para un análisis detallado; la Consulta Express queda para casos puntuales
+  var SEGUIR = 'Seguir con la Consulta Express', CITA = 'Prefiero agendar una cita';
   function etiqueta(x) { return x.l + ' · +$' + PARTE; }
   function elegida(k) { return compradas.indexOf(k) > -1 || catalogo().partes.some(function (x) { return x.k === k && tiene('partes', etiqueta(x)); }); }
   function elegidas() { return catalogo().partes.filter(function (x) { return elegida(x.k); }); }
-  function pendientes() { return catalogo().partes.filter(function (x) { return !elegida(x.k); }); }
+  // Partes que se ofrecen al final: solo las no elegidas que tienen preguntas propias, porque al sumarlas se le hacen sus preguntas
+  function pendientes() { return catalogo().partes.filter(function (x) { return !elegida(x.k) && AE.some(function (p) { return p.parte === x.k; }); }); }
   // País y moneda del cliente: la moneda rige las cifras de las fichas y lo que usa la IA; el cobro sigue en dólares.
   // El país queda guardado para el IVA de los clientes del exterior y para adaptar los términos (IESS, SRI, décimos).
   var OTRO_PAIS = 'Otro país';
@@ -721,12 +737,28 @@
     return MONEDAS[resp.pais] || MONEDAS['Ecuador · dólares'];
   }
   function ec() { return mon().pais === 'Ecuador'; }
+  // Montos de ejemplo en la escala de la moneda del cliente, redondeados a dos cifras (¤ marca un monto dentro de un texto)
+  var SUPERVISOR = { 'Ecuador': 'controlada por alguna superintendencia (de Bancos, de Compañías o de Economía Popular y Solidaria)',
+    'México': 'supervisada por la CNBV (Comisión Nacional Bancaria y de Valores)', 'Chile': 'supervisada por la CMF (Comisión para el Mercado Financiero)',
+    'Colombia': 'vigilada por la Superintendencia Financiera de Colombia', 'Perú': 'supervisada por la SBS o por la SMV' };
+  var ESCALA = { 'México': 20, 'Chile': 1000, 'Colombia': 4000, 'Perú': 4 };
+  function ejemplo(n) {
+    var x = +String(n).replace(/\./g, '') * (ESCALA[mon().pais] || 1), p = Math.pow(10, Math.max(0, Math.floor(Math.log10(x)) - 1));
+    return (Math.round(x / p) * p).toLocaleString('de-DE');
+  }
+  function ej(t, dinero) {
+    t = String(t || '').replace(/¤([\d.]+)/g, function (_, n) { return ejemplo(n); });
+    return dinero ? t.replace(/ej\.: ([\d.]+)/g, function (_, n) { return 'ej.: ' + ejemplo(n); }) : t;
+  }
+  function dinero(f) { return !f.t || f.t === 'usd'; }
   function USD() { return ec() ? '' : ' USD'; }
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
     { id: 'pais', q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país.', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
     { id: 'pais2', cond: function () { return resp.pais === OTRO_PAIS; }, q: '¿En qué país vives y en qué moneda manejas tus finanzas?', ph: 'Por ejemplo: Argentina, pesos argentinos' },
-    { id: 'partes', get q() { var b = catalogo().base; return 'Tu análisis incluye siempre lo esencial: ' + b.charAt(0).toLowerCase() + b.slice(1) + ', por $' + BASE + USD() + ' + IVA. ¿Quieres sumar alguna de estas partes? Cada una cuesta $' + PARTE + ' más; si no estás seguro, al final te muestro qué gana tu informe con cada una.'; },
+    { id: 'cita', si: 'Mi empresa', get q() { return 'Para empresas, la Consulta Express cuesta desde $' + BASE_EMPRESA + USD() + ' + IVA y está pensada para casos puntuales: una duda, una decisión o un problema concreto. Si lo que buscas es un análisis detallado de tu empresa, te recomiendo agendar una cita para el servicio presencial y personalizado, que puede tomar hasta ocho semanas, según el tamaño de la empresa. ¿Cómo prefieres seguir?'; },
+      op: [SEGUIR, CITA] },
+    { id: 'partes', get q() { var b = catalogo().base; return 'Tu análisis incluye siempre lo esencial: ' + b.charAt(0).toLowerCase() + b.slice(1) + ', por $' + base() + USD() + ' + IVA. ¿Quieres sumar alguna de estas partes? Cada una cuesta $' + PARTE + ' más; si no estás seguro, al final te muestro qué gana tu informe con cada una.'; },
       op: function () { return catalogo().partes.map(etiqueta).concat([SOLO_BASE]); }, multi: true, solo: [SOLO_BASE] },
     { id: 'datos', q: '¿A nombre de quién preparo el informe y a qué correo te lo envío?', campos: true },
     { id: 'factura', q: '¿Necesitas factura?', op: ['Sí', 'No'] },
@@ -882,12 +914,12 @@
     { id: 'p14', si: P, q: '¿Llevas un registro de tus gastos?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
     { id: 'p14p', si: P, cond: conPareja, q: '¿Y tu pareja?', op: ['Sí, al detalle', 'Más o menos', 'No'] },
     { id: 'p15', si: P, q: '¿Ya tienes en mente una meta concreta para los próximos doce meses? Si no, la propongo yo en el informe.', op: ['Sí, la tengo clara', 'No, que salga del informe'] },
-    { id: 'p15b', si: P, cond: function () { return resp.p15 === 'Sí, la tengo clara'; }, para: 'Una meta medible, con monto y plazo.', q: 'Escríbela con monto y fecha, si puedes.', ph: 'Por ejemplo: pagar la tarjeta de 2.400 antes de junio' },
+    { id: 'p15b', si: P, cond: function () { return resp.p15 === 'Sí, la tengo clara'; }, para: 'Una meta medible, con monto y plazo.', q: 'Escríbela con monto y fecha, si puedes.', ph: 'Por ejemplo: pagar la tarjeta de ¤2.400 antes de junio' },
     { id: 'pinv', si: P, parte: 'invertir', para: 'Objetivo, horizonte, monto y tolerancia al riesgo del plan de inversión o de jubilación.',
-      q: 'Vamos a tu plan para invertir. Cuéntame para qué es ese dinero, en cuánto tiempo lo necesitarías y cuánto podrías apartar cada mes o de una vez.', ph: 'Por ejemplo: quiero jubilarme a los 60 y podría apartar 200 al mes',
+      q: 'Vamos a tu plan para invertir. Cuéntame para qué es ese dinero, en cuánto tiempo lo necesitarías y cuánto podrías apartar cada mes o de una vez.', ph: 'Por ejemplo: quiero jubilarme a los 60 y podría apartar ¤200 al mes',
       conversa: 'Entender el plan de inversión o de jubilación: para qué es el dinero, en cuántos años lo necesitaría, cuánto podría invertir al mes o de una vez, qué haría si su inversión cayera 20 % en un año (su tolerancia al riesgo), si ya aporta a algún fondo de jubilación además del IESS y, si el objetivo es jubilarse, a qué edad quisiera hacerlo.' },
     { id: 'pcom', si: P, parte: 'compra', para: 'Bien, precio, plazo, entrada y financiamiento del plan de compra.',
-      q: 'Ahora tu plan de compra. Cuéntame qué quieres comprar, cuánto cuesta más o menos, para cuándo y cuánto tienes para la entrada.', ph: 'Por ejemplo: un departamento de 90.000 en dos años; tengo 10.000 ahorrados',
+      q: 'Ahora tu plan de compra. Cuéntame qué quieres comprar, cuánto cuesta más o menos, para cuándo y cuánto tienes para la entrada.', ph: 'Por ejemplo: un departamento de ¤90.000 en dos años; tengo ¤10.000 ahorrados',
       conversa: 'Entender el plan de compra: qué bien (vivienda o vehículo, nuevo o usado), su precio aproximado, para cuándo, cuánto tiene para la entrada, si piensa financiarlo y con quién (banco, BIESS, cooperativa o concesionario) y si vendería algún bien actual para pagarlo.' },
     { id: 'p16', si: P, nota: lecturaPersonal },
 
@@ -903,7 +935,7 @@
     { id: 'i7', si: 'Una inversión', q: 'Si en un año esa inversión valiera 20 % menos, ¿qué harías?', op: ['Vendería para no perder más', 'Esperaría a que se recupere', 'Aprovecharía para invertir más'] },
     { id: 'i8', si: 'Una inversión', q: '¿En qué has invertido antes? Puedes marcar varias.', op: ['Pólizas o depósitos a plazo', 'Fondos de inversión', 'Acciones o ETF', 'Bienes raíces', 'Criptomonedas', 'Nunca he invertido'], multi: true, solo: ['Nunca he invertido'] },
     { id: 'i9', si: 'Una inversión', q: '¿Conoces sus costos, sus comisiones y las condiciones para retirar el dinero?', op: ['Sí, los tengo claros', 'Más o menos', 'No'] },
-    { id: 'i10', si: 'Una inversión', q: '¿La entidad que la ofrece está controlada por alguna superintendencia (de Bancos, de Compañías o de Economía Popular y Solidaria)?', op: ['Sí', 'No', 'No lo sé'] },
+    { id: 'i10', si: 'Una inversión', get q() { return '¿La entidad que la ofrece está ' + (SUPERVISOR[mon().pais] || 'regulada y supervisada por el organismo de control financiero de tu país') + '?'; }, op: ['Sí', 'No', 'No lo sé'] },
     { id: 'i11', si: 'Una inversión', parte: 'encaje', para: 'Situación financiera general de quien invierte.', q: 'Para ubicar la inversión en tu situación general:', opcional: true, ficha: [
       { k: 'ingreso', l: 'Ingreso mensual neto' },
       { k: 'gastos', l: 'Gastos mensuales', d: 'incluidas las cuotas de deudas' },
@@ -996,7 +1028,7 @@
   };
   var CONDICIONES = 'versión 2 del 11 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría; te tomarán entre diez y veinte minutos, según tu caso. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles.';
-  var INTRO_PRECIO = 'Primero eliges el tema y las partes que quieres analizar, y pagas: $' + BASE + ' + IVA por lo esencial y $' + PARTE + ' más por cada parte adicional. Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
+  var INTRO_PRECIO = 'Primero eliges el tema y las partes que quieres analizar, y pagas: $' + BASE + ' + IVA por lo esencial ($' + BASE_EMPRESA + ' + IVA si es sobre tu empresa) y $' + PARTE + ' más por cada parte adicional. Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
   var BORRADO = 'Cuando ya no los necesito para tu informe y su seguimiento, borro tus respuestas y los archivos que adjuntaste. Solo conservo lo que la ley me obliga a guardar, como los datos de tu factura. Si más adelante quieres profundizar o revisar cómo evolucionaste, compárteme el informe que recibiste y partimos de ahí.';
   function intro() { return INTRO + '\n\n' + INTRO_PRECIO + (IA.url ? '\n\n' + INTRO_IA : ''); }
@@ -1190,7 +1222,7 @@
     var prev = previo[p.id] || {}, dos = p.dos && conPareja();
     var c = burbuja((dos ? '<p class="f f2 f-cab"><span></span><b>' + esc(p.dos[0]) + '</b><b>' + esc(p.dos[1]) + '</b></p>' : '') +
       '<div class="f-list">' + p.ficha.map(function (f) {
-        return '<label class="f' + (dos ? ' f2' : '') + '"><span class="f-l">' + esc(f.l) + (f.d ? '<small>' + esc(f.d) + '</small>' : '') + '</span>' + campo(f.k, prev[f.k], f.t, f.l + (dos ? ', ' + p.dos[0] : '')) +
+        return '<label class="f' + (dos ? ' f2' : '') + '"><span class="f-l">' + esc(f.l) + (f.d ? '<small>' + esc(ej(f.d, dinero(f))) + '</small>' : '') + '</span>' + campo(f.k, prev[f.k], f.t, f.l + (dos ? ', ' + p.dos[0] : '')) +
           (dos ? campo(f.k + '_p', prev[f.k + '_p'], f.t, f.l + ', ' + p.dos[1]) : '') + '</label>';
       }).join('') + '</div>' +
       (p.total ? '<p class="f-tot"><span>' + esc(p.total) + '</span><b></b></p>' : '') +
@@ -1204,7 +1236,7 @@
     c.addEventListener('input', calc); calc();
     c._ia = { lista: false, filas: function () { return [c]; }, conDatos: function () { return true; },
       campos: p.ficha.reduce(function (a, f) {
-        var d = [f.d, unidad(f.t, f.anual || p.todoAnual)].filter(Boolean).join('; ');
+        var d = [ej(f.d, dinero(f)), unidad(f.t, f.anual || p.todoAnual)].filter(Boolean).join('; ');
         a.push({ k: f.k, l: f.l + (dos ? ' (' + p.dos[0] + ')' : ''), d: d });
         if (dos) a.push({ k: f.k + '_p', l: f.l + ' (' + p.dos[1] + ')', d: d });
         return a;
@@ -1594,7 +1626,7 @@
         txt.hidden = !!p.campos; camposEl.hidden = !p.campos;
         okBtn.textContent = p.campos ? 'Continuar' : 'Enviar';
         if (p.campos) document.getElementById('ae-nombre').focus();
-        else { txt.value = typeof previo[p.id] === 'string' ? previo[p.id] : ''; txt.placeholder = (typeof p.ph === 'function' ? p.ph() : p.ph) || 'Escribe tu respuesta…'; autoAlto(); txt.focus(); skipBtn.hidden = !p.opcional; }
+        else { txt.value = typeof previo[p.id] === 'string' ? previo[p.id] : ''; txt.placeholder = ej(typeof p.ph === 'function' ? p.ph() : p.ph) || 'Escribe tu respuesta…'; autoAlto(); txt.focus(); skipBtn.hidden = !p.opcional; }
       }
       log.scrollTop = log.scrollHeight;
     };
@@ -1607,12 +1639,23 @@
     burbuja(textoResp(p, v), 'tu', true);
     chipsEl.innerHTML = ''; row.hidden = true; camposEl.hidden = true; skipBtn.hidden = true; dudaBtn.hidden = true;
     if (p.id === 'extra') return cobrarExtra(v);
+    if (p.id === 'cita' && v === CITA) return irACita();
     if (revisada[p.id] && !aclar[p.id]) {
       aclar[p.id] = [{ pregunta: revisada[p.id], respuesta: JSON.stringify(v) === JSON.stringify(previo[p.id]) ? 'Confirmó las cifras.' : 'Ajustó las cifras.' }];
       return preguntar(true);
     }
     if (IA.url && !p.op && !p.campos && !p.archivos && p.id !== 'fdatos' && !ayudo(p.id) && !(v === '' || (p.ficha && !Object.keys(v).length) || (p.filas && !v.length))) return revisar(p);
     preguntar(true);
+  }
+  // Elige la cita: la pregunta queda abierta por si vuelve, y lo llevo al formulario de contacto con el servicio ya elegido
+  function irACita() {
+    delete resp.cita; camino.pop();
+    burbuja('Perfecto. Te llevo al formulario para agendar la cita; si cambias de idea, aquí te espera tu Consulta Express.', 'yo', true);
+    preguntar(false);
+    setTimeout(function () {
+      dlg.close();
+      if (document.getElementById('cform')) location.hash = '#cita-empresa'; else location.href = '/#cita-empresa';
+    }, sinMov ? 0 : 1400);
   }
   function contexto(hasta) {
     // Sin datos personales: a la IA le basta el caso, no el nombre, el correo, la cédula ni el pago
@@ -1681,7 +1724,7 @@
       var m = r.mensaje || 'Ahora no pude responderte. Responde como mejor puedas; si algo no queda claro, lo vemos en el informe.';
       burbuja(m, r.mensaje ? 'yo ia' : 'yo', true); dudas.push({ pregunta: p.q, duda: d, respuesta: m });
       var c = log.querySelector('.msg.ficha'); if (c) log.appendChild(c);   // la ficha queda al final, a la vista
-      if (!p.op && !p.ficha && !p.deudas && !p.filas && !p.archivos) abrirTexto(p.ph || 'Escribe tu respuesta…', p.opcional);
+      if (!p.op && !p.ficha && !p.deudas && !p.filas && !p.archivos) abrirTexto(ej(p.ph) || 'Escribe tu respuesta…', p.opcional);
       dudaBtn.hidden = false; log.scrollTop = log.scrollHeight;
     });
   }
@@ -1719,21 +1762,21 @@
   function tiene(id, v) { return Array.isArray(resp[id]) && resp[id].indexOf(v) > -1; }
   function dolares(n) { return '$' + n.toFixed(2); }
   function conIVA(n) { return Math.round(n * (1 + IVA) * 100) / 100; }
-  function precio() { var neto = BASE + PARTE * elegidas().length; return { neto: neto, total: conIVA(neto) }; }
+  function precio() { var neto = base() + PARTE * elegidas().length; return { neto: neto, total: conIVA(neto) }; }
   function pagado() { return Math.round(cobros.reduce(function (t, c) { return t + c.monto; }, 0) * 100) / 100; }
   function minus(t) { return t.charAt(0).toLowerCase() + t.slice(1); }
   function lista(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1]; }
   function fechaEC() { return new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'long', timeStyle: 'short' }); }
   function pintarPrecio() {
     var c = catalogo(), pr = precio(), el = elegidas();
-    document.getElementById('ae-mods').innerHTML = '<li><label><input type="checkbox" checked disabled><span>' + esc(c.base) + '</span><b>$' + BASE + '</b></label></li>' +
+    document.getElementById('ae-mods').innerHTML = '<li><label><input type="checkbox" checked disabled><span>' + esc(c.base) + '</span><b>$' + base() + '</b></label></li>' +
       c.partes.map(function (x) {
         return '<li><label><input type="checkbox" data-mod="' + x.k + '"' + (elegida(x.k) ? ' checked' : '') + '><span>' + esc(x.l) + '</span><b>+ $' + PARTE + '</b></label></li>';
       }).join('');
     document.getElementById('ae-sub').textContent = '$' + pr.neto + ' + IVA (15 %)';
     // Por qué cuesta lo que cuesta: la suma a la vista, junto al botón de pagar
     document.getElementById('ae-porque').innerHTML = el.length ?
-      'Base $' + BASE + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + ' + IVA.' :
+      'Base $' + base() + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + ' + IVA.' :
       'Precio base del análisis. <a href="#ae-mods" data-ir-mods>¿Quieres sumar alguna parte?</a>';
     document.getElementById('ae-total').textContent = dolares(pr.total) + ' USD';
   }
@@ -1750,11 +1793,11 @@
     pintarPrecio();
   });
   // Resumen en dos momentos: antes del pago (lo elegido, condiciones y consentimiento) y al final (todas las respuestas, para enviarlas)
-  var CERRADOS = ['tema', 'pais', 'pais2', 'partes', 'pago', 'extra'];
+  var CERRADOS = ['tema', 'pais', 'pais2', 'cita', 'partes', 'pago', 'extra'];
   function mostrarResumen() {
     camino = enOrden();
     var cobro = !resp.pago;
-    resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota && !(cobro && id === 'partes'); }).map(function (id) {
+    resLista.innerHTML = camino.filter(function (id) { return !aePaso(id).nota && id !== 'cita' && !(cobro && id === 'partes'); }).map(function (id) {
       var p = aePaso(id), fijo = !cobro && CERRADOS.indexOf(id) > -1;
       var extra = (aclar[id] || []).filter(function (a) { return !/^(Confirmó|Ajustó) las cifras\.$/.test(a.respuesta); })
         .map(function (a) { return '<i>Aclaraste: ' + esc(a.respuesta) + '</i>'; }).join('') +
@@ -1820,14 +1863,14 @@
   // Lo que se guarda en Jotform: la transcripción completa, el alcance pagado y los datos de contacto
   function alcance() {
     var c = catalogo();
-    return 'Alcance del análisis\n✓ ' + c.base + ' ($' + BASE + ')\n' + c.partes.map(function (x) {
+    return 'Alcance del análisis\n✓ ' + c.base + ' ($' + base() + ')\n' + c.partes.map(function (x) {
       return elegida(x.k) ? '✓ ' + x.l + ' ($' + PARTE + (compradas.indexOf(x.k) > -1 ? ', sumada al final' : '') + ')' : '✗ No eligió: ' + x.l;
     }).join('\n') + '\nPagado: ' + dolares(pagado()) + ' con IVA' +
       (aceptado ? '\n\nAceptó las condiciones (' + CONDICIONES + ') y dio su consentimiento expreso el ' + aceptado + ', hora de Ecuador, antes de pagar.' : '');
   }
   function paquete() {
     camino = enOrden();
-    var lineas = camino.filter(function (id) { return ['partes', 'pago', 'extra', 'datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
+    var lineas = camino.filter(function (id) { return ['cita', 'partes', 'pago', 'extra', 'datos', 'factura', 'fdatos'].indexOf(id) < 0 && (!aePaso(id).nota || resp[id]); })
       .map(function (id) {
         var p = aePaso(id);
         if (p.nota) return 'Primer vistazo calculado en la web\n→ ' + resp[id];
