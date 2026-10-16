@@ -1062,7 +1062,7 @@
     o5b: 'Cifras principales', o5c: 'Cifras principales', o5d: 'Cifras principales', o5e: 'Cifras principales', o5f: 'Cifras principales',
     o6: 'Lo que más cuida'
   };
-  var CONDICIONES = 'versión 2 del 11 de octubre de 2026';
+  var CONDICIONES = 'versión 3 del 16 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas.';
   var INTRO_PRECIO = 'Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial para las dudas y los datos que falten; el análisis y el informe los hago yo.';
