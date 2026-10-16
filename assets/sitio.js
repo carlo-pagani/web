@@ -764,7 +764,7 @@
     var html = '<p class="lam-eyebrow">' + esc(resp.tema) + '</p><p class="lam-t">Así funciona <b>en 4 pasos</b></p>' +
       '<div class="lam-foto"><img src="/assets/carlo-recorte-420.webp" alt="" width="420" height="547"></div>' +
       '<ol class="lam-pasos">' + pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
-      '<p class="lam-tiempo"><strong>Dedica 30 minutos de tu tiempo a consciencia y obtendrás grandes resultados.</strong> Son algunas preguntas, pero todo ayudará a que el informe te sirva de verdad.</p>' +
+      '<p class="lam-tiempo"><strong>Dedica 30 minutos de tu tiempo a consciencia y obtendrás grandes resultados.</strong> Son algunas preguntas, pero todo ayudará a que el informe te sirva de verdad. Lo que no sepas lo puedes saltar y yo lo cubro con supuestos; si tienes estados financieros o extractos bancarios, tenlos a mano.</p>' +
       '<div class="lam-botones"><button type="button" class="btn btn-navy" data-empezar>Empezar</button><button type="button" class="back" data-otro>Elegir otro tema</button></div>';
     var d = burbuja(html, 'lamina' + (viva ? ' nuevo' : ' hecha'), viva, true);
     if (!viva) return d;
@@ -1052,9 +1052,9 @@
     o6: 'Lo que más cuida'
   };
   var CONDICIONES = 'versión 2 del 11 de octubre de 2026';
-  var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría; te tomarán entre diez y veinte minutos, según tu caso. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas, y te lo envío por correo en un máximo de tres días hábiles.';
-  var INTRO_PRECIO = 'Primero eliges el tema y las partes que quieres analizar, y pagas: $' + BASE + ' + IVA por lo esencial ($' + BASE_EMPRESA + ' + IVA si es sobre tu empresa) y $' + PARTE + ' más por cada parte adicional. Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
-  var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial: si algo no queda claro, te lo explica o te pide un dato que falte. El análisis y el informe los hago yo.';
+  var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas.';
+  var INTRO_PRECIO = 'Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
+  var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial para las dudas y los datos que falten; el análisis y el informe los hago yo.';
   var BORRADO = 'Cuando ya no los necesito para tu informe y su seguimiento, borro tus respuestas y los archivos que adjuntaste. Solo conservo lo que la ley me obliga a guardar, como los datos de tu factura. Si más adelante quieres profundizar o revisar cómo evolucionaste, compárteme el informe que recibiste y partimos de ahí.';
   function intro() { return INTRO + '\n\n' + INTRO_PRECIO + (IA.url ? '\n\n' + INTRO_IA : ''); }
   var dlg = document.getElementById('ae'), log = document.getElementById('ae-log'), chipsEl = document.getElementById('ae-chips');
@@ -1624,7 +1624,7 @@
       actual = null; backBtn.hidden = true;
       if (!ref) ref = 'AE-' + Date.now().toString(36).toUpperCase().slice(-6);
       if (editando) { editando = null; respaldo = null; return mostrarResumen(); }
-      burbuja('Gracias, ' + resp.datos.nombre.split(' ')[0] + '. Antes de entrar en tu caso, revisa lo que elegiste, acepta las condiciones y paga; luego seguimos con tus preguntas.', 'yo', true);
+      burbuja('Gracias, ' + resp.datos.nombre.split(' ')[0] + '. Revisa lo que elegiste, acepta las condiciones y paga; luego seguimos con tus preguntas.', 'yo', true);
       return setTimeout(mostrarResumen, sinMov ? 0 : 900);
     }
     if (p.nota) {
