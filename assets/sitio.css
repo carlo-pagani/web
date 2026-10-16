@@ -549,6 +549,49 @@ label[data-c] > span .ia-marca { margin-left: .35rem; vertical-align: .1em; }
   .msg { max-width: 92%; }
   .ae-campos { grid-template-columns: minmax(0, 1fr); }
 }
+/* Lámina de bienvenida: el proceso en cuatro pasos, clara, al estilo de las miniaturas */
+.msg.lamina { align-self: stretch; max-width: none; white-space: normal; padding: 1.1rem 1.2rem 1.2rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.35); color: var(--navy); background: #F6F7F9 radial-gradient(rgba(14,27,44,.13) 1px, transparent 1.3px) 0 0 / 14px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; }
+.lam-eyebrow { grid-column: 1; margin: 0 0 .45rem; font-family: var(--mono); font-size: var(--t-xs); letter-spacing: .14em; text-transform: uppercase; color: #8E6A2B; }
+.lam-eyebrow::before { content: ""; display: inline-block; width: 1.3rem; height: 2px; background: var(--brass); vertical-align: middle; margin-right: .5rem; }
+.lam-t { grid-column: 1; margin: 0; font-weight: 700; text-transform: uppercase; line-height: 1.08; font-size: clamp(1.45rem, 5.6vw, 2.1rem); letter-spacing: -.01em; color: var(--navy); align-self: end; }
+.lam-t b { display: inline-block; background: var(--brass); color: var(--navy); padding: .02em .3em .06em; margin-top: .12em; }
+.lam-logo { grid-column: 2; grid-row: 1 / 3; align-self: end; width: 7.2rem; height: auto; margin-bottom: .2rem; }
+.lam-barras rect { transform-box: fill-box; transform-origin: center bottom; }
+.lam-curva { stroke-dasharray: 800; }
+.lam-punta { transform-box: fill-box; transform-origin: center; }
+.lam-pasos { grid-column: 1 / -1; list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .55rem; counter-reset: lam; }
+.lam-pasos li { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); gap: .65rem; align-items: start; font-size: var(--t-s); line-height: 1.45; }
+.lam-pasos li::before { counter-increment: lam; content: counter(lam); width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--navy); color: var(--brass); font-weight: 700; font-size: .85rem; display: grid; place-items: center; }
+.lam-tiempo { grid-column: 1 / -1; margin: 1rem 0 0; padding: .35rem 0 .35rem .8rem; border-left: 3px solid var(--brass); font-size: var(--t-s); line-height: 1.5; color: #3A4556; }
+.lam-tiempo strong { color: var(--navy); }
+.lam-botones { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .6rem 1.1rem; align-items: center; margin-top: .9rem; }
+.lam-botones .btn-navy { background: var(--navy); color: #fff; }
+.lam-botones .btn-navy:hover { background: var(--navy-2); }
+.lam-botones .back { color: #4A5568; }
+.lam-botones .back:hover { color: var(--navy); }
+.lamina.hecha .lam-botones { display: none; }
+@keyframes lamPaso { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .lamina.nuevo .lam-pasos li, .lamina.nuevo .lam-tiempo, .lamina.nuevo .lam-botones { opacity: 0; animation: lamPaso .5s ease forwards; }
+  .lamina.nuevo .lam-pasos li:nth-child(1) { animation-delay: .4s; }
+  .lamina.nuevo .lam-pasos li:nth-child(2) { animation-delay: 1.05s; }
+  .lamina.nuevo .lam-pasos li:nth-child(3) { animation-delay: 1.7s; }
+  .lamina.nuevo .lam-pasos li:nth-child(4) { animation-delay: 2.35s; }
+  .lamina.nuevo .lam-tiempo { animation-delay: 2.95s; animation-duration: .6s; }
+  .lamina.nuevo .lam-botones { animation-delay: 3.3s; }
+  .lamina.nuevo .lam-barras rect { transform: scaleY(0); animation: lamBarra .4s cubic-bezier(.2,.7,.2,1) forwards; }
+  .lamina.nuevo .lam-barras rect:nth-child(2) { animation-delay: .2s; }
+  .lamina.nuevo .lam-barras rect:nth-child(3) { animation-delay: .4s; }
+  .lamina.nuevo .lam-curva { stroke-dashoffset: 800; animation: lamCurva .8s ease-in-out .7s forwards; }
+  .lamina.nuevo .lam-punta { opacity: 0; transform: scale(.4); animation: lamPunta .3s ease-out 1.4s forwards; }
+}
+@keyframes lamBarra { to { transform: scaleY(1); } }
+@keyframes lamCurva { to { stroke-dashoffset: 0; } }
+@keyframes lamPunta { to { opacity: 1; transform: scale(1); } }
+@media (max-width: 40rem) {
+  .msg.lamina { padding: 1rem .9rem 1rem; column-gap: .6rem; }
+  .lam-logo { width: 5.4rem; }
+}
 @keyframes aeIn { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: none; } }
 @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
