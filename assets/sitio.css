@@ -484,6 +484,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .d-row, .d-top select { min-width: 0; }
 .f { display: grid; grid-template-columns: minmax(0, 1fr) 8.5rem; gap: .3rem 1rem; align-items: center; padding: .5rem 0; border-bottom: 1px solid rgba(238,242,247,.08); }
 .f:last-child { border-bottom: 0; }
+.f-l { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
 .f-l small { display: block; font-size: var(--t-xs); line-height: 1.35; color: var(--on-navy-soft); }
 .f-in { position: relative; display: block; }
 .f-in input { width: 100%; font: inherit; font-size: 1rem; color: var(--on-navy); background: var(--navy); border: 1px solid rgba(238,242,247,.22); border-radius: 4px; padding: .5rem .6rem .5rem 1.45rem; text-align: right; font-variant-numeric: tabular-nums; color-scheme: dark; }

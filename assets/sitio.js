@@ -754,7 +754,7 @@
   function USD() { return ec() ? '' : ' USD'; }
   // Lámina de bienvenida: el proceso en cuatro pasos, al estilo de las miniaturas, justo después de elegir el tema
   var LAMINAS = {
-    'Mi empresa': { pasos: ['Me cuentas tu empresa y tus cifras; si no sabes cómo, la IA las llena contigo.', 'Eliges las partes que te interesen; las que falten te las ofrezco al final.', 'Recibes tu informe entre 3 y 5 días hábiles.'], docs: 'estados financieros o extractos bancarios' },
+    'Mi empresa': { pasos: ['Me cuentas tu empresa y tus cifras; si no sabes cómo, la IA las llena contigo.', 'Eliges las partes que te interesen.', 'Recibes tu informe entre 3 y 5 días hábiles.'], docs: 'estados financieros o extractos bancarios' },
     'Una inversión': { pasos: ['Me cuentas qué inversión es, quién la ofrece y cuánto pondrías.', 'Si quieres, vemos cómo encaja en tus finanzas y con qué compararla.', 'Recibes tu informe entre 3 y 5 días hábiles.'], docs: 'el folleto o el contrato de la inversión' }
   };
   // El símbolo del logo (tres barras y la flecha), dibujado para animarse: las barras suben y la flecha se traza
@@ -769,7 +769,7 @@
       '<polygon class="lam-punta" points="821,272 795,444 658,334" fill="url(#' + id + 'g)"/></svg>';
   }
   function lamina(p, viva) {
-    var l = LAMINAS[resp.tema] || (resp.tema === P ? { pasos: ['Me cuentas tu pregunta, tus ingresos, gastos y deudas.', 'Eliges partes como tarjetas, inversiones o vivienda; las que falten te las ofrezco al final.', 'Recibes tu informe entre 3 y 5 días hábiles.'], docs: 'extractos bancarios, estados de cuenta de tarjetas o tablas de pagos' }
+    var l = LAMINAS[resp.tema] || (resp.tema === P ? { pasos: ['Me cuentas tu pregunta, tus ingresos, gastos y deudas.', 'Eliges partes como tarjetas, inversiones o vivienda.', 'Recibes tu informe entre 3 y 5 días hábiles.'], docs: 'extractos bancarios, estados de cuenta de tarjetas o tablas de pagos' }
       : { pasos: ['Me cuentas la decisión y sus opciones.', 'Anotas las cifras de cada opción.', 'Recibes una recomendación clara entre 3 y 5 días hábiles.'], docs: 'cotizaciones, estados de cuenta o tablas de pagos' });
     var pasos = ['Pagas lo esencial: $' + base() + USD() + ' + IVA.'].concat(l.pasos);
     var html = '<p class="lam-eyebrow">' + esc(resp.tema) + '</p><p class="lam-t">Así funciona <b>en 4 pasos</b></p>' +
@@ -803,7 +803,7 @@
 
     { id: 'e1', si: 'Mi empresa', para: 'Giro del negocio, tipo de clientes y antigüedad.', q: '¿A qué se dedica tu empresa? Cuéntame qué vende, a quién y desde cuándo opera.', ph: 'Por ejemplo: distribuidora de alimentos para tiendas y restaurantes, desde 2018' },
     { id: 'e2', si: 'Mi empresa', q: '¿Cuántas personas trabajan en ella?', op: ['De 1 a 5', 'De 6 a 20', 'De 21 a 50', 'De 51 a 200', 'Más de 200'] },
-    { id: 'e3', si: 'Mi empresa', para: 'Ventas, costo de ventas y utilidad del último año, para estimar el margen.', q: 'Vamos a las cifras del último año. Aproximadas está bien; deja en blanco lo que no sepas.', opcional: true, ficha: [
+    { id: 'e3', si: 'Mi empresa', para: 'Ventas, costo de ventas y utilidad del último año, para estimar el margen.', q: 'Vamos a las cifras del último año.', opcional: true, ficha: [
       { k: 'ventas', l: 'Ventas del año' },
       { k: 'costo', l: 'Costo de lo vendido', d: 'mercadería, materia prima y producción' },
       { k: 'utilidad', l: 'Utilidad o pérdida del año', d: 'si fue pérdida, anótala con signo menos' }] },
