@@ -757,12 +757,23 @@
     'Mi empresa': { pasos: ['Me cuentas tu empresa y tus cifras; si no sabes cómo, la IA las llena contigo.', 'Sumas en el camino las partes que te interesen.', 'Recibes tu informe en tres días hábiles.'] },
     'Una inversión': { pasos: ['Me cuentas qué inversión es, quién la ofrece y cuánto pondrías.', 'Si quieres, vemos cómo encaja en tus finanzas y con qué compararla.', 'Recibes tu informe en tres días hábiles.'] }
   };
+  // El símbolo del logo (tres barras y la flecha), dibujado para animarse: las barras suben y la flecha se traza
+  var lamN = 0;
+  function logoAnimado() {
+    var id = 'lam' + (++lamN), curva = 'M150 830 L170 828 L190 824 L210 818 L230 811 L250 803 L270 794 L290 784 L310 773 L330 762 L350 749 L370 736 L390 722 L410 707 L430 691 L450 675 L470 658 L490 641 L510 622 L530 604 L550 584 L570 564 L590 544 L610 523 L630 501 L650 479 L670 456 L690 433 L710 409 L730 385 L750 360';
+    return '<svg class="lam-logo" viewBox="110 230 740 630" aria-hidden="true"><defs>' +
+      '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A7898"/><stop offset="1" stop-color="#043E5C"/></linearGradient>' +
+      '<mask id="' + id + 'm"><rect x="0" y="0" width="1024" height="1024" fill="#fff"/><path class="lam-curva" d="' + curva + '" fill="none" stroke="#000" stroke-width="102" stroke-linecap="round" stroke-linejoin="round"/></mask></defs>' +
+      '<g class="lam-barras" fill="url(#' + id + 'g)" mask="url(#' + id + 'm)"><rect x="212" y="490" width="150" height="300" rx="10"/><rect x="396" y="380" width="150" height="410" rx="10"/><rect x="580" y="270" width="150" height="520" rx="10"/></g>' +
+      '<path class="lam-curva" d="' + curva + '" fill="none" stroke="url(#' + id + 'g)" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<polygon class="lam-punta" points="821,272 795,444 658,334" fill="url(#' + id + 'g)"/></svg>';
+  }
   function lamina(p, viva) {
     var l = LAMINAS[resp.tema] || (resp.tema === P ? { pasos: ['Me cuentas tu pregunta, tus ingresos, gastos y deudas.', 'Sumas partes como tarjetas, inversiones o vivienda.', 'Recibes tu informe en tres días hábiles.'] }
       : { pasos: ['Me cuentas la decisión y sus opciones.', 'Anotas las cifras de cada opción.', 'Recibes una recomendación clara en tres días hábiles.'] });
     var pasos = ['Pagas lo esencial: $' + base() + USD() + ' + IVA.'].concat(l.pasos);
     var html = '<p class="lam-eyebrow">' + esc(resp.tema) + '</p><p class="lam-t">Así funciona <b>en 4 pasos</b></p>' +
-      '<div class="lam-foto"><img src="/assets/carlo-recorte-420.webp" alt="" width="420" height="547"></div>' +
+      logoAnimado() +
       '<ol class="lam-pasos">' + pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
       '<p class="lam-tiempo"><strong>Dedica 30 minutos de tu tiempo a consciencia y obtendrás grandes resultados.</strong> Son algunas preguntas, pero todo ayudará a que el informe te sirva de verdad. Lo que no sepas lo puedes saltar y yo lo cubro con supuestos; si tienes estados financieros o extractos bancarios, tenlos a mano.</p>' +
       '<div class="lam-botones"><button type="button" class="btn btn-navy" data-empezar>Empezar</button><button type="button" class="back" data-otro>Elegir otro tema</button></div>';
