@@ -693,7 +693,7 @@
   // Clave de cada tema para el Worker, que fija el precio con su propia copia del catálogo (PRECIOS en worker/src/index.js)
   var TEMAS = { 'Mi empresa': 'empresa', 'Mis finanzas personales': 'personal', 'Una inversión': 'inversion', 'Otra decisión de dinero': 'otra' };
   CATALOGO['Mi empresa'] = { precio: BASE_EMPRESA, base: 'Diagnóstico de rentabilidad y punto de equilibrio, con recomendaciones concretas', partes: [
-    { k: 'capital', l: 'Capital de trabajo y ciclo de caja', por: 'mide cuánto dinero inmoviliza tu operación entre lo que te deben, el inventario y lo que debes a proveedores.' },
+    { k: 'capital', l: 'Capital de trabajo y ciclo del efectivo', por: 'mide cuánto dinero inmoviliza tu operación entre lo que te deben, el inventario y lo que debes a proveedores.' },
     { k: 'deudas', l: 'Deudas de la empresa', por: 'calcula el costo real de cada deuda y en qué orden conviene pagarlas.' },
     { k: 'atrasos', l: 'Plan para ponerse al día', get por() { return 'ordena las obligaciones atrasadas con ' + (ec() ? 'el SRI, el IESS' : 'el ente de impuestos, la seguridad social') + ', los bancos o los proveedores.'; } }] };
   CATALOGO[P] = { base: 'Diagnóstico de tu presupuesto del mes y del año y de tu patrimonio, con la respuesta a tu pregunta y recomendaciones concretas', partes: [
@@ -754,17 +754,17 @@
   function USD() { return ec() ? '' : ' USD'; }
   // Lámina de bienvenida: el proceso en cuatro pasos, al estilo de las miniaturas, justo después de elegir el tema
   var LAMINAS = {
-    'Mi empresa': { pasos: ['Me cuentas tu empresa y tus cifras; si no sabes cómo, la IA las llena contigo.', 'Sumas en el camino las partes que te interesen.', 'Recibes tu informe en tres días hábiles.'], tiempo: 'Te tomará unos 20 minutos; con todas las partes, hasta 40.' },
-    'Una inversión': { pasos: ['Me cuentas qué inversión es, quién la ofrece y cuánto pondrías.', 'Si quieres, vemos cómo encaja en tus finanzas y con qué compararla.', 'Recibes tu informe en tres días hábiles.'], tiempo: 'Te tomará unos 10 a 12 minutos.' }
+    'Mi empresa': { pasos: ['Me cuentas tu empresa y tus cifras; si no sabes cómo, la IA las llena contigo.', 'Sumas en el camino las partes que te interesen.', 'Recibes tu informe en tres días hábiles.'] },
+    'Una inversión': { pasos: ['Me cuentas qué inversión es, quién la ofrece y cuánto pondrías.', 'Si quieres, vemos cómo encaja en tus finanzas y con qué compararla.', 'Recibes tu informe en tres días hábiles.'] }
   };
   function lamina(p, viva) {
-    var l = LAMINAS[resp.tema] || (resp.tema === P ? { pasos: ['Me cuentas tu pregunta, tus ingresos, gastos y deudas.', 'Sumas partes como tarjetas, inversiones o vivienda.', 'Recibes tu informe en tres días hábiles.'], tiempo: 'Te tomará unos 20 a 25 minutos.' }
-      : { pasos: ['Me cuentas la decisión y sus opciones.', 'Anotas las cifras de cada opción.', 'Recibes una recomendación clara en tres días hábiles.'], tiempo: 'Te tomará unos 8 a 12 minutos.' });
+    var l = LAMINAS[resp.tema] || (resp.tema === P ? { pasos: ['Me cuentas tu pregunta, tus ingresos, gastos y deudas.', 'Sumas partes como tarjetas, inversiones o vivienda.', 'Recibes tu informe en tres días hábiles.'] }
+      : { pasos: ['Me cuentas la decisión y sus opciones.', 'Anotas las cifras de cada opción.', 'Recibes una recomendación clara en tres días hábiles.'] });
     var pasos = ['Pagas lo esencial: $' + base() + USD() + ' + IVA.'].concat(l.pasos);
     var html = '<p class="lam-eyebrow">' + esc(resp.tema) + '</p><p class="lam-t">Así funciona <b>en 4 pasos</b></p>' +
       '<div class="lam-foto"><img src="/assets/carlo-recorte-420.webp" alt="" width="420" height="547"></div>' +
       '<ol class="lam-pasos">' + pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
-      '<p class="lam-tiempo">' + esc(l.tiempo) + ' Puedes saltar lo que no sepas: con más información, el informe es más útil.</p>' +
+      '<p class="lam-tiempo"><strong>Dedica 30 minutos de tu tiempo a consciencia y obtendrás grandes resultados.</strong> Son algunas preguntas, pero todo ayudará a que el informe te sirva de verdad.</p>' +
       '<div class="lam-botones"><button type="button" class="btn btn-navy" data-empezar>Empezar</button><button type="button" class="back" data-otro>Elegir otro tema</button></div>';
     var d = burbuja(html, 'lamina' + (viva ? ' nuevo' : ' hecha'), viva, true);
     if (!viva) return d;
@@ -801,8 +801,8 @@
       { k: 'arriendo', l: 'Arriendo y servicios básicos' },
       { k: 'admin', l: 'Otros gastos administrativos', d: 'contador, sistemas, seguros, movilización' },
       { k: 'ventasg', l: 'Gastos de ventas', d: 'comisiones, publicidad, transporte de entregas' }] },
-    { id: 'e5', si: 'Mi empresa', parte: 'capital', para: 'Saldos actuales de caja, cuentas por cobrar, inventario y cuentas por pagar.', q: 'Ahora el capital de trabajo, con los saldos de hoy:', opcional: true, ficha: [
-      { k: 'caja', l: 'Caja y bancos' },
+    { id: 'e5', si: 'Mi empresa', parte: 'capital', para: 'Saldos actuales de efectivo, cuentas por cobrar, inventario y cuentas por pagar.', q: 'Ahora el capital de trabajo, con los saldos de hoy:', opcional: true, ficha: [
+      { k: 'caja', l: 'Efectivo disponible (caja y bancos)' },
       { k: 'cxc', l: 'Cuentas por cobrar a clientes' },
       { k: 'inv', l: 'Inventario' },
       { k: 'cxp', l: 'Cuentas por pagar a proveedores' }] },
@@ -812,10 +812,10 @@
       { k: 'cuota', l: 'Cuotas de todas las deudas', d: 'al mes' },
       { k: 'saldo', l: 'Lo que deben en total' }] },
     { id: 'e8', si: 'Mi empresa', parte: 'deudas', para: 'Detalle de las deudas de la empresa para medir su carga financiera.', q: 'Anota las deudas de la empresa con su saldo y su cuota mensual. La tasa y el plazo son opcionales: si no los sabes, déjalos en blanco y los calculo yo.', deudas: DEUDAS_E },
-    { id: 'e9', si: 'Mi empresa', q: 'En los últimos tres meses, ¿cómo estuvo la caja?', op: ['Hubo excedentes', 'Alcanzó justo', 'Faltó y usamos crédito o sobregiro', 'Tuvimos que atrasar pagos'] },
+    { id: 'e9', si: 'Mi empresa', q: 'En los últimos tres meses, ¿cómo te parece que estuvo tu efectivo disponible?', op: ['Sobró dinero', 'Alcanzó justo', 'Faltó y usamos crédito o sobregiro', 'Tuvimos que atrasar pagos'] },
     { id: 'e10', si: 'Mi empresa', q: '¿Están al día con sus obligaciones? Marca lo que corresponda.', op: function () { return ['Todo al día', ec() ? 'Atrasos con el SRI' : 'Atrasos con el ente de impuestos', ec() ? 'Atrasos con el IESS' : 'Atrasos con la seguridad social', 'Atrasos con bancos', 'Atrasos con proveedores']; }, multi: true, solo: ['Todo al día'] },
     { id: 'e11', si: 'Mi empresa', q: '¿Qué información financiera llevan? Puedes marcar varias.', op: ['Contabilidad al día', 'Estados financieros mensuales', 'Flujo de caja proyectado', 'Presupuesto anual', 'Costos por producto', 'Nada formal todavía'], multi: true, solo: ['Nada formal todavía'] },
-    { id: 'e12', si: 'Mi empresa', para: 'El problema financiero concreto que el informe debe atender.', q: '¿Cuál es el problema o la decisión principal que quieres resolver con este análisis?', ph: 'Por ejemplo: vendemos más que el año pasado, pero no alcanza la caja' },
+    { id: 'e12', si: 'Mi empresa', para: 'El problema financiero concreto que el informe debe atender.', q: '¿Cuál es el problema o la decisión principal que quieres resolver con este análisis?', ph: 'Por ejemplo: vendemos más que el año pasado, pero el efectivo no alcanza' },
     { id: 'e13', si: 'Mi empresa', para: 'Acciones ya intentadas, para no repetir recomendaciones.', q: '¿Qué han intentado hasta ahora para resolverlo?', opcional: true },
     { id: 'e14', si: 'Mi empresa', nota: lecturaEmpresa },
 
@@ -1018,7 +1018,7 @@
       { k: 'monto', l: 'Monto involucrado', d: 'ej.: 5.000' },
       { k: 'cuota', l: 'Pago mensual que implicaría', d: 'si lo hay; ej.: 200' },
       { k: 'ingreso', l: 'Tu ingreso mensual neto', d: 'o el de la empresa; ej.: 1.500' },
-      { k: 'ahorro', l: 'Ahorro o caja disponible', d: 'ej.: 4.000' }] },
+      { k: 'ahorro', l: 'Ahorro o efectivo disponible', d: 'ej.: 4.000' }] },
     { id: 'o6', si: O, q: 'Si solo pudieras cuidar una cosa en esta decisión, ¿cuál sería?', op: ['Pagar menos en total', 'Una cuota mensual cómoda', 'Correr poco riesgo', 'Tener dinero disponible', 'Resolverlo rápido'] },
 
     { id: 'extra', cond: function () { return !!resp.pago && (pendientes().length > 0 || 'extra' in resp); }, multi: true, solo: [NO_EXTRA],
@@ -1034,7 +1034,7 @@
   var RES = {
     tema: 'Tema del análisis', pais: 'País y moneda', pais2: 'País y moneda', partes: 'Partes adicionales', pago: 'Tu pago', extra: 'Partes que sumaste al final', mas: 'Algo más a considerar', datos: 'Informe a nombre de', factura: 'Factura', fdatos: 'Datos para la factura',
     e1: 'A qué se dedica la empresa', e2: 'Personas que trabajan', e3: 'Cifras del último año', e4: 'Gastos fijos al mes', e5: 'Capital de trabajo',
-    e6: 'Plazo de cobro a clientes', e7: 'Plazo de pago a proveedores', e8: 'Deudas de la empresa', e8s: 'Deudas de la empresa, en total', e9: 'Caja en los últimos tres meses',
+    e6: 'Plazo de cobro a clientes', e7: 'Plazo de pago a proveedores', e8: 'Deudas de la empresa', e8s: 'Deudas de la empresa, en total', e9: 'Efectivo disponible en los últimos tres meses',
     e10: 'Obligaciones', e11: 'Información financiera que llevan', e12: 'Problema o decisión principal', e13: 'Lo que han intentado',
     p1: 'Lo que quieres lograr', p0: 'Lo que quieres que responda el informe', p0b: 'Lo que haría útil el informe', p2: 'Edad', p3: 'Situación laboral',
     p2c: 'Unidad del análisis', p2p: 'Edad de tu pareja', p3p: 'Situación laboral de tu pareja', p4: 'Personas que dependen de los ingresos',
@@ -1590,7 +1590,7 @@
     ['Lo que buscas', 'p1 p0 p0b'], ['Tu hogar', 'p2 p3 p2c p2p p3p p4'], ['Ingresos', 'p5'], ['Gastos', 'p6 p7 p6a'], ['Bienes', 'p12 p12b'],
     ['Préstamos y tarjetas', 'p8s p8 p5s p5b p5t p5u p5c p5g p5f p5fm p5d p10'], ['Ahorros e inversiones', 'p11 p11b'], ['Protección', 'p13i p13ip p13s p13x'],
     ['Hábitos y metas', 'p14 p14p p15 p15b'], ['Tu plan', 'pinv pcom'],
-    ['Tu empresa', 'e1 e2'], ['Resultados', 'e3 e4'], ['Capital de trabajo', 'e5 e6 e7'], ['Deudas', 'e8s e8'], ['Caja y obligaciones', 'e9 e10 e11'], ['Lo que buscas', 'e12 e13'],
+    ['Tu empresa', 'e1 e2'], ['Resultados', 'e3 e4'], ['Capital de trabajo', 'e5 e6 e7'], ['Deudas', 'e8s e8'], ['Efectivo y obligaciones', 'e9 e10 e11'], ['Lo que buscas', 'e12 e13'],
     ['La inversión', 'i1 i2 i3 i4'], ['Tu perfil', 'i5 i6 i7 i8 i9 i10'], ['Tu situación', 'i11'], ['Alternativas', 'i12'],
     ['Para terminar', 'extra mas adj']
   ].forEach(function (x) { x[1].split(' ').forEach(function (id) { SEC[id] = x[0]; }); });

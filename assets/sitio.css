@@ -561,7 +561,8 @@ label[data-c] > span .ia-marca { margin-left: .35rem; vertical-align: .1em; }
 .lam-pasos { grid-column: 1 / -1; list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .55rem; counter-reset: lam; }
 .lam-pasos li { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); gap: .65rem; align-items: start; font-size: var(--t-s); line-height: 1.45; }
 .lam-pasos li::before { counter-increment: lam; content: counter(lam); width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--navy); color: var(--brass); font-weight: 700; font-size: .85rem; display: grid; place-items: center; }
-.lam-tiempo { grid-column: 1 / -1; margin: .9rem 0 0; font-size: var(--t-xs); line-height: 1.5; color: #4A5568; }
+.lam-tiempo { grid-column: 1 / -1; margin: 1rem 0 0; padding: .35rem 0 .35rem .8rem; border-left: 3px solid var(--brass); font-size: var(--t-s); line-height: 1.5; color: #3A4556; }
+.lam-tiempo strong { color: var(--navy); }
 .lam-botones { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .6rem 1.1rem; align-items: center; margin-top: .9rem; }
 .lam-botones .btn-navy { background: var(--navy); color: #fff; }
 .lam-botones .btn-navy:hover { background: var(--navy-2); }
@@ -575,7 +576,7 @@ label[data-c] > span .ia-marca { margin-left: .35rem; vertical-align: .1em; }
   .lamina.nuevo .lam-pasos li:nth-child(2) { animation-delay: 1.4s; }
   .lamina.nuevo .lam-pasos li:nth-child(3) { animation-delay: 2.3s; }
   .lamina.nuevo .lam-pasos li:nth-child(4) { animation-delay: 3.2s; }
-  .lamina.nuevo .lam-tiempo { animation-delay: 4s; }
+  .lamina.nuevo .lam-tiempo { animation-delay: 4s; animation-duration: .8s; }
   .lamina.nuevo .lam-botones { animation-delay: 4.3s; }
 }
 @media (max-width: 40rem) {
