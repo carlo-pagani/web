@@ -1039,7 +1039,7 @@
     { id: 'mas', para: 'Cambios, ingresos o gastos previstos que modifiquen el análisis.', opcional: true,
       get q() { return resp.tema === P ? '¿Hay algo más que quieras contarme, o alguna parte que quieras explicarme mejor, para que tu informe se ajuste a lo que esperas?' : '¿Hay algo más que deba considerar, como un cambio previsto, un ingreso que viene o un gasto importante en los próximos meses?'; },
       get conversa() { return resp.tema === P ? 'Profundizar en lo que el cliente cuenta aquí para que el informe se ajuste a lo que espera: cambios previstos, ingresos o gastos que vienen, o cualquier punto de sus respuestas que quiera explicar mejor. Pregunta solo lo que aporte al informe y nada que ya esté respondido.' : ''; } },
-    { id: 'adj', si: P, archivos: true, q: '¿Quieres adjuntar algo que me ayude? Por ejemplo, tu último estado de cuenta de la tarjeta, la tabla de pagos de un préstamo o tus pólizas de seguro. Hasta 5 archivos de 5 MB cada uno, en PDF, foto o Excel. Tapa el número completo de la tarjeta: me bastan los últimos cuatro dígitos. Tus archivos se tratan con la misma confidencialidad que tus respuestas.' },
+    { id: 'adj', si: P, archivos: true, q: '¿Quieres adjuntar algo que me ayude? Por ejemplo, tu último estado de cuenta de la tarjeta, la tabla de pagos de un préstamo o tus pólizas de seguro. Hasta 5 archivos de 5 MB cada uno, en PDF, foto o Excel. Tapa el número completo de la tarjeta o de la cuenta: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.' },
   ];
   // Etiquetas cortas para el resumen previo al pago
   var RES = {
@@ -1062,7 +1062,7 @@
     o5b: 'Cifras principales', o5c: 'Cifras principales', o5d: 'Cifras principales', o5e: 'Cifras principales', o5f: 'Cifras principales',
     o6: 'Lo que más cuida'
   };
-  var CONDICIONES = 'versión 3 del 16 de octubre de 2026';
+  var CONDICIONES = 'versión 4 del 17 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas.';
   var INTRO_PRECIO = 'Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Te acompaña un asistente con inteligencia artificial para las dudas y los datos que falten; el análisis y el informe los hago yo.';
