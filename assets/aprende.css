@@ -17,7 +17,7 @@
 .ap-grupo { font-size: clamp(1.9rem, 4vw, 2.6rem); margin: 3.5rem 0 0; padding-top: 1.5rem; border-top: 3px solid var(--brass); scroll-margin-top: 1rem; }
 .tema { padding-block: 2.5rem 1rem; border-top: 1px solid var(--rule); scroll-margin-top: 1rem; }
 .ap-grupo + .tema { border-top: 0; padding-top: 1.5rem; }
-.tema h2 { font-size: var(--t-xl); margin: .25rem 0 1.25rem; }
+.tema h2, .tema h1 { font-size: var(--t-xl); margin: .25rem 0 1.25rem; }
 .tema h3 { font-size: var(--t-l); margin: 2rem 0 .9rem; }
 .tema p { margin: 0 0 1rem; }
 .tema .fuentes, .ap .fuentes { font-size: var(--t-xs); color: var(--ink-soft); margin-top: 1rem; }
@@ -132,3 +132,10 @@ body.ap { padding-bottom: 0; }
   .hbar .val.larga { left: auto !important; right: calc(100% - var(--w)); padding: 0 .45rem 0 0; color: var(--ink); }
   .hbar.hi .val.larga { color: #fff; }
 }
+
+/* Páginas propias de cada tema */
+.ap-migas { padding-top: 1.5rem; font-size: var(--t-xs); color: var(--ink-soft); }
+.ap-migas a { color: inherit; }
+.ap-migas + .tema { border-top: 0; padding-top: 1rem; }
+.ap-rel { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.ap-rel h2 { font-size: var(--t-l); margin: 0 0 .75rem; }
