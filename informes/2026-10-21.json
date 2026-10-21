@@ -1,0 +1,163 @@
+{
+ "fecha": "2026-10-21",
+ "disponibilidad": [
+  {
+   "url": "https://carlo-pagani.com/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/consulta-express/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/jubilacion/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/metas/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/esperar/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/apalancamiento/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/trading/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/bitcoin/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/casa/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/auto/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/electricos/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/diferidos/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/svb/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/privacidad/",
+   "estado": 200
+  },
+  {
+   "url": "https://carlo-pagani.com/condiciones/",
+   "estado": 200
+  }
+ ],
+ "velocidad": [
+  {
+   "url": "https://carlo-pagani.com/aprende/bitcoin/",
+   "dispositivo": "mobile",
+   "rendimiento": 99,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 2.01,
+   "cls": 0.023,
+   "tbt_ms": 0
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/",
+   "dispositivo": "desktop",
+   "rendimiento": 96,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 0.34,
+   "cls": 0.124,
+   "tbt_ms": 0
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/jubilacion/",
+   "dispositivo": "mobile",
+   "rendimiento": 99,
+   "accesibilidad": 98,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 2.03,
+   "cls": 0.001,
+   "tbt_ms": 0
+  },
+  {
+   "url": "https://carlo-pagani.com/aprende/",
+   "dispositivo": "mobile",
+   "rendimiento": 100,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 1.02,
+   "cls": 0.002,
+   "tbt_ms": 32
+  },
+  {
+   "url": "https://carlo-pagani.com/consulta-express/",
+   "dispositivo": "desktop",
+   "rendimiento": 100,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 0.53,
+   "cls": 0.024,
+   "tbt_ms": 0
+  },
+  {
+   "url": "https://carlo-pagani.com/consulta-express/",
+   "dispositivo": "mobile",
+   "rendimiento": 99,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 2.17,
+   "cls": 0,
+   "tbt_ms": 14
+  },
+  {
+   "url": "https://carlo-pagani.com/",
+   "dispositivo": "desktop",
+   "rendimiento": 100,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 0.5,
+   "cls": 0.02,
+   "tbt_ms": 0
+  },
+  {
+   "url": "https://carlo-pagani.com/",
+   "dispositivo": "mobile",
+   "rendimiento": 87,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 2.6,
+   "cls": 0.0,
+   "tbt_ms": 371
+  }
+ ],
+ "google": {
+  "disponible": false,
+  "motivo": "Falta el secreto GSC_CREDENTIALS"
+ }
+}
