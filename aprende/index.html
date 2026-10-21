@@ -209,6 +209,7 @@
 </script>
 </head>
 <body class="ap con-pest">
+<script>try{if(sessionStorage.getItem('pest-cerrada')==='1')document.body.classList.remove('con-pest')}catch(e){}</script>
 
 <div class="navy">
   <header class="topbar">
@@ -463,6 +464,7 @@
     <a class="pest-op" href="/#masterclass"><b>Masterclass · 14 de noviembre</b><span>Finanzas personales, en línea · $15, IVA incluido</span><em>Masterclass · $15</em><i aria-hidden="true">→</i></a>
   </div>
 </aside>
+<script>try{if(sessionStorage.getItem('pest-cerrada')==='1'){document.getElementById('pest').classList.remove('abierta');document.getElementById('pest-abrir').setAttribute('aria-expanded','false')}}catch(e){}</script>
 <script src="/assets/aprende.js?v=6"></script>
 <script src="/assets/pestana.js?v=6"></script>
 </body>
