@@ -17,8 +17,11 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-pest]'), function (e) { e.setAttribute('data-pest', cambia(e.getAttribute('data-pest'))); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-faltan="2026-11-14"]'), function (e) { if (cerrada) e.removeAttribute('data-faltan'), e.hidden = true; else e.setAttribute('data-faltan', '2026-12-19'); });
     Array.prototype.forEach.call(document.querySelectorAll('.mc-datos'), function (u) {
-      Array.prototype.forEach.call(u.children, function (li) { if (cerrada && /^\s*Solo 30 cupos\s*$/.test(li.textContent)) li.hidden = true; });
+      Array.prototype.forEach.call(u.children, function (li) { if (cerrada && /^\s*(Solo 30 cupos|\$15 · IVA incluido)\s*$/.test(li.textContent)) li.hidden = true; });
       var li = document.createElement('li'); li.textContent = cerrada ? 'Cupos del 19 de diciembre cerrados' : 'Cupos del 14 de noviembre cerrados'; u.insertBefore(li, u.firstChild);
+    });
+    if (cerrada) Array.prototype.forEach.call(document.querySelectorAll('a[href$="#masterclass"] span, a[href$="#masterclass"] em'), function (e) {
+      e.textContent = e.textContent.replace(/ · \$15, IVA incluido| · \$15/, '');
     });
     if (cerrada) Array.prototype.forEach.call(document.querySelectorAll('#mform'), function (f) {
       Array.prototype.forEach.call(f.children, function (c) { c.hidden = true; });
