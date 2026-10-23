@@ -1,4 +1,35 @@
 (function () {
+  // Masterclass: la venta del sábado 14 de noviembre cierra el jueves 12 al terminar el día (hora de Ecuador); desde el 13,
+  // la web ofrece la del sábado 19 de diciembre y avisa que los cupos del 14 se cerraron. sitio.js y pestana.js lo hacen una sola vez.
+  (function () {
+    if (window.MC_FECHA) return;
+    var ahora = Date.now();
+    var nueva = ahora >= Date.parse('2026-11-13T00:00:00-05:00');
+    // La del 19 de diciembre cierra el jueves 17 al terminar el día; desde el 18 la web anuncia que la próxima fecha está por anunciarse.
+    var cerrada = ahora >= Date.parse('2026-12-18T00:00:00-05:00');
+    window.MC_FECHA = nueva ? { iso: '2026-12-19', texto: '19 de diciembre', cerrada: cerrada } : { iso: '2026-11-14', texto: '14 de noviembre' };
+    if (!nueva) return;
+    var cambia = cerrada
+      ? function (t) { return t.replace(/[Ss]ábado 14 de noviembre, en línea: ordena tus finanzas personales conmigo\./, 'Masterclass de finanzas personales: próxima fecha por anunciar.').replace(/Sábado 14 de noviembre/g, 'Próxima fecha por anunciar').replace(/(sábado )?14 de noviembre/g, 'próxima fecha por anunciar'); }
+      : function (t) { return t.replace(/14 de noviembre/g, '19 de diciembre'); };
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) if (n.nodeValue.indexOf('14 de noviembre') > -1) n.nodeValue = cambia(n.nodeValue);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pest]'), function (e) { e.setAttribute('data-pest', cambia(e.getAttribute('data-pest'))); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-faltan="2026-11-14"]'), function (e) { if (cerrada) e.removeAttribute('data-faltan'), e.hidden = true; else e.setAttribute('data-faltan', '2026-12-19'); });
+    Array.prototype.forEach.call(document.querySelectorAll('.mc-datos'), function (u) {
+      Array.prototype.forEach.call(u.children, function (li) { if (cerrada && /^\s*(Solo 30 cupos|\$15 · IVA incluido)\s*$/.test(li.textContent)) li.hidden = true; });
+      var li = document.createElement('li'); li.textContent = cerrada ? 'Cupos del 19 de diciembre cerrados' : 'Cupos del 14 de noviembre cerrados'; u.insertBefore(li, u.firstChild);
+    });
+    if (cerrada) Array.prototype.forEach.call(document.querySelectorAll('a[href$="#masterclass"] span, a[href$="#masterclass"] em'), function (e) {
+      e.textContent = e.textContent.replace(/ · \$15, IVA incluido| · \$15/, '');
+    });
+    if (cerrada) Array.prototype.forEach.call(document.querySelectorAll('#mform'), function (f) {
+      Array.prototype.forEach.call(f.children, function (c) { c.hidden = true; });
+      var q = document.createElement('p'); q.className = 'q'; q.textContent = 'Próxima fecha por anunciar';
+      var s = document.createElement('p'); s.textContent = 'Los cupos del 19 de diciembre se cerraron. La próxima fecha se anuncia aquí mismo.';
+      f.insertBefore(s, f.firstChild); f.insertBefore(q, s);
+    });
+  })();
   var NS = 'http://www.w3.org/2000/svg';
   var CANAL = 'https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A';
   var fmt0 = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 0 });
@@ -556,6 +587,7 @@
   function refMC() { return 'MC-' + Math.random().toString(36).slice(2, 8).toUpperCase(); }
   mf.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (window.MC_FECHA.cerrada) return;
     var invalid = Array.prototype.filter.call(mf.querySelectorAll('[required]'), function (f) {
       var bad = !f.checkValidity() || (f.type === 'email' && !correoOk(f.value)); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
     });
@@ -566,7 +598,7 @@
     var ref = refMC();
     var datos = { nombre: mf.nombre.value.trim(), email: mf.email.value.trim(), whatsapp: mf.whatsapp.value.trim(), intereses: intereses, referencia: ref, pago: 'Pendiente de pago' };
     // Los campos Referencia y Pago van también dentro de Intereses, que es el campo seguro del formulario
-    datos.intereses = (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: pendiente';
+    datos.intereses = (intereses || 'Sin intereses marcados') + '\nFecha: ' + window.MC_FECHA.texto + ' de 2026\nReferencia: ' + ref + '\nPago: pendiente';
     var btn = document.getElementById('m-enviar'); btn.disabled = true; ms.className = 'cstatus'; ms.textContent = 'Enviando…';
     var bot = !!mf._gotcha.value;
     (bot ? Promise.resolve() : enviar(FORMS.masterclass, datos)).then(function () {
@@ -594,7 +626,7 @@
       var n = comp.value.trim();
       if (!/^[A-Za-z0-9][A-Za-z0-9 .\/#-]{3,39}$/.test(n)) { comp.setAttribute('aria-invalid', 'true'); st.className = 'cstatus'; st.textContent = 'Escribe el número de comprobante que te mostró la app al pagar.'; comp.focus(); return; }
       var pago = 'Deuna: comprobante ' + n + ' por ' + MC.precio + '. Por confirmar en Deuna Negocios que el monto esté completo.';
-      var d2 = Object.assign({}, datos, { pago: pago, intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' + pago });
+      var d2 = Object.assign({}, datos, { pago: pago, intereses: (intereses || 'Sin intereses marcados') + '\nFecha: ' + window.MC_FECHA.texto + ' de 2026\nReferencia: ' + ref + '\nPago: ' + pago });
       ok.disabled = true; st.className = 'cstatus'; st.textContent = 'Enviando…';
       enviar(FORMS.masterclass, d2).then(function () {
         mf.innerHTML = '<p class="q">Listo, ' + nombre + '. Tu cupo queda separado.</p><p style="color:var(--on-navy-soft);margin:0">Verifico tu pago y te escribo a ' + esc(datos.email) + ' con la hora y el enlace. Si la masterclass no llegara a abrirse, te devuelvo el valor completo.</p>';
@@ -628,14 +660,14 @@
       b.addEventListener('click', function () { pagoMCPayPal(datos, ref, intereses, nombre); });
       st.appendChild(b);
     };
-    if (tarjeta) cajitaPayphone(document.getElementById('m-pph'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, datos.email, {
+    if (tarjeta) cajitaPayphone(document.getElementById('m-pph'), 15, 'Masterclass de finanzas personales, ' + window.MC_FECHA.texto + ' de 2026', ref, datos.email, {
       form: 'masterclass', anexo: 'intereses', volver: '/#masterclass',
-      datos: Object.assign({}, datos, { intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' }),
+      datos: Object.assign({}, datos, { intereses: (intereses || 'Sin intereses marcados') + '\nFecha: ' + window.MC_FECHA.texto + ' de 2026\nReferencia: ' + ref + '\nPago: ' }),
       listo: 'Listo, ' + datos.nombre.split(' ')[0] + '. Tu cupo en la masterclass está confirmado. Te escribo a ' + datos.email + ' con la hora y el enlace. Si la masterclass no llegara a abrirse, te devuelvo el valor completo.'
     }, alError, { producto: 'masterclass' });
-    if (pp) botonesPayPal(document.getElementById('m-pp'), 15, 'Masterclass de finanzas personales, 14 de noviembre de 2026', ref, function (r) {
+    if (pp) botonesPayPal(document.getElementById('m-pp'), 15, 'Masterclass de finanzas personales, ' + window.MC_FECHA.texto + ' de 2026', ref, function (r) {
       var pago = textoPayPal(r);
-      var d2 = Object.assign({}, datos, { pago: pago, intereses: (intereses || 'Sin intereses marcados') + '\nReferencia: ' + ref + '\nPago: ' + pago });
+      var d2 = Object.assign({}, datos, { pago: pago, intereses: (intereses || 'Sin intereses marcados') + '\nFecha: ' + window.MC_FECHA.texto + ' de 2026\nReferencia: ' + ref + '\nPago: ' + pago });
       st.className = 'cstatus'; st.textContent = 'Pago aprobado. Guardando tu cupo…';
       var guardar = function () {
         return enviar(FORMS.masterclass, d2).then(function () {
@@ -696,6 +728,11 @@
     return MONEDAS[resp.pais] || MONEDAS['Ecuador · dólares'];
   }
   function ec() { return mon().pais === 'Ecuador'; }
+  // Quien vive fuera del Ecuador recibe una exportación de servicios: IVA 0 % (LRTI art. 56). Paga solo con PayPal y el Worker
+  // comprueba, antes de cobrar, que el pagador sea del exterior; si no, no cobra y le pide elegir Ecuador.
+  function exterior() { return !!resp.pais && !/^\s*ecuador\s*$/i.test(mon().pais); }
+  function ivaExacto() { return exterior() ? ' (IVA 0 %, exportación de servicios)' : ' + IVA'; }
+  function conIVAtxt() { return exterior() ? ' sin IVA (exportación de servicios)' : ' con IVA'; }
   // Montos de ejemplo en la escala de la moneda del cliente, redondeados a dos cifras (¤ marca un monto dentro de un texto)
   var ESCALA = { 'México': 20, 'Chile': 1000, 'Colombia': 4000, 'Perú': 4 };
   function ejemplo(n) {
@@ -792,7 +829,8 @@
     { id: 'intro', lamina: true },
     // Empresa con la agenda llena: el caso en pocas líneas y los datos de contacto, sin pagar
     { id: 'ecaso', cond: llena, para: 'El caso de la empresa, en pocas líneas, para la lista de espera.', q: 'Cuéntame tu caso en pocas líneas: a qué se dedica tu empresa, qué está pasando y qué quieres resolver.', get ph() { return PH[E]; } },
-    { id: 'pais', vende: true, q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país.', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
+    // Fuera del Ecuador: exportación de servicios (IVA 0 %, solo PayPal); para personas, la consulta incluye una videoconferencia (las empresas ya tienen cita)
+    { id: 'pais', vende: true, get q() { return '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país.' + (resp.tema === E ? ' Si vives fuera del Ecuador, lo pagas con PayPal.' : ' Si vives fuera del Ecuador, lo pagas con PayPal y la consulta incluye una videoconferencia para explicarte el informe (aplican condiciones).'); }, op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
     { id: 'pais2', vende: true, cond: function () { return resp.pais === OTRO_PAIS; }, q: '¿En qué país vives y en qué moneda manejas tus finanzas?', ph: 'Por ejemplo: Argentina, pesos argentinos' },
     { id: 'datos', get q() { return llena() ? 'Déjame tu nombre y tu correo: ahí te aviso cuando pueda atender tu caso.' : resp.tema === E ? '¿A nombre de quién preparo el análisis y a qué correo te escribo para acordar la cita?' : '¿A nombre de quién preparo el informe y a qué correo te lo envío?'; }, campos: true },
     { id: 'factura', vende: true, q: '¿Necesitas factura?', op: ['Sí', 'No'] },
@@ -814,7 +852,7 @@
     tema: 'Tema del análisis', pais: 'País y moneda', pais2: 'País y moneda', pago: 'Tu pago', get datos() { return resp.tema === E ? 'Análisis a nombre de' : 'Informe a nombre de'; }, factura: 'Factura', fdatos: 'Datos para la factura',
     caso: 'Tu caso', ecaso: 'Tu caso', cifras: 'Tus cifras', espera: 'Lo que haría útil el informe', adj: 'Archivos adjuntos'
   };
-  var CONDICIONES = 'versión 5 del 23 de octubre de 2026';
+  var CONDICIONES = 'versión 7 del 23 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas; si es sobre tu empresa, preparo con ellas nuestra primera cita.';
   var INTRO_PRECIO = 'Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Las preguntas te las hace mi asistente con inteligencia artificial, conversando contigo; el análisis y el informe los hago yo.';
@@ -845,7 +883,7 @@
       } },
     // Payphone: la Cajita cobra con tarjeta dentro de la página y luego Payphone lleva al cliente a /pago/, que lo devuelve aquí para confirmar.
     // Si PayPal también está activo, sus botones quedan debajo como alternativa.
-    { activa: function () { return !!PAYPHONE.url; }, sale: true,
+    { activa: function () { return !!PAYPHONE.url && !exterior(); }, sale: true,
       nota: 'Pagas con tarjeta de crédito o débito de cualquier banco, con el monto exacto y confirmación inmediata.',
       ayuda: 'Paga con tarjeta de crédito o débito de cualquier banco. El monto ya está fijado y la confirmación es inmediata.',
       pintar: function (caja, monto, desc, referencia, ok, mal, pedido) {
@@ -871,8 +909,8 @@
     if (!p) { caja.innerHTML = ''; return alError('El pago en línea no está disponible en este momento. Escríbeme por LinkedIn y lo resolvemos.'); }
     var cobro = { monto: monto, desc: desc, referencia: referencia };
     if (p.sale) guardarCurso(cobro);
-    // Lo que se compra, para que el Worker fije el precio: el tema
-    var pedido = { producto: 'consulta', tema: TEMAS[resp.tema] };
+    // Lo que se compra, para que el Worker fije el precio: el tema y si el cliente vive fuera del Ecuador (IVA 0 %)
+    var pedido = { producto: 'consulta', tema: TEMAS[resp.tema], exterior: exterior() };
     p.pintar(caja, monto, desc, referencia, function (r) { pagoAprobado(cobro, r); }, alError, pedido);
   }
   var resp = {}, camino = [], actual = null, enviado = false, ref = '', previo = {}, editando = null, respaldo = null;
@@ -1127,13 +1165,13 @@
   function enOrden() { return AE.map(function (p) { return p.id; }).filter(function (id) { return id in resp; }); }
   // Precio único, antes de IVA
   function dolares(n) { return '$' + n.toFixed(2); }
-  function conIVA(n) { return Math.round(n * (1 + IVA) * 100) / 100; }
+  function conIVA(n) { return Math.round(n * (1 + (exterior() ? 0 : IVA)) * 100) / 100; }
   function precio() { return { neto: precioBase(), total: conIVA(precioBase()) }; }
   function pagado() { return Math.round(cobros.reduce(function (t, c) { return t + c.monto; }, 0) * 100) / 100; }
   function fechaEC() { return new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'long', timeStyle: 'short' }); }
   function pintarPrecio() {
     var pr = precio();
-    document.getElementById('ae-sub').textContent = '$' + pr.neto + ' + IVA (15 %)';
+    document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios' + (resp.tema === E ? '' : ' · incluye videoconferencia (aplican condiciones)') : ' + IVA (15 %)');
     document.getElementById('ae-porque').textContent = resp.tema === E ? 'Cubre el análisis previo de tu caso y la coordinación de la cita.' : 'Diagnóstico de tu caso y recomendaciones concretas, por escrito.';
     document.getElementById('ae-total').textContent = dolares(pr.total) + ' USD';
   }
@@ -1205,7 +1243,8 @@
   // Lo que se guarda en Jotform: la conversación completa, el resumen del asistente, el alcance pagado y los datos de contacto
   function alcance() {
     return 'Alcance del análisis\n✓ Consulta Express sobre ' + resp.tema.toLowerCase() + ' ($' + precioBase() + ', más impuestos si aplica): ' + (resp.tema === E ? 'análisis previo del caso y cita por acordar' : 'diagnóstico del caso y recomendaciones concretas') +
-      '\nPagado: ' + dolares(pagado()) + ' con IVA' +
+      '\nPagado: ' + dolares(pagado()) + conIVAtxt() +
+      (exterior() ? '\nDeclaró que vive fuera del Ecuador (' + mon().pais + ') y que usará ' + (resp.tema === E ? 'el análisis' : 'el informe') + ' allí: exportación de servicios, factura con IVA 0 %.' + (resp.tema === E ? '' : ' Incluye videoconferencia para explicarle el informe.') : '') +
       (aceptado ? '\n\nAceptó las condiciones (' + CONDICIONES + ') y dio su consentimiento expreso el ' + aceptado + ', hora de Ecuador, antes de pagar.' : '');
   }
   function paquete() {

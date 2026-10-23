@@ -37,9 +37,9 @@ try {
 
 function detalle(d) {
   if (d === "masterclass") return "Masterclass";
-  // Sellos de la versión anterior: «tema.parte.parte» o «extra.tema.parte»; desde la versión del caso abierto, solo el tema
-  const p = d.split("."), extra = p[0] === "extra" ? p.shift() : "", tema = p.shift();
-  return `Consulta (${tema})${extra ? ", partes sumadas al final" : ""}${p.length ? ": " + p.join(", ") : ""}`;
+  // Sellos: «tema» desde el caso abierto, con prefijo «ext» si fue sin IVA por exportación de servicios; versión anterior: «tema.parte.parte» o «extra.tema.parte»
+  const p = d.split("."), ext = p[0] === "ext" ? p.shift() : "", extra = p[0] === "extra" ? p.shift() : "", tema = p.shift();
+  return `Consulta (${tema})${ext ? ", sin IVA por exportación de servicios" : ""}${extra ? ", partes sumadas al final" : ""}${p.length ? ": " + p.join(", ") : ""}`;
 }
 
 // Junta cada pago con los envíos donde aparece (una vez por envío, aunque el texto lo repita)
