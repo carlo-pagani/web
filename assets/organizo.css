@@ -1,4 +1,4 @@
-/* Sección de la app «Organizo mis Finanzas»: un iPhone 18 Pro dibujado con CSS que muestra la app en uso. */
+/* Sección de la app «Organizo mis Finanzas»: un iPhone 18 Pro (marco de aluminio azul, bordes finos, isla dinámica) dibujado con CSS que muestra la app en uso. */
 .appsec { background: #F3EEE4; --surface: #FFFDF9; --rule: #E3D9C6; }
 .appsec .wrap.app-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 0 clamp(2rem, 6vw, 5rem); align-items: start; }
 .app-eyebrow { color: #7A5A1E; }
@@ -10,18 +10,18 @@
 .app-fono { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 5.5rem; justify-self: center; }
 .app-intro, .app-cuerpo { grid-column: 2; }
 .app-intro { align-self: end; }
-.iphone { --w: min(300px, 70vw); width: var(--w); aspect-ratio: 71.9 / 150; position: relative; border-radius: calc(var(--w) * .165); padding: calc(var(--w) * .03);
-  background: linear-gradient(145deg, #3A3D42, #16181B 30%, #2B2E33 70%, #0D0E10);
-  box-shadow: 0 0 0 1px #4A4E55 inset, 0 30px 60px -20px rgba(14,27,44,.45), 0 12px 24px -12px rgba(14,27,44,.3); }
-.iphone::before, .iphone::after { content: ""; position: absolute; width: 3px; border-radius: 2px; background: #2A2D31; }
-.iphone::before { left: -3px; top: 19%; height: 7%; box-shadow: 0 calc(var(--w) * .13) 0 #2A2D31, 0 calc(var(--w) * .26) 0 #2A2D31; } /* acción y volumen */
-.iphone::after { right: -3px; top: 27%; height: 11%; } /* encendido */
-.iphone .cc { position: absolute; right: -3px; top: 52%; width: 3px; height: 9%; border-radius: 2px; background: #2A2D31; } /* Control de Cámara */
-.pantalla { position: relative; width: 100%; height: 100%; border-radius: calc(var(--w) * .135); overflow: hidden; background: #0E1B2C; }
+.iphone { --w: min(300px, 70vw); --metal: #34465F; width: var(--w); aspect-ratio: 71.9 / 150; position: relative; border-radius: calc(var(--w) * .19); padding: calc(var(--w) * .011);
+  background: linear-gradient(150deg, #6E819C, #34465F 22%, #26364C 50%, #3E5270 78%, #1E2B3D);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset, 0 0 0 calc(var(--w) * .005) rgba(0,0,0,.25) inset, 0 30px 60px -20px rgba(14,27,44,.45), 0 12px 24px -12px rgba(14,27,44,.3); }
+.iphone::before, .iphone::after { content: ""; position: absolute; width: 2px; border-radius: 1px; background: var(--metal); }
+.iphone::before { left: -2px; top: 18%; height: 6%; box-shadow: 0 calc(var(--w) * .13) 0 var(--metal), 0 calc(var(--w) * .25) 0 var(--metal); } /* acción y volumen */
+.iphone::after { right: -2px; top: 26%; height: 11%; } /* encendido */
+.iphone .cc { position: absolute; right: -1px; top: 53%; width: 1px; height: 8%; border-radius: 1px; background: var(--metal); } /* Control de Cámara, a ras del marco */
+.pantalla { position: relative; width: 100%; height: 100%; border-radius: calc(var(--w) * .179); border: calc(var(--w) * .016) solid #050608; overflow: hidden; background: #0E1B2C; }
 .pantalla img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s ease; }
 .pantalla img.on { opacity: 1; }
-.isla { position: absolute; left: 50%; top: 2.5%; transform: translateX(-50%); width: 21%; height: 3.1%; border-radius: 999px; background: #000; z-index: 2; }
-.estado { position: absolute; inset: 0 0 auto; height: 7%; display: flex; align-items: center; justify-content: space-between; padding: 0 9% 0 11%; color: #fff; font: 600 calc(var(--w) * .047) / 1 -apple-system, "SF Pro Text", var(--body); z-index: 2; pointer-events: none; }
+.isla { position: absolute; left: 50%; top: 1.3%; transform: translateX(-50%); width: 31%; height: 4.2%; border-radius: 999px; background: #000; z-index: 2; }
+.estado { position: absolute; inset: 0 0 auto; height: 6.8%; display: flex; align-items: center; justify-content: space-between; padding: 0 9% 0 11%; color: #fff; font: 600 calc(var(--w) * .047) / 1 -apple-system, "SF Pro Text", var(--body); z-index: 2; pointer-events: none; }
 .estado svg { height: calc(var(--w) * .038); fill: #fff; }
 .estado span:last-child { display: flex; gap: 5px; align-items: center; }
 .home { position: absolute; left: 50%; bottom: 1.1%; transform: translateX(-50%); width: 34%; height: .55%; border-radius: 9px; background: #111; z-index: 2; }
