@@ -247,7 +247,11 @@ function precioDe(d, ref) {
   if (!t || partes.length > t.partes.length || partes.some((p) => !t.partes.includes(p))) return null;
   if (!(extra ? /^AE-[A-Z0-9]{4,12}-\d{1,2}$/ : /^AE-[A-Z0-9]{4,12}$/).test(ref) || (extra && !partes.length)) return null;
   const neto = (extra ? 0 : t.base) + PRECIOS.parte * partes.length;
-  return { centavos: Math.round(neto * (1 + PRECIOS.iva) * 100), detalle: [extra ? "extra" : "", d.tema, ...partes].filter(Boolean).join(".") };
+  // Cliente que vive fuera del Ecuador: exportación de servicios, IVA 0 % (LRTI art. 56). Solo se cobra con PayPal y antes de
+  // cobrar se comprueba que el pagador sea del exterior (cobrarPayPal); el detalle del sello empieza con «ext».
+  const exterior = d.exterior === true;
+  return { centavos: Math.round(neto * (exterior ? 1 : 1 + PRECIOS.iva) * 100), exterior,
+    detalle: [exterior ? "ext" : "", extra ? "extra" : "", d.tema, ...partes].filter(Boolean).join(".") };
 }
 
 const P256 = { name: "ECDSA", namedCurve: "P-256" };
@@ -384,7 +388,8 @@ async function crearPedido(request, env, origen) {
   if (!precio) return json({ error: "Pedido no válido" }, 400, origen);
   if (d.proveedor === "paypal" ? !paypalListo(env) : d.proveedor === "payphone" ? !listo(env) : true) return json({ error: "Cobro no configurado" }, 503, origen);
   if (!(await selloDO(env).permitir(await visitante(request)))) return muchos(origen);
-  const datos = { ref, centavos: precio.centavos, detalle: precio.detalle };
+  const datos = { ref, centavos: precio.centavos, detalle: precio.detalle, ...(precio.exterior ? { exterior: true } : {}) };
+  if (precio.exterior && d.proveedor !== "paypal") return json({ error: "El precio sin IVA para el exterior se paga con PayPal" }, 400, origen);
   if (d.proveedor === "payphone") {
     const tx = `${ref}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36).toUpperCase().slice(-5)}`;
     if (!(await selloDO(env).registrar("payphone", tx, datos))) return json({ error: "Inténtalo de nuevo" }, 409, origen);
@@ -411,6 +416,14 @@ async function crearPedido(request, env, origen) {
   }
 }
 
+// País del pagador según PayPal (código ISO de dos letras), de la cuenta o de la dirección de la tarjeta
+function paisPagador(o) {
+  const ps = o.payment_source || {};
+  const c = (o.payer && o.payer.address && o.payer.address.country_code) || (ps.paypal && ps.paypal.address && ps.paypal.address.country_code) ||
+    (ps.card && ps.card.billing_address && ps.card.billing_address.country_code) || "";
+  return /^[A-Z]{2}$/.test(c) ? c : "";
+}
+
 // PayPal: cobra una orden creada por el Worker y aprobada por el cliente, comprueba el cobro completo y lo sella
 async function cobrarPayPal(request, env, origen) {
   if (!paypalListo(env)) return json({ error: "Cobro no configurado" }, 503, origen);
@@ -431,6 +444,15 @@ async function cobrarPayPal(request, env, origen) {
     if (!o.id || !cuadra(o)) {
       console.log(`PayPal: la orden ${orden} no cuadra con su pedido; no se cobra`);
       return no("La orden de PayPal no coincide con tu compra, así que no se cobró nada. Vuelve a intentarlo.");
+    }
+    if (o.status === "APPROVED" && p.exterior) {
+      // Precio sin IVA (exportación de servicios): el pago tiene que venir del exterior. Si PayPal dice que el pagador es de
+      // Ecuador, o no dice de dónde es, no se cobra y el cliente vuelve a empezar con el precio con IVA.
+      const pais = paisPagador(o);
+      if (!pais || pais === "EC") {
+        console.log(`PayPal: la orden ${orden} es sin IVA pero el pagador es de ${pais || "un país desconocido"}; no se cobra`);
+        return no("El precio sin IVA es para quienes viven y pagan desde fuera del Ecuador, y este pago figura como hecho desde Ecuador, así que no se cobró nada. Vuelve atrás, elige Ecuador como tu país y paga el precio con IVA.");
+      }
     }
     if (o.status === "APPROVED") {
       // Sin clave de idempotencia: si el banco rechaza la tarjeta, el cliente elige otra y la misma orden se vuelve a cobrar.
@@ -454,7 +476,7 @@ async function cobrarPayPal(request, env, origen) {
     if (s.error) return no(s.error);
     const q = o.payer || {}, nombre = q.name ? [q.name.given_name, q.name.surname].filter(Boolean).join(" ") : "";
     const pagador = [nombre, q.email_address].filter(Boolean).map((x) => corto(x, 80)).join(" · ");
-    const pago = `PayPal: pagado $${(p.centavos / 100).toFixed(2)} USD · orden ${orden} · captura ${corto(cap.id, 30)}${pagador ? " · " + pagador : ""} · ${s.sello}`;
+    const pago = `PayPal: pagado $${(p.centavos / 100).toFixed(2)} USD · orden ${orden} · captura ${corto(cap.id, 30)}${pagador ? " · " + pagador : ""}${p.exterior ? " · sin IVA, exportación de servicios, pagador de " + (paisPagador(o) || "?") : ""} · ${s.sello}`;
     const recibo = { aprobado: true, centavos: p.centavos, referencia: p.ref, orden, captura: cap.id, pagador, pago };
     await sello.guardarRecibo("paypal", orden, recibo);
     return json(recibo, 200, origen);

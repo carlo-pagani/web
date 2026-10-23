@@ -37,8 +37,8 @@ try {
 
 function detalle(d) {
   if (d === "masterclass") return "Masterclass";
-  const p = d.split("."), extra = p[0] === "extra" ? p.shift() : "", tema = p.shift();
-  return `Consulta (${tema})${extra ? ", partes sumadas al final" : ""}: ${p.length ? p.join(", ") : "solo lo esencial"}`;
+  const p = d.split("."), ext = p[0] === "ext" ? p.shift() : "", extra = p[0] === "extra" ? p.shift() : "", tema = p.shift();
+  return `Consulta (${tema})${ext ? ", sin IVA por exportación de servicios" : ""}${extra ? ", partes sumadas al final" : ""}: ${p.length ? p.join(", ") : "solo lo esencial"}`;
 }
 
 // Junta cada pago con los envíos donde aparece (una vez por envío, aunque el texto lo repita)

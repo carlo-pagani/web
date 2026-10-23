@@ -1,6 +1,22 @@
 /* Recuadro de Consulta Express y Masterclass, siempre a la vista: arriba a la derecha en computadora y barra abajo en el teléfono.
    Su mensaje cambia según la sección que se está leyendo. La × lo reduce a un botón dorado y la elección se recuerda durante la visita. */
 (function () {
+  // Masterclass: la venta del sábado 14 de noviembre cierra el jueves 12 al terminar el día (hora de Ecuador); desde el 13,
+  // la web ofrece la del sábado 19 de diciembre y avisa que los cupos del 14 se cerraron. sitio.js y pestana.js lo hacen una sola vez.
+  (function () {
+    if (window.MC_FECHA) return;
+    var nueva = Date.now() >= Date.parse('2026-11-13T00:00:00-05:00');
+    window.MC_FECHA = nueva ? { iso: '2026-12-19', texto: '19 de diciembre' } : { iso: '2026-11-14', texto: '14 de noviembre' };
+    if (!nueva) return;
+    var cambia = function (t) { return t.replace(/14 de noviembre/g, '19 de diciembre'); };
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) if (n.nodeValue.indexOf('14 de noviembre') > -1) n.nodeValue = cambia(n.nodeValue);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pest]'), function (e) { e.setAttribute('data-pest', cambia(e.getAttribute('data-pest'))); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-faltan="2026-11-14"]'), function (e) { e.setAttribute('data-faltan', '2026-12-19'); });
+    Array.prototype.forEach.call(document.querySelectorAll('.mc-datos'), function (u) {
+      var li = document.createElement('li'); li.textContent = 'Cupos del 14 de noviembre cerrados'; u.insertBefore(li, u.firstChild);
+    });
+  })();
   var p = document.getElementById('pest'); if (!p) return;
   var tab = document.getElementById('pest-abrir');
   var texto = document.getElementById('pest-t');
