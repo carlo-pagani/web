@@ -655,7 +655,7 @@
   /* ---------- Consulta Express: el cliente cuenta su caso a un asistente con IA, en una ventana (solo en /consulta-express/) ---------- */
   // Un caso abierto: el cliente elige el tema, paga un solo precio y le cuenta su caso al asistente con sus palabras; el asistente
   // le pregunta lo que Carlo necesita saber (según el tema) y cierra con un resumen que el cliente confirma. Luego adjunta documentos.
-  // Empresas: el mismo recorrido, por $70 + IVA, confirma una cita; Carlo analiza el caso y escribe para acordar la fecha. Si la agenda
+  // Empresas: el mismo recorrido, por $70 (más impuestos si aplica), confirma una cita; Carlo analiza el caso y escribe para acordar la fecha. Si la agenda
   // está llena (data/agenda.json), la empresa deja sus datos y su caso en pocas líneas, sin pagar, y se le avisa por correo cuando llegue su turno.
   if (document.getElementById('ae')) (function () {
   var E = 'Mi empresa', P = 'Mis finanzas personales', I = 'Una inversión', O = 'Otra decisión de dinero';
@@ -708,7 +708,7 @@
     nota: '<strong>Llego a la primera cita con tu caso ya analizado.</strong> El pago cubre ese análisis previo, la coordinación de la agenda y la infraestructura: es parte del proceso para darte la mejor atención desde el inicio. Dedica unos 30 minutos; si tienes ¤, tenlos a mano.' };
   // Empresas con la agenda llena: lista de espera gratuita, con los datos de contacto y el caso en pocas líneas
   var ESPERA = { titulo: 'Lista de espera <b>en 4 pasos</b>', boton: 'Dejar mis datos',
-    pasos: ['Me cuentas tu caso en pocas líneas y me dejas tu correo, sin costo.', 'Te escribo a tu correo cuando pueda atender tu caso.', 'Entonces pagas $70 + IVA y le cuentas tu caso completo a mi asistente, con tus documentos.', 'Analizo tu caso y acordamos el día y la hora de la cita.'],
+    pasos: ['Me cuentas tu caso en pocas líneas y me dejas tu correo, sin costo.', 'Te escribo a tu correo cuando pueda atender tu caso.', 'Entonces pagas $70 (más impuestos si aplica) y le cuentas tu caso completo a mi asistente, con tus documentos.', 'Analizo tu caso y acordamos el día y la hora de la cita.'],
     nota: '<strong>Para mantener la calidad atiendo pocas empresas a la vez, y ahora mismo la agenda está llena.</strong> Te aviso a tu correo cuando llegue tu turno.' };
   // El símbolo del logo (tres barras y la flecha), dibujado para animarse: las barras suben y la flecha se traza
   var lamN = 0;
@@ -723,7 +723,7 @@
   }
   function lamina(p, viva) {
     var l = llena() ? ESPERA : LAMINAS[resp.tema] || LAMINAS[O];
-    var pasos = l === ESPERA ? l.pasos : ['Pagas $' + precioBase() + USD() + ' + IVA' + (l.pago || '.')].concat(l.pasos, [l.fin || 'Recibes tu informe entre 3 y 5 días hábiles.']);
+    var pasos = l === ESPERA ? l.pasos : ['Pagas $' + precioBase() + USD() + ' (más impuestos si aplica)' + (l.pago || '.')].concat(l.pasos, [l.fin || 'Recibes tu informe entre 3 y 5 días hábiles.']);
     var html = '<p class="lam-eyebrow">' + esc(resp.tema) + '</p><p class="lam-t">' + (l.titulo || 'Así funciona <b>en 4 pasos</b>') + '</p>' +
       logoAnimado() +
       '<ol class="lam-pasos">' + pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
@@ -1195,7 +1195,7 @@
   });
   // Lo que se guarda en Jotform: la conversación completa, el resumen del asistente, el alcance pagado y los datos de contacto
   function alcance() {
-    return 'Alcance del análisis\n✓ Consulta Express sobre ' + resp.tema.toLowerCase() + ' ($' + precioBase() + ' + IVA): ' + (resp.tema === E ? 'análisis previo del caso y cita por acordar' : 'diagnóstico del caso y recomendaciones concretas') +
+    return 'Alcance del análisis\n✓ Consulta Express sobre ' + resp.tema.toLowerCase() + ' ($' + precioBase() + ', más impuestos si aplica): ' + (resp.tema === E ? 'análisis previo del caso y cita por acordar' : 'diagnóstico del caso y recomendaciones concretas') +
       '\nPagado: ' + dolares(pagado()) + ' con IVA' +
       (aceptado ? '\n\nAceptó las condiciones (' + CONDICIONES + ') y dio su consentimiento expreso el ' + aceptado + ', hora de Ecuador, antes de pagar.' : '');
   }
