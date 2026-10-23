@@ -742,7 +742,7 @@
   function ej(t) { return String(t || '').replace(/¤([\d.]+)/g, function (_, n) { return ejemplo(n); }); }
   function USD() { return ec() ? '' : ' USD'; }
   // Lámina de bienvenida: el proceso en cuatro pasos, al estilo de las miniaturas, justo después de elegir el tema
-  var TIEMPO = '<strong>Dedica 30 minutos de tu tiempo a consciencia y obtendrás grandes resultados.</strong> Es una conversación, no un formulario: cuéntalo con tus palabras y las cifras pueden ser aproximadas. Lo que no sepas, dilo y yo lo cubro con supuestos; si tienes ¤, tenlos a mano.';
+  var TIEMPO = '<strong>Dedica 30 minutos de tu tiempo a conciencia y obtendrás grandes resultados.</strong> Es una conversación, no un formulario: cuéntalo con tus palabras y las cifras pueden ser aproximadas. Lo que no sepas, dilo y yo lo cubro con supuestos; si tienes ¤, tenlos a mano.';
   var LAMINAS = {};
   LAMINAS[P] = { pasos: ['Le cuentas tu caso a mi asistente con tus palabras; él te pregunta lo que haga falta.', 'Adjuntas lo que ayude: estados de cuenta, tablas de pagos o pólizas.'], docs: 'tus estados de cuenta o la tabla de pagos de un préstamo' };
   LAMINAS[I] = { pasos: ['Le cuentas a mi asistente qué inversión es, quién la ofrece y cuánto pondrías; él te pregunta lo que haga falta.', 'Adjuntas el folleto o el contrato de la inversión, si lo tienes.'], docs: 'el folleto o el contrato de la inversión' };
