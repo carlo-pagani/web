@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/assets/fuentes.css?v=1">
 <link rel="stylesheet" href="/assets/sitio.css?v=27">
-<link rel="stylesheet" href="/assets/aprende.css?v=5">
+<link rel="stylesheet" href="/assets/aprende.css?v=6">
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
@@ -208,7 +208,8 @@
 }
 </script>
 </head>
-<body class="ap">
+<body class="ap con-pest">
+<script>try{if(sessionStorage.getItem('pest-cerrada')==='1')document.body.classList.remove('con-pest')}catch(e){}</script>
 
 <div class="navy">
   <header class="topbar">
@@ -229,7 +230,7 @@
     <div class="wrap">
       <p class="eyebrow">Aprende finanzas</p>
       <h1>Entender tu dinero, <em>para decidir con criterio.</em></h1>
-      <p class="lede">Soy Carlo Pagani, profesor universitario de finanzas y CFO de más de diez empresas. Aquí reúno lo que explico en mis videos, con más detalle y con herramientas para que hagas tus propios números.</p>
+      <p class="lede">Soy Carlo Pagani, profesor universitario de finanzas y CFO fraccional. Aquí reúno lo que explico en mis videos, con más detalle y con herramientas para que hagas tus propios números.</p>
       <nav class="ap-indice" aria-label="Índice de temas">
         <div><span>Invertir</span><a href="#metas">Metas y perfil de riesgo</a><a href="#esperar">El costo de no invertir</a><a href="#jubilacion">Tu jubilación</a></div>
         <div><span>Riesgo</span><a href="#apalancamiento">Apalancamiento</a><a href="#trading">Trading</a><a href="#bitcoin">Bitcoin</a></div>
@@ -257,6 +258,7 @@
     <p>Nadie conoce tu situación financiera mejor que tú, y por eso debes tener una estrategia definida. Cierro el video con una anécdota de Joseph Heller: en una fiesta en Shelter Island le comentaron que el anfitrión ganaba en un día más de lo que él había ganado con su novela, y respondió que él tenía algo que ese hombre nunca tendría: saber que ya tenía suficiente.</p>
     <h3>Haz tus números</h3>
     <div class="herr" id="h-meta"></div>
+    <p class="ap-ir"><a href="/aprende/metas/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="tema" id="esperar" data-ce="Si no sabes por dónde empezar a invertir, te digo cuánto, dónde y en qué orden.">
@@ -266,9 +268,10 @@
     <p>El tiempo es dinero, y en las inversiones se ve con claridad. En el video tomo un aporte de 215 dólares al mes al 6 % anual. Si lo mantienes 25 años, llegas a unos 150.000 dólares habiendo puesto 65.000; en 20 años, a unos 100.000; en 15, a 63.000; en 10, apenas a 35.000. Visto al revés: para juntar 100.000 dólares necesitas 215 al mes si empiezas con 20 años por delante, 342 si tienes 15 y 607 si solo te quedan 10.</p>
     <p>Te lo digo por experiencia: estoy cerca de los 40 y pude haber empezado a los 25. Esos quince años me costaron alrededor de 63.000 dólares. No es culpa de nadie en particular; en el colegio no nos enseñan de dinero. En una encuesta de la OSC, solo el 7 % respondió bien seis preguntas básicas de finanzas, aunque el 30 % creía saber del tema.</p>
     <p>Mientras tanto, el dinero quieto pierde. Cuando grabé el video, la inflación de 2022 según el INEC fue de 3,74 % y la canasta básica costaba 763 dólares. El banco más grande del país pagaba 0,05 % anual, y solo por saldos de más de 10.000 dólares: 10.500 dólares se convertían en 10.505 al cabo de un año, que en poder de compra equivalían a unos 10.126. Le estás prestando tu dinero al banco prácticamente gratis.</p>
-    <p>Mis recomendaciones son tres: arma un fondo de emergencia de seis meses de gastos, mantén tus deudas por debajo del 30 % de tu ingreso y empieza hoy, aunque sea con poco. La calculadora parte de mi ejemplo; cámbialo por tus cifras.</p>
+    <p>Mis recomendaciones son tres: arma un fondo de emergencia de seis meses de gastos, mantén tus deudas por debajo del 30 % de tu ingreso y empieza hoy, aunque sea con poco.</p>
     <h3>¿Cuánto te cuesta esperar?</h3>
     <div class="herr" id="h-esperar"></div>
+    <p class="ap-ir"><a href="/aprende/esperar/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="tema" id="jubilacion" data-ce="¿Te alcanzará para jubilarte? Reviso tus cifras y te digo cuánto ahorrar al mes.">
@@ -281,6 +284,7 @@
     <p>La pensión del IESS es un complemento, no el plan completo: en el ejemplo rondaría los 1.063 dólares al mes, así que conviene un esquema mixto. Escríbela en la calculadora si la tendrás. Y cuando vayas donde un asesor, ve con tu cifra base en la mano y no aceptes productos innecesarios que te venden por la comisión.</p>
     <h3>Calcula tu jubilación</h3>
     <div class="herr" id="h-jub"></div>
+    <p class="ap-ir"><a href="/aprende/jubilacion/">Abrir en su propia página →</a></p>
   </section>
 
   <!-- ============ RIESGO ============ -->
@@ -296,6 +300,7 @@
     <p>La calculadora parte de ese caso. Mueve el precio de venta hacia abajo y verás la otra cara: el apalancamiento multiplica el resultado para los dos lados, y una venta por debajo de lo esperado golpea mucho más a tu capital cuando trabajas con dinero prestado.</p>
     <h3>Simula una inversión apalancada</h3>
     <div class="herr" id="h-apal"></div>
+    <p class="ap-ir"><a href="/aprende/apalancamiento/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="tema" id="trading" data-ce="Si quieres que tu dinero crezca sin vivir pegado a la pantalla, te propongo un plan.">
@@ -308,6 +313,7 @@
     <p>Un estudio que confirma lo que digo en el video siguió a casi 20.000 personas que empezaron a hacer <em>day trading</em> en la bolsa de Brasil entre 2013 y 2015. Entre los 1.551 que persistieron más de 300 días, el 97 % perdió dinero y solo 17 ganaron más que el salario mínimo. Cuanto más tiempo insistían, menos ganadores quedaban.</p>
     <div class="herr" id="h-trading"></div>
     <p class="fuentes">Fuente: Chague, De-Losso y Giovannetti, <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3423101" target="_blank" rel="noopener">«Day Trading for a Living?»</a> (2019).</p>
+    <p class="ap-ir"><a href="/aprende/trading/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="tema" id="bitcoin" data-ce="¿Cuánto de tu portafolio debería estar en Bitcoin, si algo? Te lo analizo con tu perfil.">
@@ -320,6 +326,7 @@
     <p>Cuando grabé el video, en febrero de 2023, un bitcoin costaba alrededor de 24.000 dólares, después de meses de caídas. La explicación sigue igual; lo que cambió es el precio, y la gráfica muestra las dos caras: subidas que pocos activos han dado y caídas de más del 70 % que hay que estar dispuesto a aguantar.</p>
     <div class="herr" id="h-btc"></div>
     <p>Por eso lo veo como una pieza pequeña de un portafolio diversificado, no como su centro: una porción que, si se multiplica, mueve el total, y si cae a la mitad, no te cambia la vida. La diversificación funciona porque Bitcoin no siempre se mueve al mismo ritmo que las acciones, aunque en las crisis fuertes suele caer junto con ellas.</p>
+    <p class="ap-ir"><a href="/aprende/bitcoin/">Abrir en su propia página →</a></p>
   </section>
 
   <!-- ============ GRANDES COMPRAS ============ -->
@@ -336,6 +343,7 @@
     <h3>¿Cuánta casa te alcanza?</h3>
     <div class="herr" id="h-casa"></div>
     <p class="fuentes">Fuente de la tasa del BIESS: <a href="https://www.vistazo.com/actualidad/nacional/2026-01-27-como-acceder-credito-hipotecario-biess-nueva-tasa-del-2-99-GC10654727" target="_blank" rel="noopener">Vistazo, 27 de enero de 2026</a>.</p>
+    <p class="ap-ir"><a href="/aprende/casa/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="tema" id="auto" data-ce="¿Nuevo, usado o eléctrico? Te hago los números de tu caso antes de que firmes.">
@@ -348,6 +356,7 @@
     <p>El propósito no es desanimar a nadie; a mí me gustan los autos. Mis recomendaciones: ten el dinero primero y gástalo después, ahorrando al menos la mitad; considera un usado de tres o cuatro años con poco recorrido, que ya no paga ICE y cuya depreciación más fuerte la pagó otro; y hazlo revisar a fondo antes de comprar. La calculadora parte de mi ejemplo con el precio actual de la gasolina; cambia lo que quieras.</p>
     <h3>El costo real de tu auto</h3>
     <div class="herr" id="h-auto"></div>
+    <p class="ap-ir"><a href="/aprende/auto/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="tema" id="electricos" data-ce="¿Te conviene un eléctrico con tu forma de manejar? Lo analizo con tus trayectos y tus cifras.">
@@ -388,6 +397,7 @@
       <li><span class="pais">Ecuador · 2024</span><b>Sin luz, sin carga.</b> En octubre de 2024, por la peor sequía en seis décadas, hubo apagones programados de hasta 14 horas diarias. Un eléctrico que se carga en casa depende de que haya luz. <a href="https://www.vistazo.com/actualidad/26-10-2024-ecuador-inicia-apagones-14-horas-diarias-tres-dias-XX8213671" target="_blank" rel="noopener">Vistazo</a></li>
     </ol>
     <p class="fuentes">Beneficios tributarios y costos de energía en Ecuador: <a href="https://www.teleamazonas.com/actualidad/noticias/economia/son-beneficios-economicos-tributarios-vehiculos-electricos-ecuador-128835/" target="_blank" rel="noopener">Teleamazonas, 26 de septiembre de 2026</a>. Puntos de carga y ventas: <a href="https://www.vistazo.com/enfoque/2026-03-16-crece-venta-vehiculos-electricos-ecuador-estos-son-mas-vendidos-precios-IC10748505" target="_blank" rel="noopener">Vistazo, con datos de Aeade</a> y <a href="https://www.expreso.ec/actualidad/economia/regulacion-de-tarifas-impulsa-la-inversion-en-las-electrolineras-274690.html" target="_blank" rel="noopener">Expreso, con datos de Cinae</a>. Gasolineras: <a href="https://www.primicias.ec/economia/mercado-gasolineras-extra-ecopais-aramco-competencia-95613" target="_blank" rel="noopener">Primicias</a>.</p>
+    <p class="ap-ir"><a href="/aprende/electricos/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="tema" id="diferidos" data-ce="¿Diferir o pagar de contado? Te ayudo a ordenar tus tarjetas y tus deudas.">
@@ -399,6 +409,7 @@
     <p>Mis recomendaciones: compara siempre con el precio de contado; paga la cuota completa; suma los otros cargos de la tarjeta; vigila la fecha máxima de pago, y si cae en fin de semana, paga el viernes anterior. La calculadora parte de mi ejemplo y te muestra la tasa anual que esconde un «sin intereses».</p>
     <h3>Descubre el interés escondido</h3>
     <div class="herr" id="h-dif"></div>
+    <p class="ap-ir"><a href="/aprende/diferidos/">Abrir en su propia página →</a></p>
   </section>
 
   <!-- ============ CRISIS ============ -->
@@ -412,6 +423,7 @@
     <p>Mira su balance: los pasivos eran el 92 % de los activos y los depósitos, 173.000 millones, el 82 %, cuando lo normal ronda entre el 50 y el 60 % (en JP Morgan, cerca del 60 %). Y había invertido el 90 % a más de diez años, con un rendimiento de apenas 1,56 %. ¿Invertirías todo tu dinero a diez años y solo al 1,56 %? Para colmo, su jefe de riesgos salió en abril de 2022 y el reemplazo llegó en enero de 2023.</p>
     <p>Cuando la Reserva Federal subió las tasas a cerca del 5 %, esos bonos perdieron valor. Los fondos de capital de riesgo pidieron a sus <em>startups</em> que retiraran el dinero: el 9 de marzo salieron 42.000 millones, el 10 el banco tenía un saldo negativo de alrededor de 1.000 millones y la FDIC tomó el control. El seguro de depósitos cubría 250.000 dólares por cliente; empresas como Roku tenían mucho más. Circle, emisora de la stablecoin USDC, perdió por unos días la paridad con el dólar, y BlockFi tenía 227 millones atrapados.</p>
     <p>Las lecciones que dejo en el video: no entres en pánico ni creas en rumores; nada es cien por ciento seguro; diversifica tus bancos; ahorra en las épocas buenas; y planifica a corto, mediano y largo plazo, porque empezar a hacer algo es mejor que no hacer nada.</p>
+    <p class="ap-ir"><a href="/aprende/svb/">Abrir en su propia página →</a></p>
   </section>
 
   <section class="ap-cierre">
@@ -435,15 +447,15 @@
 <div class="navy">
   <footer>
     <div class="wrap">
-      <span>Carlo Pagani · <a href="/" style="color:var(--on-navy)">Inicio</a> · <a href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener" style="color:var(--on-navy)">YouTube</a> · <a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--on-navy)">LinkedIn</a> · <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#102;&#105;&#110;&#97;&#110;&#122;&#97;&#115;&#64;&#99;&#97;&#114;&#108;&#111;&#45;&#112;&#97;&#103;&#97;&#110;&#105;&#46;&#99;&#111;&#109;" style="color:var(--on-navy);white-space:nowrap">&#102;&#105;&#110;&#97;&#110;&#122;&#97;&#115;&#64;&#99;&#97;&#114;&#108;&#111;&#45;&#112;&#97;&#103;&#97;&#110;&#105;&#46;&#99;&#111;&#109;</a> · <a href="/privacidad/" style="color:var(--on-navy)">Privacidad</a> · <a href="/condiciones/" style="color:var(--on-navy)">Condiciones</a></span>
+      <span>Carlo Pagani · <a href="/" style="color:var(--on-navy)">Inicio</a> · <a href="https://www.youtube.com/channel/UCgNAS6dyYXn8vcLnmSci03A" target="_blank" rel="noopener" style="color:var(--on-navy)">YouTube</a> · <a href="https://www.linkedin.com/in/carlo-g-pagani-48708625" target="_blank" rel="noopener" style="color:var(--on-navy)">LinkedIn</a> · <a href="/privacidad/" style="color:var(--on-navy)">Privacidad</a> · <a href="/condiciones/" style="color:var(--on-navy)">Condiciones</a></span>
       <span>© <span class="num" id="anio">2026</span> Carlo Pagani. Todos los derechos reservados.</span>
       <p class="disclaimer">El contenido de esta página es informativo y educativo; no constituye una recomendación de inversión. Las calculadoras usan supuestos simplificados que puedes cambiar. Los rendimientos pasados no garantizan rendimientos futuros.</p>
     </div>
   </footer>
 </div>
 
-<aside class="pest" id="pest" aria-label="Consulta Express y Masterclass">
-  <button class="pest-tab" id="pest-abrir" type="button" aria-controls="pest-caja" aria-expanded="false">Consulta Express · Masterclass</button>
+<aside class="pest abierta" id="pest" aria-label="Consulta Express y Masterclass">
+  <button class="pest-tab" id="pest-abrir" type="button" aria-controls="pest-caja" aria-expanded="true">Consulta Express · Masterclass</button>
   <div class="pest-caja" id="pest-caja">
     <button class="pest-x" id="pest-x" type="button" aria-label="Ocultar">×</button>
     <p class="eyebrow">Empieza aquí</p>
@@ -452,6 +464,7 @@
     <a class="pest-op" href="/#masterclass"><b>Masterclass · 14 de noviembre</b><span>Finanzas personales, en línea · $15, IVA incluido</span><em>Masterclass · $15</em><i aria-hidden="true">→</i></a>
   </div>
 </aside>
+<script>try{if(sessionStorage.getItem('pest-cerrada')==='1'){document.getElementById('pest').classList.remove('abierta');document.getElementById('pest-abrir').setAttribute('aria-expanded','false')}}catch(e){}</script>
 <script src="/assets/aprende.js?v=6"></script>
 <script src="/assets/pestana.js?v=6"></script>
 </body>
