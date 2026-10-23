@@ -829,8 +829,8 @@
     { id: 'intro', lamina: true },
     // Empresa con la agenda llena: el caso en pocas líneas y los datos de contacto, sin pagar
     { id: 'ecaso', cond: llena, para: 'El caso de la empresa, en pocas líneas, para la lista de espera.', q: 'Cuéntame tu caso en pocas líneas: a qué se dedica tu empresa, qué está pasando y qué quieres resolver.', get ph() { return PH[E]; } },
-    // Fuera del Ecuador: exportación de servicios (IVA 0 %, solo PayPal); para personas, la consulta incluye una videoconferencia (las empresas ya tienen cita)
-    { id: 'pais', vende: true, get q() { return '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país.' + (resp.tema === E ? ' Si vives fuera del Ecuador, lo pagas con PayPal.' : ' Si vives fuera del Ecuador, lo pagas con PayPal y la consulta incluye una videoconferencia para explicarte el informe (aplican condiciones).'); }, op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
+    // Fuera del Ecuador: exportación de servicios (IVA 0 %, solo PayPal)
+    { id: 'pais', vende: true, get q() { return '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país.' + ' Si vives fuera del Ecuador, lo pagas con PayPal.'; }, op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
     { id: 'pais2', vende: true, cond: function () { return resp.pais === OTRO_PAIS; }, q: '¿En qué país vives y en qué moneda manejas tus finanzas?', ph: 'Por ejemplo: Argentina, pesos argentinos' },
     { id: 'datos', get q() { return llena() ? 'Déjame tu nombre y tu correo: ahí te aviso cuando pueda atender tu caso.' : resp.tema === E ? '¿A nombre de quién preparo el análisis y a qué correo te escribo para acordar la cita?' : '¿A nombre de quién preparo el informe y a qué correo te lo envío?'; }, campos: true },
     { id: 'factura', vende: true, q: '¿Necesitas factura?', op: ['Sí', 'No'] },
@@ -852,7 +852,7 @@
     tema: 'Tema del análisis', pais: 'País y moneda', pais2: 'País y moneda', pago: 'Tu pago', get datos() { return resp.tema === E ? 'Análisis a nombre de' : 'Informe a nombre de'; }, factura: 'Factura', fdatos: 'Datos para la factura',
     caso: 'Tu caso', ecaso: 'Tu caso', cifras: 'Tus cifras', espera: 'Lo que haría útil el informe', adj: 'Archivos adjuntos'
   };
-  var CONDICIONES = 'versión 7 del 23 de octubre de 2026';
+  var CONDICIONES = 'versión 8 del 23 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas; si es sobre tu empresa, preparo con ellas nuestra primera cita.';
   var INTRO_PRECIO = 'Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Las preguntas te las hace mi asistente con inteligencia artificial, conversando contigo; el análisis y el informe los hago yo.';
@@ -1171,7 +1171,7 @@
   function fechaEC() { return new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', dateStyle: 'long', timeStyle: 'short' }); }
   function pintarPrecio() {
     var pr = precio();
-    document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios' + (resp.tema === E ? '' : ' · incluye videoconferencia (aplican condiciones)') : ' + IVA (15 %)');
+    document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios' : ' + IVA (15 %)');
     document.getElementById('ae-porque').textContent = resp.tema === E ? 'Cubre el análisis previo de tu caso y la coordinación de la cita.' : 'Diagnóstico de tu caso y recomendaciones concretas, por escrito.';
     document.getElementById('ae-total').textContent = dolares(pr.total) + ' USD';
   }
@@ -1244,7 +1244,7 @@
   function alcance() {
     return 'Alcance del análisis\n✓ Consulta Express sobre ' + resp.tema.toLowerCase() + ' ($' + precioBase() + ', más impuestos si aplica): ' + (resp.tema === E ? 'análisis previo del caso y cita por acordar' : 'diagnóstico del caso y recomendaciones concretas') +
       '\nPagado: ' + dolares(pagado()) + conIVAtxt() +
-      (exterior() ? '\nDeclaró que vive fuera del Ecuador (' + mon().pais + ') y que usará ' + (resp.tema === E ? 'el análisis' : 'el informe') + ' allí: exportación de servicios, factura con IVA 0 %.' + (resp.tema === E ? '' : ' Incluye videoconferencia para explicarle el informe.') : '') +
+      (exterior() ? '\nDeclaró que vive fuera del Ecuador (' + mon().pais + ') y que usará ' + (resp.tema === E ? 'el análisis' : 'el informe') + ' allí: exportación de servicios, factura con IVA 0 %.' : '') +
       (aceptado ? '\n\nAceptó las condiciones (' + CONDICIONES + ') y dio su consentimiento expreso el ' + aceptado + ', hora de Ecuador, antes de pagar.' : '');
   }
   function paquete() {
