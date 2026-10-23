@@ -1856,7 +1856,7 @@
       c.partes.map(function (x) {
         return '<li><label><input type="checkbox" data-mod="' + x.k + '"' + (elegida(x.k) ? ' checked' : '') + '><span>' + esc(x.l) + '</span><b>+ $' + PARTE + '</b></label></li>';
       }).join('');
-    document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios (pagas con PayPal desde el exterior; la consulta incluye una videoconferencia para explicarte el informe, aplican condiciones)' : ' + IVA (15 %)');
+    document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios · incluye videoconferencia (aplican condiciones)' : ' + IVA (15 %)');
     // Por qué cuesta lo que cuesta: la suma a la vista, junto al botón de pagar
     document.getElementById('ae-porque').innerHTML = el.length ?
       'Base $' + base() + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + ivaExacto() + '.' :
