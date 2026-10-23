@@ -589,7 +589,7 @@
             <li>Relación con bancos y financiamiento</li>
             <li>Gestión de inventarios y capital de trabajo</li>
           </ul>
-          <a class="btn btn-brass cita" href="/consulta-express/#empresa">Agenda tu cita para una revisión a la medida de tus necesidades</a>
+          <a class="btn btn-brass cita" href="#contacto" data-cita>Agenda tu cita para una revisión a la medida de tus necesidades</a>
         </article>
         <article class="service">
           <span class="tag">Patrimonio</span>
@@ -666,7 +666,7 @@
         <div class="step" data-step="1">
           <p class="q" id="q1">¿En qué te puedo ayudar?</p>
           <div class="chips" role="group" aria-labelledby="q1" data-field="servicio">
-            <a class="chip" href="/consulta-express/#empresa" data-ir><b>Ordenar o dirigir las finanzas de mi empresa</b><small>Empieza con una cita: analizo tu caso antes · $70 USD, más impuestos si aplica</small></a>
+            <button type="button" class="chip" data-v="CFO fraccional o consultoría"><b>Ordenar o dirigir las finanzas de mi empresa</b><small>CFO fraccional o consultoría financiera</small></button>
             <a class="chip" href="/consulta-express/#persona" data-ir><b>Mis finanzas, una inversión o una decisión</b><small>Consulta Express, por escrito · $35 USD, más impuestos si aplica</small></a>
             <button type="button" class="chip" data-v="Asesoría de inversiones"><b>Invertir mi patrimonio</b><small>Asesoría de inversiones</small></button>
             <button type="button" class="chip" data-v="Capacitación"><b>Capacitar a mi equipo</b><small>Talleres de finanzas</small></button>
@@ -687,6 +687,7 @@
         <div class="step" data-step="4" hidden>
           <p class="q">¿Cómo te contacto?</p>
           <p class="resumen" id="w-resumen"></p>
+          <p class="resumen" id="w-leyenda" hidden>Te atiendo lo más pronto posible: te escribo a tu correo para confirmar lo que necesitas y, antes de agendar la cita formal, te indico el pago.</p>
           <div class="cgrid">
             <label for="c-nombre"><span>Tu nombre</span><input id="c-nombre" name="nombre" required autocomplete="name"></label>
             <label for="c-correo"><span>Correo</span><input id="c-correo" name="email" type="email" required autocomplete="email"></label>

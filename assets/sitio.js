@@ -473,7 +473,9 @@
     fondos: { q: '¿Cuánto planeas invertir?', o: ['Menos de 10 mil dólares', 'De 10 mil a 50 mil dólares', 'De 50 mil a 250 mil dólares', 'Más de 250 mil dólares'] }
   };
   var PLAZOS = { 1: 'Lo antes posible', 2: 'En uno a tres meses', 3: 'Solo estoy explorando' };
+  var EMPRESA_SERV = 'CFO fraccional o consultoría';
   function esFondos() { return document.getElementById('w-servicio').value === 'Asesoría de inversiones'; }
+  function esEmpresa() { return document.getElementById('w-servicio').value === EMPRESA_SERV; }
   function ir(n) {
     paso = n;
     cf.querySelectorAll('.step').forEach(function (s) { s.hidden = +s.dataset.step !== n; });
@@ -489,6 +491,7 @@
     }
     if (n === 4) {
       document.getElementById('c-empresa-l').hidden = esFondos();
+      document.getElementById('w-leyenda').hidden = !esEmpresa();   // empresas: se les atiende lo antes posible y el pago va antes de la cita formal
       var t2 = esFondos() ? TAM.fondos : TAM.empresa;
       document.getElementById('w-resumen').textContent = [document.getElementById('w-servicio').value, t2.o[+document.getElementById('w-tamano').value - 1], PLAZOS[document.getElementById('w-plazo').value]].join(' · ');
     }
@@ -504,7 +507,7 @@
     setTimeout(function () { ir(paso + 1); }, 160);
   });
   atras.addEventListener('click', function () { ir(Math.max(1, paso - 1)); });
-  // «Evalúa mi portafolio» (fondos) baja al formulario con el servicio ya elegido; la tarjeta del CFO lleva a la cita de empresa de la Consulta Express
+  // «Agenda tu cita» (CFO) y «Evalúa mi portafolio» (fondos): bajan al formulario con el servicio ya elegido
   function agendar(servicio, e) {
     if (e) e.preventDefault();
     var chip = cf.querySelector('.chip[data-v="' + servicio + '"]');
@@ -514,7 +517,7 @@
     document.getElementById('contacto').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   var cfoCard = document.querySelector('.service[data-cfo]');
-  if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a')) location.href = '/consulta-express/#empresa'; });
+  if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a:not([data-cita])')) agendar(EMPRESA_SERV, e); });
   document.querySelectorAll('[data-agendar]').forEach(function (a) {
     a.addEventListener('click', function (e) { agendar(a.dataset.agendar, e); });
   });
@@ -535,7 +538,7 @@
     if (!FORMS.contacto.url) { cs.className = 'cstatus'; cs.innerHTML = 'El formulario se activa en los próximos días. Mientras tanto, escríbeme por ' + LINKEDIN + '.'; return; }
     var btn = document.getElementById('c-enviar'); btn.disabled = true; cs.className = 'cstatus'; cs.textContent = 'Enviando…';
     (cf._gotcha.value ? Promise.resolve() : enviar(FORMS.contacto, datos)).then(function () {
-      cf.querySelector('.step[data-step="4"]').innerHTML = '<p class="q">Gracias, ' + esc(cf.nombre.value.split(' ')[0]) + '.</p><p style="color:var(--on-navy-soft)">Recibí tu solicitud. Reviso todas cada semana y, si encaja, te escribo para agendar una conversación.</p>';
+      cf.querySelector('.step[data-step="4"]').innerHTML = '<p class="q">Gracias, ' + esc(cf.nombre.value.split(' ')[0]) + '.</p><p style="color:var(--on-navy-soft)">' + (esEmpresa() ? 'Te atiendo lo más pronto posible: te escribo a ' + esc(cf.email.value.trim()) + ' para confirmar lo que necesitas y, antes de agendar la cita formal, te indico el pago.' : 'Recibí tu solicitud. Reviso todas cada semana y, si encaja, te escribo para agendar una conversación.') + '</p>';
       atras.hidden = true; cs.textContent = '';
     }).catch(function () {
       cs.className = 'cstatus'; cs.textContent = 'No se pudo enviar. Inténtalo de nuevo en unos minutos o escríbeme por LinkedIn.';
@@ -666,9 +669,15 @@
   var TEMAS = { 'Mi empresa': 'empresa', 'Mis finanzas personales': 'personal', 'Una inversión': 'inversion', 'Otra decisión de dinero': 'otra' };
   var cobros = [], aceptado = '';   // pagos aprobados y fecha en que aceptó las condiciones
   // Agenda de citas para empresas: «abierta» o «llena». Se cambia en data/agenda.json, sin tocar el código.
-  var AGENDA = { empresa: 'abierta' };
-  fetch('/data/agenda.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { if (j && j.empresa) AGENDA.empresa = j.empresa; }).catch(function () {});
-  function llena() { return resp.tema === E && AGENDA.empresa !== 'abierta'; }
+  // Cupos de empresa: data/agenda.json trae { "empresa": { "cupos": 3, "ocupados": 1 } }; sin cupos libres, la empresa ve la lista de espera
+  var AGENDA = { cupos: 1, ocupados: 0 };
+  fetch('/data/agenda.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) {
+    var e = j && j.empresa;
+    if (e && typeof e === 'object') AGENDA = { cupos: +e.cupos || 0, ocupados: +e.ocupados || 0 };
+    else if (e === 'llena') AGENDA = { cupos: 0, ocupados: 0 };
+  }).catch(function () {});
+  function cuposLibres() { return Math.max(0, AGENDA.cupos - AGENDA.ocupados); }
+  function llena() { return resp.tema === E && cuposLibres() <= 0; }
   // País y moneda del cliente: la moneda rige las cifras que usa la IA; el cobro sigue en dólares.
   // El país queda guardado para el IVA de los clientes del exterior y para adaptar los términos (IESS, SRI, décimos).
   var OTRO_PAIS = 'Otro país';
@@ -705,7 +714,7 @@
   LAMINAS[E] = { titulo: 'Tu cita <b>en 4 pasos</b>', pago: ': cubre el análisis previo de tu caso y la coordinación de la agenda.',
     pasos: ['Le cuentas tu caso a mi asistente con tus palabras; él te pregunta lo que haga falta.', 'Adjuntas lo que ayude: estados financieros, extractos bancarios o tus propios registros.'],
     fin: 'Analizo tu caso y te escribo para acordar el día y la hora de la cita.', docs: 'estados financieros o extractos bancarios',
-    nota: '<strong>Llego a la primera cita con tu caso ya analizado.</strong> El pago cubre ese análisis previo, la coordinación de la agenda y la infraestructura: es parte del proceso para darte la mejor atención desde el inicio. Dedica unos 30 minutos; si tienes ¤, tenlos a mano.' };
+    nota: '<strong>Llego a la primera cita con tu caso ya analizado.</strong> El pago cubre ese análisis previo, la coordinación de la agenda y la infraestructura: es parte del proceso para darte la mejor atención desde el inicio. Atiendo pocas empresas a la vez; ahora mismo §. Dedica unos 30 minutos; si tienes ¤, tenlos a mano.' };
   // Empresas con la agenda llena: lista de espera gratuita, con los datos de contacto y el caso en pocas líneas
   var ESPERA = { titulo: 'Lista de espera <b>en 4 pasos</b>', boton: 'Dejar mis datos',
     pasos: ['Me cuentas tu caso en pocas líneas y me dejas tu correo, sin costo.', 'Te escribo a tu correo cuando pueda atender tu caso.', 'Entonces pagas $70 (más impuestos si aplica) y le cuentas tu caso completo a mi asistente, con tus documentos.', 'Analizo tu caso y acordamos el día y la hora de la cita.'],
@@ -727,7 +736,7 @@
     var html = '<p class="lam-eyebrow">' + esc(resp.tema) + '</p><p class="lam-t">' + (l.titulo || 'Así funciona <b>en 4 pasos</b>') + '</p>' +
       logoAnimado() +
       '<ol class="lam-pasos">' + pasos.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
-      '<p class="lam-tiempo">' + (l.nota || TIEMPO).replace('¤', esc(l.docs || '')) + '</p>' +
+      '<p class="lam-tiempo">' + (l.nota || TIEMPO).replace('§', cuposLibres() === 1 ? 'queda 1 cupo' : 'quedan ' + cuposLibres() + ' cupos').replace('¤', esc(l.docs || '')) + '</p>' +
       '<div class="lam-botones"><button type="button" class="btn btn-navy" data-empezar>' + (l.boton || 'Empezar') + '</button><button type="button" class="back" data-otro>Elegir otro tema</button></div>';
     var d = burbuja(html, 'lamina' + (viva ? ' nuevo' : ' hecha'), viva, true);
     if (!viva) return d;
@@ -798,7 +807,7 @@
     // Si el asistente no está disponible, dos preguntas fijas recogen lo esencial
     { id: 'cifras', vende: true, cond: sinIA, opcional: true, para: 'Las cifras del caso.', q: 'Anota las cifras que tengan que ver con tu caso, aunque sean aproximadas: ingresos y gastos del mes, saldos y cuotas de deudas, ahorros, o los montos de lo que estás evaluando.' },
     { id: 'espera', vende: true, cond: sinIA, opcional: true, para: 'Lo que el cliente considera una respuesta útil.', get q() { return resp.tema === E ? '¿Qué tendría que resolver la cita para que te sea útil, y para cuándo necesitas la respuesta?' : '¿Qué tendría que decir el informe para que te sea útil, y para cuándo necesitas la respuesta?'; } },
-    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros o la tabla de pagos de una deuda' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión o tus pólizas') + '. Hasta 5 archivos de 5 MB cada uno, en PDF, foto, Excel o Word. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
+    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros o la tabla de pagos de una deuda' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión o tus pólizas') + '. Hasta 5 archivos de 5 MB cada uno, en PDF, Excel o Word. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
   ];
   // Etiquetas cortas para el resumen previo al envío
   var RES = {
@@ -908,7 +917,7 @@
     }).catch(function () { return file; });
   }
   function archivos(p, ancla) {
-    var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.webp,.xls,.xlsx,.csv,.doc,.docx,application/pdf,image/*" hidden></label>' +
+    var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple accept=".pdf,.xls,.xlsx,.xlsm,.csv,.doc,.docx,application/pdf" hidden></label>' +
       '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button><button type="button" class="btn btn-line d-no">No tengo nada que adjuntar</button></div>', 'ficha', true, true);
     var ul = c.querySelector('.a-list'), input = c.querySelector('input[type=file]');
     var pintarA = function () {
@@ -922,7 +931,7 @@
       errEl.textContent = elegidos > nuevos.length ? 'Puedes adjuntar hasta ' + MAX_ARCH + ' archivos.' : '';
       Promise.all(nuevos.map(reducir)).then(function (fs) {
         fs.forEach(function (f) {
-          if (f.size > MAX_MB * 1e6) errEl.textContent = '«' + f.name + '» pesa más de ' + MAX_MB + ' MB. Si es una foto, prueba con una captura de pantalla; si es un PDF, envía solo las páginas necesarias.';
+          if (f.size > MAX_MB * 1e6) errEl.textContent = '«' + f.name + '» pesa más de ' + MAX_MB + ' MB. Si es un PDF, envía solo las páginas necesarias.';
           else adjuntos.push(f);
         });
         pintarA();
