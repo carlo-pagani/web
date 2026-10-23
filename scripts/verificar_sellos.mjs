@@ -37,8 +37,9 @@ try {
 
 function detalle(d) {
   if (d === "masterclass") return "Masterclass";
+  // Sellos de la versión anterior: «tema.parte.parte» o «extra.tema.parte»; desde la versión del caso abierto, solo el tema
   const p = d.split("."), extra = p[0] === "extra" ? p.shift() : "", tema = p.shift();
-  return `Consulta (${tema})${extra ? ", partes sumadas al final" : ""}: ${p.length ? p.join(", ") : "solo lo esencial"}`;
+  return `Consulta (${tema})${extra ? ", partes sumadas al final" : ""}${p.length ? ": " + p.join(", ") : ""}`;
 }
 
 // Junta cada pago con los envíos donde aparece (una vez por envío, aunque el texto lo repita)
