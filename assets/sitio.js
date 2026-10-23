@@ -203,7 +203,7 @@
       var f = n.fecha ? fmtFecha.format(new Date(n.fecha)) : '';
       return '<li><span class="meta">' + (n.region ? '<b class="region">' + esc(n.region) + '</b>' : '') + esc([f, n.fuente].filter(Boolean).join(' · ')) + '</span><a href="' + esc(n.url) + '" target="_blank" rel="noopener">' + esc(n.titulo) + '</a></li>';
     }).join('');
-    if (data.actualizado) document.getElementById('news-updated').textContent = 'Actualizado el ' + fmtFechaLarga.format(new Date(data.actualizado)) + '. Se renueva automáticamente cada seis horas con titulares de medios; las noticias pertenecen a sus fuentes.';
+    if (data.actualizado) document.getElementById('news-updated').textContent = 'Actualizado el ' + fmtFechaLarga.format(new Date(data.actualizado)) + '. Las noticias pertenecen a sus fuentes.';
     carrete(items);
   }).catch(function () {});
 
@@ -496,7 +496,7 @@
     if (foco && document.activeElement && cf.contains(document.activeElement)) foco.focus();
   }
   cf.addEventListener('click', function (e) {
-    var chip = e.target.closest('.chip'); if (!chip) return;
+    var chip = e.target.closest('.chip'); if (!chip || chip.hasAttribute('data-ir')) return;   // los enlaces del paso 1 llevan a la Consulta Express
     var group = chip.parentNode, field = document.getElementById('w-' + group.dataset.field);
     if (field.id === 'w-servicio' && field.value !== chip.dataset.v) document.getElementById('w-tamano').value = '';
     field.value = chip.dataset.v;
@@ -504,7 +504,7 @@
     setTimeout(function () { ir(paso + 1); }, 160);
   });
   atras.addEventListener('click', function () { ir(Math.max(1, paso - 1)); });
-  // «Agenda tu cita» (CFO) y «Evalúa mi portafolio» (fondos): bajan al formulario con el servicio ya elegido
+  // «Evalúa mi portafolio» (fondos) baja al formulario con el servicio ya elegido; la tarjeta del CFO lleva a la cita de empresa de la Consulta Express
   function agendar(servicio, e) {
     if (e) e.preventDefault();
     var chip = cf.querySelector('.chip[data-v="' + servicio + '"]');
@@ -514,19 +514,7 @@
     document.getElementById('contacto').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   var cfoCard = document.querySelector('.service[data-cfo]');
-  if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a:not([data-cita])')) agendar('CFO fraccional', e); });
-  // Desde la Consulta Express de empresas: «Prefiero agendar una cita»
-  function citaEmpresa() {
-    if (location.hash !== '#cita-empresa') return;
-    history.replaceState(null, '', location.pathname + '#contacto');
-    var bajar = function () {
-      agendar('Consultoría financiera');
-      // Al llegar desde otra página, lo de arriba aún se acomoda mientras baja: se corrige al final
-      setTimeout(function () { document.getElementById('contacto').scrollIntoView({ block: 'start' }); }, 1200);
-    };
-    if (document.readyState === 'complete') bajar(); else window.addEventListener('load', bajar);
-  }
-  window.addEventListener('hashchange', citaEmpresa); citaEmpresa();
+  if (cfoCard) cfoCard.addEventListener('click', function (e) { if (!e.target.closest('a')) location.href = '/consulta-express/#empresa'; });
   document.querySelectorAll('[data-agendar]').forEach(function (a) {
     a.addEventListener('click', function (e) { agendar(a.dataset.agendar, e); });
   });
@@ -1355,6 +1343,8 @@
     dlg.showModal(); document.documentElement.style.overflow = 'hidden';
     if (!log.children.length) {
       var sigue = retomar();
+      // Desde la portada, «Agenda tu cita» llega con el tema de empresa ya elegido
+      if (!sigue && location.hash === '#empresa') { resp.tema = E; camino.push('tema'); }
       pintar();
       if (porConfirmar) return confirmarAlVolver();
       if (sigue) burbuja('Retomemos donde quedaste. Tu pago ya está registrado.', 'yo', true);
@@ -1381,7 +1371,7 @@
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
   document.getElementById('ae-x').addEventListener('click', function () { dlg.close(); });
   document.querySelectorAll('[data-ae]').forEach(function (b) { b.addEventListener('click', abrir); });
-  if (location.hash === '#empezar' || location.hash === '#analisis-expres') abrir();
+  if (location.hash === '#empezar' || location.hash === '#analisis-expres' || location.hash === '#empresa') abrir();
   // Si quedó un caso pagado a medias en este navegador, se abre solo para retomarlo
   function volvio() { var p = pasarela(); return !p || !p.volvio || p.volvio(); }
   servicios.then(function () { var g = !dlg.open && !PRUEBA && leerCurso(); if (g && (g.resp.pago || volvio())) abrir(); });

@@ -330,6 +330,7 @@ details.data td:first-child, details.data th:first-child { text-align: left; fon
 .wiz .q, .mform .q { font-family: var(--display); font-size: var(--t-l); color: var(--on-navy); margin: 0 0 1rem; max-width: none; }
 .chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
 .chip { text-align: left; font: inherit; cursor: pointer; background: var(--navy); color: var(--on-navy); border: 1px solid rgba(238,242,247,.2); border-radius: 4px; padding: .85rem .95rem; display: grid; gap: .2rem; align-content: start; transition: border-color .15s, background .15s; }
+a.chip, a.chip:hover { text-decoration: none; }
 .chip b { font-weight: 600; font-size: var(--t-s); }
 .chip small { color: var(--on-navy-soft); font-size: var(--t-xs); }
 @media (hover: hover) { .chip:hover { border-color: var(--brass); } }
