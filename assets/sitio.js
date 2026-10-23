@@ -828,7 +828,7 @@
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
     { id: 'intro', lamina: true },
-    { id: 'pais', q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país. Si vives fuera del Ecuador, lo pagas con PayPal.', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
+    { id: 'pais', q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país. Si vives fuera del Ecuador, lo pagas con PayPal y la consulta es por videoconferencia (aplican condiciones).', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
     { id: 'pais2', cond: function () { return resp.pais === OTRO_PAIS; }, q: '¿En qué país vives y en qué moneda manejas tus finanzas?', ph: 'Por ejemplo: Argentina, pesos argentinos' },
     { id: 'cita', si: 'Mi empresa', get q() { return 'Para empresas, la Consulta Express está pensada para casos puntuales: una duda, una decisión o un problema concreto. Si lo que buscas es un análisis detallado de tu empresa, te recomiendo agendar una cita para el servicio presencial y personalizado, que puede tomar hasta ocho semanas, según el tamaño de la empresa. ¿Cómo prefieres seguir?'; },
       op: [SEGUIR, CITA] },
@@ -1856,7 +1856,7 @@
       c.partes.map(function (x) {
         return '<li><label><input type="checkbox" data-mod="' + x.k + '"' + (elegida(x.k) ? ' checked' : '') + '><span>' + esc(x.l) + '</span><b>+ $' + PARTE + '</b></label></li>';
       }).join('');
-    document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios (pagas con PayPal desde el exterior)' : ' + IVA (15 %)');
+    document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios (pagas con PayPal desde el exterior; la consulta es por videoconferencia, aplican condiciones)' : ' + IVA (15 %)');
     // Por qué cuesta lo que cuesta: la suma a la vista, junto al botón de pagar
     document.getElementById('ae-porque').innerHTML = el.length ?
       'Base $' + base() + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + ivaExacto() + '.' :
@@ -1949,7 +1949,7 @@
     return 'Alcance del análisis\n✓ ' + c.base + ' ($' + base() + ')\n' + c.partes.map(function (x) {
       return elegida(x.k) ? '✓ ' + x.l + ' ($' + PARTE + (compradas.indexOf(x.k) > -1 ? ', sumada al final' : '') + ')' : '✗ No eligió: ' + x.l;
     }).join('\n') + '\nPagado: ' + dolares(pagado()) + conIVAtxt() +
-      (exterior() ? '\nDeclaró que vive fuera del Ecuador (' + mon().pais + ') y que usará el informe allí: exportación de servicios, factura con IVA 0 %.' : '') +
+      (exterior() ? '\nDeclaró que vive fuera del Ecuador (' + mon().pais + ') y que usará el informe allí: exportación de servicios, factura con IVA 0 %. Consulta por videoconferencia.' : '') +
       (aceptado ? '\n\nAceptó las condiciones (' + CONDICIONES + ') y dio su consentimiento expreso el ' + aceptado + ', hora de Ecuador, antes de pagar.' : '');
   }
   function paquete() {
