@@ -717,11 +717,11 @@
   LAMINAS[E] = { titulo: 'Tu cita <b>en 4 pasos</b>', pago: ': cubre el análisis previo de tu caso y la coordinación de la agenda.',
     pasos: ['Le cuentas tu caso a mi asistente con tus palabras; él te pregunta lo que haga falta.', 'Adjuntas lo que ayude: estados financieros, extractos bancarios o tus propios registros.'],
     fin: 'Analizo tu caso y te escribo para acordar el día y la hora de la cita.', docs: 'estados financieros o extractos bancarios',
-    nota: '<strong>Llego a la primera cita con tu caso ya analizado.</strong> Así te doy la mejor atención desde el inicio, con tu empresa y tus cifras ya conocidas. El pago va antes porque cubre ese análisis previo, la coordinación de la agenda y la infraestructura que lo sostiene; es parte del proceso para mantener el estándar de trabajo que quiero darte. Dedica unos 30 minutos a contarlo con tus palabras; si tienes ¤, tenlos a mano.' };
+    nota: '<strong>Llego a la primera cita con tu caso ya analizado.</strong> El pago cubre ese análisis previo, la coordinación de la agenda y la infraestructura: es parte del proceso para darte la mejor atención desde el inicio. Dedica unos 30 minutos; si tienes ¤, tenlos a mano.' };
   // Empresas con la agenda llena: lista de espera gratuita, con los datos de contacto y el caso en pocas líneas
   var ESPERA = { titulo: 'Lista de espera <b>en 4 pasos</b>', boton: 'Dejar mis datos',
     pasos: ['Me cuentas tu caso en pocas líneas y me dejas tu correo, sin costo.', 'Te escribo a tu correo cuando pueda atender tu caso.', 'Entonces pagas $70 + IVA y le cuentas tu caso completo a mi asistente, con tus documentos.', 'Analizo tu caso y acordamos el día y la hora de la cita.'],
-    nota: '<strong>Para mantener la calidad atiendo pocas empresas a la vez, y ahora mismo la agenda está llena.</strong> Déjame tus datos y tu caso en pocas líneas; te aviso a tu correo cuando llegue tu turno para seguir con el proceso.' };
+    nota: '<strong>Para mantener la calidad atiendo pocas empresas a la vez, y ahora mismo la agenda está llena.</strong> Te aviso a tu correo cuando llegue tu turno.' };
   // El símbolo del logo (tres barras y la flecha), dibujado para animarse: las barras suben y la flecha se traza
   var lamN = 0;
   function logoAnimado() {
@@ -1136,8 +1136,7 @@
   function pintarPrecio() {
     var pr = precio();
     document.getElementById('ae-sub').textContent = '$' + pr.neto + ' + IVA (15 %)';
-    document.getElementById('ae-porque').textContent = resp.tema === E ? 'Consulta Express para tu empresa: analizo tu caso y te escribo para acordar la cita; el pago cubre ese análisis previo y la coordinación de la agenda.' :
-      'Consulta Express sobre ' + resp.tema.toLowerCase() + ': diagnóstico de tu caso y recomendaciones concretas, por escrito.';
+    document.getElementById('ae-porque').textContent = resp.tema === E ? 'Cubre el análisis previo de tu caso y la coordinación de la cita.' : 'Diagnóstico de tu caso y recomendaciones concretas, por escrito.';
     document.getElementById('ae-total').textContent = dolares(pr.total) + ' USD';
   }
   // Resumen en dos momentos: antes del pago (lo elegido, condiciones y consentimiento) y al final (todo lo que contó, para enviarlo)
