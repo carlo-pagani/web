@@ -196,7 +196,7 @@
 }
 </script>
 <link rel="stylesheet" href="/assets/fuentes.css?v=1">
-<link rel="stylesheet" href="/assets/sitio.css?v=27">
+<link rel="stylesheet" href="/assets/sitio.css?v=28">
 <link rel="stylesheet" href="/assets/organizo.css?v=2">
 </head>
 <body>
@@ -377,14 +377,14 @@
           <p class="eyebrow">Nuevo · Consulta Express</p>
           <h2>¿Tienes una duda concreta de dinero?</h2>
         </div>
-        <p>La Consulta Express es mi análisis por escrito de un caso puntual: tu empresa, tus finanzas personales, una inversión o una decisión que no te deja dormir. Sin reuniones ni agendas.</p>
+        <p>La Consulta Express es mi análisis por escrito de un caso puntual: tus finanzas personales, una inversión o una decisión que no te deja dormir. Sin reuniones ni agendas. Si es sobre tu empresa, prepara nuestra primera cita.</p>
       </div>
       <div class="ae-band">
         <div>
           <h3>Tu duda de dinero, resuelta por escrito en 3 a 5 días hábiles.</h3>
           <ul class="ae-pasos">
-            <li><b>Pagas</b> solo lo que quieres analizar: $35 de base ($100 si es sobre tu empresa) y $5 por cada parte que sumes, más impuestos si aplica.</li>
-            <li><b>Respondes</b> un cuestionario guiado de unos treinta minutos, desde el celular.</li>
+            <li><b>Pagas</b> un solo precio: $35, o $70 si es sobre tu empresa, más impuestos si aplica.</li>
+            <li><b>Le cuentas</b> tu caso a mi asistente con tus palabras, unos treinta minutos desde el celular, y adjuntas lo que ayude.</li>
             <li><b>Recibes</b> mi diagnóstico y recomendaciones concretas en tu correo.</li>
           </ul>
         </div>
@@ -672,7 +672,7 @@
       <details><summary>¿Cuánto cuesta?</summary><p>El precio referencial del CFO fraccional es de $500 USD al mes por cuatro horas semanales de reuniones, visitas o acompañamiento en sitio. Si tu empresa necesita más horas o más frentes, el costo se ajusta a esa dedicación y te lo propongo por escrito antes de empezar.</p></details>
       <details><summary>¿Para qué tamaño de empresa es?</summary><p>Para pymes que ya facturan de forma constante y en las que las decisiones financieras pesan, pero que todavía no justifican un gerente de finanzas a tiempo completo.</p></details>
       <details><summary>¿Reemplaza a mi contador?</summary><p>No. Trabajo con tu contador: él registra y cumple con lo tributario; yo uso esa información para proyectar, controlar y decidir.</p></details>
-      <details><summary>¿Qué es la Consulta Express?</summary><p>Una revisión breve de un caso concreto. Eliges qué quieres que analice y pagas desde $35 USD, o desde $100 USD si es sobre tu empresa, y $5 por cada parte adicional, más impuestos si aplica; luego respondes un cuestionario de unos treinta minutos, como el de una primera reunión de asesoría, y en un plazo de entre 3 y 5 días hábiles recibes en tu correo un informe con un diagnóstico y recomendaciones concretas. Si después contratas otro servicio, partimos de ahí. <a href="/consulta-express/">Ver cómo funciona</a>.</p></details>
+      <details><summary>¿Qué es la Consulta Express?</summary><p>Una revisión breve de un caso concreto. Pagas $35 USD, o $70 USD si es sobre tu empresa, más impuestos si aplica; luego le cuentas tu caso a mi asistente con inteligencia artificial, en unos treinta minutos, como en una primera reunión de asesoría, y en un plazo de entre 3 y 5 días hábiles recibes en tu correo un informe con un diagnóstico y recomendaciones concretas. Si después contratas otro servicio, partimos de ahí. <a href="/consulta-express/">Ver cómo funciona</a>.</p></details>
       <details><summary>¿Cómo empezamos?</summary><p>Con una conversación para entender tu empresa y lo que necesitas. Si tiene sentido trabajar juntos, te propongo un alcance, un plazo y un costo por escrito.</p></details>
     </div>
   </section>
@@ -699,8 +699,8 @@
         <div class="step" data-step="1">
           <p class="q" id="q1">¿En qué te puedo ayudar?</p>
           <div class="chips" role="group" aria-labelledby="q1" data-field="servicio">
-            <button type="button" class="chip" data-v="CFO fraccional"><b>Ordenar las finanzas de mi empresa</b><small>CFO fraccional, referencial $500 USD al mes</small></button>
-            <button type="button" class="chip" data-v="Consultoría financiera"><b>Resolver una decisión puntual</b><small>Consultoría financiera</small></button>
+            <button type="button" class="chip" data-v="CFO fraccional o consultoría"><b>Ordenar o dirigir las finanzas de mi empresa</b><small>CFO fraccional o consultoría financiera</small></button>
+            <a class="chip" href="/consulta-express/#persona" data-ir><b>Mis finanzas, una inversión o una decisión</b><small>Consulta Express, por escrito · $35 USD, más impuestos si aplica</small></a>
             <button type="button" class="chip" data-v="Asesoría de inversiones"><b>Invertir mi patrimonio</b><small>Asesoría de inversiones</small></button>
             <button type="button" class="chip" data-v="Capacitación"><b>Capacitar a mi equipo</b><small>Talleres de finanzas</small></button>
           </div>
@@ -720,6 +720,7 @@
         <div class="step" data-step="4" hidden>
           <p class="q">¿Cómo te contacto?</p>
           <p class="resumen" id="w-resumen"></p>
+          <p class="resumen" id="w-leyenda" hidden>Te atiendo lo más pronto posible: te escribo a tu correo para confirmar lo que necesitas y, antes de agendar la cita formal, te indico el pago.</p>
           <div class="cgrid">
             <label for="c-nombre"><span>Tu nombre</span><input id="c-nombre" name="nombre" required autocomplete="name"></label>
             <label for="c-correo"><span>Correo</span><input id="c-correo" name="email" type="email" required autocomplete="email"></label>
@@ -758,7 +759,7 @@
     <a class="pest-op" href="/#masterclass"><b>Masterclass · 14 de noviembre</b><span>Finanzas personales, en línea · $15, IVA incluido</span><em>Masterclass · $15</em><i aria-hidden="true">→</i></a>
   </div>
 </aside>
-<script src="/assets/sitio.js?v=35"></script>
+<script src="/assets/sitio.js?v=36"></script>
 <script src="/assets/pestana.js?v=7"></script>
 <script src="/assets/organizo.js?v=1"></script>
 </body>
