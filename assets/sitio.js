@@ -772,7 +772,8 @@
   // Quien vive fuera del Ecuador recibe una exportación de servicios: IVA 0 % (LRTI art. 56). Paga solo con PayPal y el Worker
   // comprueba, antes de cobrar, que el pagador sea del exterior; si no, no cobra y le pide elegir Ecuador.
   function exterior() { return !!resp.pais && !/^\s*ecuador\s*$/i.test(mon().pais); }
-  function masIVA() { return exterior() ? ' (IVA 0 %, exportación de servicios)' : ' + IVA'; }
+  function masIVA() { return ' (más impuestos si aplica)'; }
+  function ivaExacto() { return exterior() ? ' (IVA 0 %, exportación de servicios)' : ' + IVA'; }
   function conIVAtxt() { return exterior() ? ' sin IVA (exportación de servicios)' : ' con IVA'; }
   // Montos de ejemplo en la escala de la moneda del cliente, redondeados a dos cifras (¤ marca un monto dentro de un texto)
   var SUPERVISOR = { 'Ecuador': 'controlada por alguna superintendencia (de Bancos, de Compañías o de Economía Popular y Solidaria)',
@@ -827,7 +828,7 @@
   var AE = [
     { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: ['Mi empresa', P, 'Una inversión', O] },
     { id: 'intro', lamina: true },
-    { id: 'pais', q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país. Si vives fuera del Ecuador, tu análisis va sin IVA y lo pagas con PayPal.', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
+    { id: 'pais', q: '¿Dónde vives y en qué moneda manejas tus finanzas? Así anoto tus cifras en tu moneda y te hablo con los términos de tu país. Si vives fuera del Ecuador, lo pagas con PayPal.', op: Object.keys(MONEDAS).concat([OTRO_PAIS]) },
     { id: 'pais2', cond: function () { return resp.pais === OTRO_PAIS; }, q: '¿En qué país vives y en qué moneda manejas tus finanzas?', ph: 'Por ejemplo: Argentina, pesos argentinos' },
     { id: 'cita', si: 'Mi empresa', get q() { return 'Para empresas, la Consulta Express está pensada para casos puntuales: una duda, una decisión o un problema concreto. Si lo que buscas es un análisis detallado de tu empresa, te recomiendo agendar una cita para el servicio presencial y personalizado, que puede tomar hasta ocho semanas, según el tamaño de la empresa. ¿Cómo prefieres seguir?'; },
       op: [SEGUIR, CITA] },
@@ -1858,7 +1859,7 @@
     document.getElementById('ae-sub').textContent = '$' + pr.neto + (exterior() ? ' · IVA 0 % por exportación de servicios (pagas con PayPal desde el exterior)' : ' + IVA (15 %)');
     // Por qué cuesta lo que cuesta: la suma a la vista, junto al botón de pagar
     document.getElementById('ae-porque').innerHTML = el.length ?
-      'Base $' + base() + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + masIVA() + '.' :
+      'Base $' + base() + el.map(function (x) { return ' + $' + PARTE + ' por ' + esc(minus(x.l)); }).join('') + ' = $' + pr.neto + ivaExacto() + '.' :
       'Precio base del análisis. <a href="#ae-mods" data-ir-mods>¿Quieres sumar alguna parte?</a>';
     document.getElementById('ae-total').textContent = dolares(pr.total) + ' USD';
   }
