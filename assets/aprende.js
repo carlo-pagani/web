@@ -235,7 +235,7 @@
       P = Math.min(P, K);
       var i = t / 12, n = pz * 12, q = P ? (i > 0 ? P * i / (1 - Math.pow(1 + i, -n)) : P / n) : 0, B = P, I = 0;
       for (var k = 0; k < Math.min(m, n); k++) { var it = B * i; I += it; B -= q - it; }
-      var gastos = V * com + V * (1 - com) * imp, base = V - K - I, imps = Math.max(0, base) * plu;
+      var gastos = V * com + V * (1 - com) * imp, base = V - K, imps = Math.max(0, base) * plu;
       var neta = V - K - gastos - I + ar * am - imps;
       return { propio: K - P, int: I, saldo: Math.max(0, B), imps: imps, neta: neta, roi: neta / Math.max(1, K - P), cuota: q };
     }
@@ -246,10 +246,10 @@
       F.out.innerHTML = tarjetas([
         { k: 'Con préstamo: pones ' + usd(A.propio), v: usd(A.neta), c: A.neta < 0 ? 'neg' : 'pos', s: pct(A.roi * 100) + ' sobre tu capital; ' + usd(A.int) + ' de intereses' },
         { k: 'Sin préstamo: pones ' + usd(K), v: usd(S.neta), c: S.neta < 0 ? 'neg' : 'pos', s: pct(S.roi * 100) + ' sobre tu capital' },
-        { k: 'Impuesto a la plusvalía', v: usd(A.imps) + ' / ' + usd(S.imps), s: 'con préstamo / sin préstamo; los intereses se deducen' }
+        { k: 'Impuesto a la plusvalía', v: usd(A.imps) + ' / ' + usd(S.imps), s: 'con préstamo / sin préstamo' }
       ]) + '<p class="veredicto ' + (A.neta < 0 ? 'bad' : 'ok') + '">' +
         (A.neta < 0 ? (x < 0 ? 'Con la venta ' + f0.format(-x * 100) + ' % por debajo de lo esperado, el préstamo' : 'Con estos supuestos, el préstamo') + ' convierte la operación en una pérdida de ' + usd(-A.neta) + ': el ' + pct(-A.roi * 100) + ' de tu capital. Sin préstamo, el resultado sería ' + usd(S.neta) + '.'
-          : 'En ' + (anios % 1 ? f1 : f0).format(anios) + ' años, el apalancamiento te deja ' + pct(A.roi * 100) + ' sobre tu capital frente a ' + pct(S.roi * 100) + ' sin préstamo, y te quedan ' + usd(K - A.propio) + ' libres para otras oportunidades. Al vender cancelas un saldo de ' + usd(A.saldo) + '.') + '</p>';
+          : 'En ' + (anios % 1 ? f1 : f0).format(anios) + ' años, el apalancamiento te deja ' + pct(A.roi * 100) + ' sobre tu capital frente a ' + pct(S.roi * 100) + ' sin préstamo, y al inicio te quedan ' + usd(K - A.propio) + ' libres para otras oportunidades. Al vender cancelas un saldo de ' + usd(A.saldo) + '.') + '</p>';
       var a = [], b = [];
       for (var y = -30; y <= 15; y += 1) { a.push([y, caso(K, 0, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); b.push([y, caso(K, fin, t, pz, V0 * (1 + y / 100), m, ar, am, com, imp, plu).roi * 100]); }
       var vals = a.concat(b).map(function (q) { return q[1]; }), lo = Math.floor(Math.min.apply(null, vals) / 25) * 25, hi = Math.ceil(Math.max.apply(null, vals) / 25) * 25, yt = [];
