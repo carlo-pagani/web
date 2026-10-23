@@ -778,7 +778,8 @@
   PH[O] = 'Por ejemplo: pago ¤450 de arriendo y me ofrecen un crédito para comprar con una cuota de ¤750…';
   function sinIA() { return !IA.url || !!IA.caida; }
   var AE = [
-    { id: 'tema', q: '¿Sobre qué quieres el análisis?', op: [E, P, I, O] },
+    // Quien llega desde la portada diciendo que no es de empresa ve «Mi empresa» al final
+    { id: 'tema', q: '¿Sobre qué quieres el análisis?', get op() { return location.hash === '#persona' ? [P, I, O, E] : [E, P, I, O]; } },
     { id: 'intro', lamina: true },
     // Empresa con la agenda llena: el caso en pocas líneas y los datos de contacto, sin pagar
     { id: 'ecaso', cond: llena, para: 'El caso de la empresa, en pocas líneas, para la lista de espera.', q: 'Cuéntame tu caso en pocas líneas: a qué se dedica tu empresa, qué está pasando y qué quieres resolver.', get ph() { return PH[E]; } },
@@ -1371,7 +1372,7 @@
   dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
   document.getElementById('ae-x').addEventListener('click', function () { dlg.close(); });
   document.querySelectorAll('[data-ae]').forEach(function (b) { b.addEventListener('click', abrir); });
-  if (location.hash === '#empezar' || location.hash === '#analisis-expres' || location.hash === '#empresa') abrir();
+  if (/^#(empezar|analisis-expres|empresa|persona)$/.test(location.hash)) abrir();
   // Si quedó un caso pagado a medias en este navegador, se abre solo para retomarlo
   function volvio() { var p = pasarela(); return !p || !p.volvio || p.volvio(); }
   servicios.then(function () { var g = !dlg.open && !PRUEBA && leerCurso(); if (g && (g.resp.pago || volvio())) abrir(); });
