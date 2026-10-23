@@ -852,7 +852,7 @@
     tema: 'Tema del análisis', pais: 'País y moneda', pais2: 'País y moneda', pago: 'Tu pago', get datos() { return resp.tema === E ? 'Análisis a nombre de' : 'Informe a nombre de'; }, factura: 'Factura', fdatos: 'Datos para la factura',
     caso: 'Tu caso', ecaso: 'Tu caso', cifras: 'Tus cifras', espera: 'Lo que haría útil el informe', adj: 'Archivos adjuntos'
   };
-  var CONDICIONES = 'versión 8 del 23 de octubre de 2026';
+  var CONDICIONES = 'versión 9 del 23 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas; si es sobre tu empresa, preparo con ellas nuestra primera cita.';
   var INTRO_PRECIO = 'Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Las preguntas te las hace mi asistente con inteligencia artificial, conversando contigo; el análisis y el informe los hago yo.';
