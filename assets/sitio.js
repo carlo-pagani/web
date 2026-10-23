@@ -809,14 +809,14 @@
     // Si el asistente no está disponible, dos preguntas fijas recogen lo esencial
     { id: 'cifras', vende: true, cond: sinIA, opcional: true, para: 'Las cifras del caso.', q: 'Anota las cifras que tengan que ver con tu caso, aunque sean aproximadas: ingresos y gastos del mes, saldos y cuotas de deudas, ahorros, o los montos de lo que estás evaluando.' },
     { id: 'espera', vende: true, cond: sinIA, opcional: true, para: 'Lo que el cliente considera una respuesta útil.', get q() { return resp.tema === E ? '¿Qué tendría que resolver la cita para que te sea útil, y para cuándo necesitas la respuesta?' : '¿Qué tendría que decir el informe para que te sea útil, y para cuándo necesitas la respuesta?'; } },
-    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros o la tabla de pagos de una deuda' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión o tus pólizas') + '. Hasta 5 archivos de 5 MB cada uno, en PDF, foto, Excel o Word. Tapa el número completo de las tarjetas: me bastan los últimos cuatro dígitos. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
+    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros o la tabla de pagos de una deuda' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión o tus pólizas') + '. Hasta 5 archivos de 5 MB cada uno, en PDF, foto, Excel o Word. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
   ];
   // Etiquetas cortas para el resumen previo al envío
   var RES = {
     tema: 'Tema del análisis', pais: 'País y moneda', pais2: 'País y moneda', pago: 'Tu pago', get datos() { return resp.tema === E ? 'Análisis a nombre de' : 'Informe a nombre de'; }, factura: 'Factura', fdatos: 'Datos para la factura',
     caso: 'Tu caso', ecaso: 'Tu caso', cifras: 'Tus cifras', espera: 'Lo que haría útil el informe', adj: 'Archivos adjuntos'
   };
-  var CONDICIONES = 'versión 4 del 23 de octubre de 2026';
+  var CONDICIONES = 'versión 5 del 23 de octubre de 2026';
   var INTRO = 'Hola, soy Carlo. Para darte un análisis serio necesito conocer bien tu situación, así que te haré las preguntas de una primera reunión de asesoría. Con tus respuestas preparo un informe con un diagnóstico y recomendaciones concretas; si es sobre tu empresa, preparo con ellas nuestra primera cita.';
   var INTRO_PRECIO = 'Te pido el pago al inicio porque vas a compartir información muy sensible, y la trato con un rigor que tiene un costo: viaja cifrada, solo yo la veo, no la comparto con nadie sin tu consentimiento expreso y la borro cuando deja de ser necesaria.';
   var INTRO_IA = 'Las preguntas te las hace mi asistente con inteligencia artificial, conversando contigo; el análisis y el informe los hago yo.';
