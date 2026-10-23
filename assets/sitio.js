@@ -3,16 +3,28 @@
   // la web ofrece la del sábado 19 de diciembre y avisa que los cupos del 14 se cerraron. sitio.js y pestana.js lo hacen una sola vez.
   (function () {
     if (window.MC_FECHA) return;
-    var nueva = Date.now() >= Date.parse('2026-11-13T00:00:00-05:00');
-    window.MC_FECHA = nueva ? { iso: '2026-12-19', texto: '19 de diciembre' } : { iso: '2026-11-14', texto: '14 de noviembre' };
+    var ahora = Date.now();
+    var nueva = ahora >= Date.parse('2026-11-13T00:00:00-05:00');
+    // La del 19 de diciembre cierra el jueves 17 al terminar el día; desde el 18 la web anuncia que la próxima fecha está por anunciarse.
+    var cerrada = ahora >= Date.parse('2026-12-18T00:00:00-05:00');
+    window.MC_FECHA = nueva ? { iso: '2026-12-19', texto: '19 de diciembre', cerrada: cerrada } : { iso: '2026-11-14', texto: '14 de noviembre' };
     if (!nueva) return;
-    var cambia = function (t) { return t.replace(/14 de noviembre/g, '19 de diciembre'); };
+    var cambia = cerrada
+      ? function (t) { return t.replace(/[Ss]ábado 14 de noviembre, en línea: ordena tus finanzas personales conmigo\./, 'Masterclass de finanzas personales: próxima fecha por anunciar.').replace(/Sábado 14 de noviembre/g, 'Próxima fecha por anunciar').replace(/(sábado )?14 de noviembre/g, 'próxima fecha por anunciar'); }
+      : function (t) { return t.replace(/14 de noviembre/g, '19 de diciembre'); };
     var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n;
     while ((n = w.nextNode())) if (n.nodeValue.indexOf('14 de noviembre') > -1) n.nodeValue = cambia(n.nodeValue);
     Array.prototype.forEach.call(document.querySelectorAll('[data-pest]'), function (e) { e.setAttribute('data-pest', cambia(e.getAttribute('data-pest'))); });
-    Array.prototype.forEach.call(document.querySelectorAll('[data-faltan="2026-11-14"]'), function (e) { e.setAttribute('data-faltan', '2026-12-19'); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-faltan="2026-11-14"]'), function (e) { if (cerrada) e.removeAttribute('data-faltan'), e.hidden = true; else e.setAttribute('data-faltan', '2026-12-19'); });
     Array.prototype.forEach.call(document.querySelectorAll('.mc-datos'), function (u) {
-      var li = document.createElement('li'); li.textContent = 'Cupos del 14 de noviembre cerrados'; u.insertBefore(li, u.firstChild);
+      Array.prototype.forEach.call(u.children, function (li) { if (cerrada && /^\s*Solo 30 cupos\s*$/.test(li.textContent)) li.hidden = true; });
+      var li = document.createElement('li'); li.textContent = cerrada ? 'Cupos del 19 de diciembre cerrados' : 'Cupos del 14 de noviembre cerrados'; u.insertBefore(li, u.firstChild);
+    });
+    if (cerrada) Array.prototype.forEach.call(document.querySelectorAll('#mform'), function (f) {
+      Array.prototype.forEach.call(f.children, function (c) { c.hidden = true; });
+      var q = document.createElement('p'); q.className = 'q'; q.textContent = 'Próxima fecha por anunciar';
+      var s = document.createElement('p'); s.textContent = 'Los cupos del 19 de diciembre se cerraron. La próxima fecha se anuncia aquí mismo.';
+      f.insertBefore(s, f.firstChild); f.insertBefore(q, s);
     });
   })();
   var NS = 'http://www.w3.org/2000/svg';
@@ -581,6 +593,7 @@
   function refMC() { return 'MC-' + Math.random().toString(36).slice(2, 8).toUpperCase(); }
   mf.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (window.MC_FECHA.cerrada) return;
     var invalid = Array.prototype.filter.call(mf.querySelectorAll('[required]'), function (f) {
       var bad = !f.checkValidity() || (f.type === 'email' && !correoOk(f.value)); f.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad;
     });
