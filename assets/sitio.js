@@ -845,7 +845,7 @@
     // Si el asistente no está disponible, dos preguntas fijas recogen lo esencial
     { id: 'cifras', vende: true, cond: sinIA, opcional: true, para: 'Las cifras del caso.', q: 'Anota las cifras que tengan que ver con tu caso, aunque sean aproximadas: ingresos y gastos del mes, saldos y cuotas de deudas, ahorros, o los montos de lo que estás evaluando.' },
     { id: 'espera', vende: true, cond: sinIA, opcional: true, para: 'Lo que el cliente considera una respuesta útil.', get q() { return resp.tema === E ? '¿Qué tendría que resolver la cita para que te sea útil, y para cuándo necesitas la respuesta?' : '¿Qué tendría que decir el informe para que te sea útil, y para cuándo necesitas la respuesta?'; } },
-    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros, la tabla de pagos de una deuda o capturas de pantalla' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión, tus pólizas o capturas de pantalla de tu banca') + '. Los que necesites, en PDF, Excel, Word, o fotos y capturas de pantalla (JPG, PNG o WebP), de hasta ' + MAX_MB + ' MB cada uno. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
+    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros, la tabla de pagos de una deuda o capturas de pantalla' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión, tus pólizas o capturas de pantalla de tu banca') + '. Los que necesites, de cualquier tipo, de hasta ' + MAX_MB + ' MB cada uno. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
   ];
   // Etiquetas cortas para el resumen previo al envío
   var RES = {
@@ -956,7 +956,7 @@
     }).catch(function () { return file; });
   }
   function archivos(p, ancla) {
-    var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple accept=".pdf,.xls,.xlsx,.xlsm,.csv,.doc,.docx,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" hidden></label>' +
+    var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple hidden></label>' +
       '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button><button type="button" class="btn btn-line d-no">No tengo nada que adjuntar</button></div>', 'ficha', true, true);
     var ul = c.querySelector('.a-list'), input = c.querySelector('input[type=file]');
     var pintarA = function () {
