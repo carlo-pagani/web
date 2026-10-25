@@ -958,7 +958,7 @@
   function archivos(p, ancla) {
     var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple hidden></label>' +
       '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button><button type="button" class="btn btn-line d-no">No tengo nada que adjuntar</button></div>', 'ficha', true, true);
-    var ul = c.querySelector('.a-list'), input = c.querySelector('input[type=file]');
+    var ul = c.querySelector('.a-list'), input = c.querySelector('input[type=file]'), enCola = {};
     var pintarA = function () {
       ul.innerHTML = adjuntos.map(function (a, i) { return '<li><span>' + esc(a.name) + '</span><small>' + (a.size / 1e6).toFixed(1) + ' MB</small><button type="button" class="d-x" data-i="' + i + '" aria-label="Quitar ' + esc(a.name) + '">×</button></li>'; }).join('');
     };
@@ -967,14 +967,16 @@
       // Sin archivos vacíos ni el mismo archivo dos veces (mismo nombre, tamaño y fecha que uno ya elegido)
       var clave = function (f) { return f.name + '|' + f.size + '|' + f.lastModified; };
       var nuevos = Array.prototype.slice.call(input.files).filter(function (f, i, todos) {
-        return f.size > 0 && !adjuntos.some(function (a) { return a.origen === clave(f); }) &&
+        return f.size > 0 && !adjuntos.some(function (a) { return a.origen === clave(f); }) && !enCola[clave(f)] &&
           todos.findIndex(function (g) { return clave(g) === clave(f); }) === i;
       }); input.value = '';
+      nuevos.forEach(function (f) { enCola[clave(f)] = true; });   // los que aún se están reduciendo también cuentan
       errEl.textContent = '';
       // Una foto a la vez: reducirlas todas juntas llena la memoria del teléfono y puede cerrar la pestaña
       var pesados = [];
       nuevos.reduce(function (cadena, f0) {
         return cadena.then(function () { return reducir(f0); }).then(function (f) {
+          delete enCola[clave(f0)];
           if (f.size > MAX_MB * 1e6) pesados.push('«' + f.name + '»'); else { f.origen = clave(f0); adjuntos.push(f); }
           pintarA();
         });
