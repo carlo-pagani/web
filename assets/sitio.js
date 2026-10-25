@@ -845,7 +845,7 @@
     // Si el asistente no está disponible, dos preguntas fijas recogen lo esencial
     { id: 'cifras', vende: true, cond: sinIA, opcional: true, para: 'Las cifras del caso.', q: 'Anota las cifras que tengan que ver con tu caso, aunque sean aproximadas: ingresos y gastos del mes, saldos y cuotas de deudas, ahorros, o los montos de lo que estás evaluando.' },
     { id: 'espera', vende: true, cond: sinIA, opcional: true, para: 'Lo que el cliente considera una respuesta útil.', get q() { return resp.tema === E ? '¿Qué tendría que resolver la cita para que te sea útil, y para cuándo necesitas la respuesta?' : '¿Qué tendría que decir el informe para que te sea útil, y para cuándo necesitas la respuesta?'; } },
-    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros, la tabla de pagos de una deuda o capturas de pantalla' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión, tus pólizas o capturas de pantalla de tu banca') + '. Hasta ' + MAX_ARCH + ' archivos de ' + MAX_MB + ' MB cada uno, en PDF, Excel, Word, o fotos y capturas de pantalla (JPG, PNG o WebP). Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
+    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros, la tabla de pagos de una deuda o capturas de pantalla' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión, tus pólizas o capturas de pantalla de tu banca') + '. Los que necesites, en PDF, Excel, Word, o fotos y capturas de pantalla (JPG, PNG o WebP), de hasta ' + MAX_MB + ' MB cada uno. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
   ];
   // Etiquetas cortas para el resumen previo al envío
   var RES = {
@@ -944,7 +944,7 @@
   }
   function autoAlto() { txt.style.height = 'auto'; txt.style.height = Math.min(txt.scrollHeight + 2, 144) + 'px'; }
   // Adjuntos: se guardan en memoria y se suben solo al enviar; las fotos y capturas grandes se reducen antes (JPEG de hasta 2000 px)
-  var adjuntos = [], MAX_ARCH = 10, MAX_MB = 5;
+  var adjuntos = [], MAX_MB = 5; // sin tope de cantidad (decisión de Carlo, 25 oct 2026); el peso por archivo cuida el espacio de Jotform
   function reducir(file) {
     if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 1.5e6 || !window.createImageBitmap) return Promise.resolve(file);
     return createImageBitmap(file).then(function (img) {
@@ -960,13 +960,11 @@
     var ul = c.querySelector('.a-list'), input = c.querySelector('input[type=file]');
     var pintarA = function () {
       ul.innerHTML = adjuntos.map(function (a, i) { return '<li><span>' + esc(a.name) + '</span><small>' + (a.size / 1e6).toFixed(1) + ' MB</small><button type="button" class="d-x" data-i="' + i + '" aria-label="Quitar ' + esc(a.name) + '">×</button></li>'; }).join('');
-      c.querySelector('.a-pick').hidden = adjuntos.length >= MAX_ARCH;
     };
     pintarA();
     input.addEventListener('change', function () {
-      var elegidos = input.files ? input.files.length : 0;
-      var nuevos = Array.prototype.slice.call(input.files, 0, MAX_ARCH - adjuntos.length); input.value = '';
-      errEl.textContent = elegidos > nuevos.length ? 'Puedes adjuntar hasta ' + MAX_ARCH + ' archivos.' : '';
+      var nuevos = Array.prototype.slice.call(input.files); input.value = '';
+      errEl.textContent = '';
       Promise.all(nuevos.map(reducir)).then(function (fs) {
         fs.forEach(function (f) {
           if (f.size > MAX_MB * 1e6) errEl.textContent = '«' + f.name + '» pesa más de ' + MAX_MB + ' MB. Si es un PDF, envía solo las páginas necesarias.';
