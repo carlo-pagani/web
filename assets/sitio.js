@@ -951,7 +951,8 @@
       var k = Math.min(1, 2000 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
       cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
       cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-      return new Promise(function (ok) { cv.toBlob(function (b) { ok(b && b.size < file.size ? new File([b], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }) : file); }, 'image/jpeg', 0.82); });
+      if (img.close) img.close();   // suelta la foto descomprimida antes de pasar a la siguiente
+      return new Promise(function (ok) { cv.toBlob(function (b) { cv.width = cv.height = 0; ok(b && b.size < file.size ? new File([b], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }) : file); }, 'image/jpeg', 0.82); });
     }).catch(function () { return file; });
   }
   function archivos(p, ancla) {
@@ -965,12 +966,15 @@
     input.addEventListener('change', function () {
       var nuevos = Array.prototype.slice.call(input.files); input.value = '';
       errEl.textContent = '';
-      Promise.all(nuevos.map(reducir)).then(function (fs) {
-        fs.forEach(function (f) {
-          if (f.size > MAX_MB * 1e6) errEl.textContent = '«' + f.name + '» pesa más de ' + MAX_MB + ' MB. Si es un PDF, envía solo las páginas necesarias.';
-          else adjuntos.push(f);
+      // Una foto a la vez: reducirlas todas juntas llena la memoria del teléfono y puede cerrar la pestaña
+      var pesados = [];
+      nuevos.reduce(function (cadena, f0) {
+        return cadena.then(function () { return reducir(f0); }).then(function (f) {
+          if (f.size > MAX_MB * 1e6) pesados.push('«' + f.name + '»'); else adjuntos.push(f);
+          pintarA();
         });
-        pintarA();
+      }, Promise.resolve()).then(function () {
+        if (pesados.length) errEl.textContent = pesados.join(', ') + (pesados.length > 1 ? ' pesan' : ' pesa') + ' más de ' + MAX_MB + ' MB. Si es un PDF, envía solo las páginas necesarias.';
       });
     });
     c.addEventListener('click', function (e) {
