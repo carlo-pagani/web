@@ -974,7 +974,7 @@
           pintarA();
         });
       }, Promise.resolve()).then(function () {
-        if (pesados.length) errEl.textContent = pesados.join(', ') + (pesados.length > 1 ? ' pesan' : ' pesa') + ' más de ' + MAX_MB + ' MB. Si es un PDF, envía solo las páginas necesarias.';
+        if (pesados.length) errEl.textContent = (pesados.length > 1 ? pesados.slice(0, -1).join(', ') + ' y ' + pesados[pesados.length - 1] + ' pesan' : pesados[0] + ' pesa') + ' más de ' + MAX_MB + ' MB. Si es un PDF, envía solo las páginas necesarias.';
       });
     });
     c.addEventListener('click', function (e) {
