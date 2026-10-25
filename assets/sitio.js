@@ -744,12 +744,12 @@
   // Lámina de bienvenida: el proceso en cuatro pasos, al estilo de las miniaturas, justo después de elegir el tema
   var TIEMPO = '<strong>Dedica unos treinta minutos de tu tiempo a conciencia y obtendrás grandes resultados.</strong> Es una conversación, no un formulario: cuéntalo con tus palabras y las cifras pueden ser aproximadas. Lo que no sepas, dilo y yo lo cubro con supuestos; si tienes ¤, tenlos a mano.';
   var LAMINAS = {};
-  LAMINAS[P] = { pasos: ['Le cuentas tu caso a mi asistente con tus palabras; él te pregunta lo que haga falta.', 'Adjuntas lo que ayude: estados de cuenta, tablas de pagos o pólizas.'], docs: 'tus estados de cuenta o la tabla de pagos de un préstamo' };
+  LAMINAS[P] = { pasos: ['Le cuentas tu caso a mi asistente con tus palabras; él te pregunta lo que haga falta.', 'Adjuntas lo que ayude: estados de cuenta, tablas de pagos, pólizas o capturas de pantalla.'], docs: 'tus estados de cuenta o la tabla de pagos de un préstamo' };
   LAMINAS[I] = { pasos: ['Le cuentas a mi asistente qué inversión es, quién la ofrece y cuánto pondrías; él te pregunta lo que haga falta.', 'Adjuntas el folleto o el contrato de la inversión, si lo tienes.'], docs: 'el folleto o el contrato de la inversión' };
-  LAMINAS[O] = { pasos: ['Le cuentas a mi asistente la decisión y sus opciones; él te pregunta lo que haga falta.', 'Adjuntas cotizaciones, tablas de pagos o estados de cuenta.'], docs: 'cotizaciones, tablas de pagos o estados de cuenta' };
+  LAMINAS[O] = { pasos: ['Le cuentas a mi asistente la decisión y sus opciones; él te pregunta lo que haga falta.', 'Adjuntas cotizaciones, tablas de pagos, estados de cuenta o capturas de pantalla.'], docs: 'cotizaciones, tablas de pagos o estados de cuenta' };
   // Empresas: la cita se confirma con el caso ya analizado; el pago cubre ese análisis previo y la coordinación de la agenda
   LAMINAS[E] = { titulo: 'Tu cita <b>en 4 pasos</b>', pago: ': cubre el análisis previo de tu caso y la coordinación de la agenda.',
-    pasos: ['Le cuentas tu caso a mi asistente con tus palabras; él te pregunta lo que haga falta.', 'Adjuntas lo que ayude: estados financieros, extractos bancarios o tus propios registros.'],
+    pasos: ['Le cuentas tu caso a mi asistente con tus palabras; él te pregunta lo que haga falta.', 'Adjuntas lo que ayude: estados financieros, extractos bancarios, capturas de pantalla o tus propios registros.'],
     fin: 'Analizo tu caso y te escribo para acordar el día y la hora de la cita.', docs: 'estados financieros o extractos bancarios',
     nota: '<strong>Llego a la primera cita con tu caso ya analizado.</strong> El pago cubre ese análisis previo, la coordinación de la agenda y la infraestructura: es parte del proceso para darte la mejor atención desde el inicio. Atiendo pocas empresas a la vez; ahora mismo §. Dedica unos 30 minutos; si tienes ¤, tenlos a mano.' };
   // Empresas con la agenda llena: lista de espera gratuita, con los datos de contacto y el caso en pocas líneas
@@ -845,7 +845,7 @@
     // Si el asistente no está disponible, dos preguntas fijas recogen lo esencial
     { id: 'cifras', vende: true, cond: sinIA, opcional: true, para: 'Las cifras del caso.', q: 'Anota las cifras que tengan que ver con tu caso, aunque sean aproximadas: ingresos y gastos del mes, saldos y cuotas de deudas, ahorros, o los montos de lo que estás evaluando.' },
     { id: 'espera', vende: true, cond: sinIA, opcional: true, para: 'Lo que el cliente considera una respuesta útil.', get q() { return resp.tema === E ? '¿Qué tendría que resolver la cita para que te sea útil, y para cuándo necesitas la respuesta?' : '¿Qué tendría que decir el informe para que te sea útil, y para cuándo necesitas la respuesta?'; } },
-    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros o la tabla de pagos de una deuda' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión o tus pólizas') + '. Hasta 5 archivos de 5 MB cada uno, en PDF, Excel o Word. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
+    { id: 'adj', vende: true, archivos: true, get q() { return 'Adjunta lo que me ayude a entender tu caso: ' + (resp.tema === E ? 'estados financieros, extractos bancarios, tus propios registros, la tabla de pagos de una deuda o capturas de pantalla' : 'estados de cuenta, la tabla de pagos de un préstamo, cotizaciones, el folleto de una inversión, tus pólizas o capturas de pantalla de tu banca') + '. Los que necesites, en PDF, Excel, Word, o fotos y capturas de pantalla (JPG, PNG o WebP), de hasta ' + MAX_MB + ' MB cada uno. Tapa el número completo de las tarjetas o de las cuentas: me bastan los últimos cuatro dígitos. Nunca incluyas claves ni contraseñas. Tus archivos se tratan con la misma confidencialidad que tus respuestas.'; } }
   ];
   // Etiquetas cortas para el resumen previo al envío
   var RES = {
@@ -943,8 +943,8 @@
     });
   }
   function autoAlto() { txt.style.height = 'auto'; txt.style.height = Math.min(txt.scrollHeight + 2, 144) + 'px'; }
-  // Adjuntos: se guardan en memoria y se suben solo al enviar; las fotos grandes se reducen antes
-  var adjuntos = [], MAX_ARCH = 5, MAX_MB = 5;
+  // Adjuntos: se guardan en memoria y se suben solo al enviar; las fotos y capturas grandes se reducen antes (JPEG de hasta 2000 px)
+  var adjuntos = [], MAX_MB = 5; // sin tope de cantidad (decisión de Carlo, 25 oct 2026); el peso por archivo cuida el espacio de Jotform
   function reducir(file) {
     if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 1.5e6 || !window.createImageBitmap) return Promise.resolve(file);
     return createImageBitmap(file).then(function (img) {
@@ -955,18 +955,16 @@
     }).catch(function () { return file; });
   }
   function archivos(p, ancla) {
-    var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple accept=".pdf,.xls,.xlsx,.xlsm,.csv,.doc,.docx,application/pdf" hidden></label>' +
+    var c = burbuja('<ul class="a-list"></ul><label class="btn btn-line a-pick">Elegir archivos<input type="file" multiple accept=".pdf,.xls,.xlsx,.xlsm,.csv,.doc,.docx,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" hidden></label>' +
       '<div class="f-acc"><button type="button" class="btn btn-brass f-ok">Continuar</button><button type="button" class="btn btn-line d-no">No tengo nada que adjuntar</button></div>', 'ficha', true, true);
     var ul = c.querySelector('.a-list'), input = c.querySelector('input[type=file]');
     var pintarA = function () {
       ul.innerHTML = adjuntos.map(function (a, i) { return '<li><span>' + esc(a.name) + '</span><small>' + (a.size / 1e6).toFixed(1) + ' MB</small><button type="button" class="d-x" data-i="' + i + '" aria-label="Quitar ' + esc(a.name) + '">×</button></li>'; }).join('');
-      c.querySelector('.a-pick').hidden = adjuntos.length >= MAX_ARCH;
     };
     pintarA();
     input.addEventListener('change', function () {
-      var elegidos = input.files ? input.files.length : 0;
-      var nuevos = Array.prototype.slice.call(input.files, 0, MAX_ARCH - adjuntos.length); input.value = '';
-      errEl.textContent = elegidos > nuevos.length ? 'Puedes adjuntar hasta ' + MAX_ARCH + ' archivos.' : '';
+      var nuevos = Array.prototype.slice.call(input.files); input.value = '';
+      errEl.textContent = '';
       Promise.all(nuevos.map(reducir)).then(function (fs) {
         fs.forEach(function (f) {
           if (f.size > MAX_MB * 1e6) errEl.textContent = '«' + f.name + '» pesa más de ' + MAX_MB + ' MB. Si es un PDF, envía solo las páginas necesarias.';
