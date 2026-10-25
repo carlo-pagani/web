@@ -964,13 +964,18 @@
     };
     pintarA();
     input.addEventListener('change', function () {
-      var nuevos = Array.prototype.slice.call(input.files); input.value = '';
+      // Sin archivos vacíos ni el mismo archivo dos veces (mismo nombre, tamaño y fecha que uno ya elegido)
+      var clave = function (f) { return f.name + '|' + f.size + '|' + f.lastModified; };
+      var nuevos = Array.prototype.slice.call(input.files).filter(function (f, i, todos) {
+        return f.size > 0 && !adjuntos.some(function (a) { return a.origen === clave(f); }) &&
+          todos.findIndex(function (g) { return clave(g) === clave(f); }) === i;
+      }); input.value = '';
       errEl.textContent = '';
       // Una foto a la vez: reducirlas todas juntas llena la memoria del teléfono y puede cerrar la pestaña
       var pesados = [];
       nuevos.reduce(function (cadena, f0) {
         return cadena.then(function () { return reducir(f0); }).then(function (f) {
-          if (f.size > MAX_MB * 1e6) pesados.push('«' + f.name + '»'); else adjuntos.push(f);
+          if (f.size > MAX_MB * 1e6) pesados.push('«' + f.name + '»'); else { f.origen = clave(f0); adjuntos.push(f); }
           pintarA();
         });
       }, Promise.resolve()).then(function () {
