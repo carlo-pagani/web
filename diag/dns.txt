@@ -1,0 +1,36 @@
+carlo-pagani.com A @8.8.8.8: 185.199.108.153 
+carlo-pagani.com A @1.1.1.1: 185.199.108.153 
+carlo-pagani.com AAAA @8.8.8.8: 
+carlo-pagani.com AAAA @1.1.1.1: 
+carlo-pagani.com CNAME @8.8.8.8: 
+carlo-pagani.com CNAME @1.1.1.1: 
+carlo-pagani.com NS @8.8.8.8: ns19.domaincontrol.com. ns20.domaincontrol.com. 
+carlo-pagani.com NS @1.1.1.1: ns20.domaincontrol.com. ns19.domaincontrol.com. 
+www.carlo-pagani.com A @8.8.8.8: carlo-pagani.github.io. 185.199.108.153 185.199.109.153 185.199.111.153 185.199.110.153 
+www.carlo-pagani.com A @1.1.1.1: carlo-pagani.github.io. 185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153 
+www.carlo-pagani.com AAAA @8.8.8.8: carlo-pagani.github.io. 2606:50c0:8003::153 2606:50c0:8000::153 2606:50c0:8001::153 2606:50c0:8002::153 
+www.carlo-pagani.com AAAA @1.1.1.1: carlo-pagani.github.io. 2606:50c0:8000::153 2606:50c0:8003::153 2606:50c0:8002::153 2606:50c0:8001::153 
+www.carlo-pagani.com CNAME @8.8.8.8: carlo-pagani.github.io. 
+www.carlo-pagani.com CNAME @1.1.1.1: carlo-pagani.github.io. 
+www.carlo-pagani.com NS @8.8.8.8: carlo-pagani.github.io. 
+www.carlo-pagani.com NS @1.1.1.1: carlo-pagani.github.io. 
+carlogalarza-pagani.com A @8.8.8.8: 15.197.225.128 3.33.251.168 
+carlogalarza-pagani.com A @1.1.1.1: 15.197.225.128 3.33.251.168 
+carlogalarza-pagani.com AAAA @8.8.8.8: 
+carlogalarza-pagani.com AAAA @1.1.1.1: 
+carlogalarza-pagani.com CNAME @8.8.8.8: 
+carlogalarza-pagani.com CNAME @1.1.1.1: 
+carlogalarza-pagani.com NS @8.8.8.8: ns47.domaincontrol.com. ns48.domaincontrol.com. 
+carlogalarza-pagani.com NS @1.1.1.1: ns47.domaincontrol.com. ns48.domaincontrol.com. 
+www.carlogalarza-pagani.com A @8.8.8.8: carlo-pagani.github.io. 185.199.109.153 185.199.110.153 185.199.111.153 185.199.108.153 
+www.carlogalarza-pagani.com A @1.1.1.1: carlo-pagani.github.io. 185.199.110.153 185.199.111.153 185.199.108.153 185.199.109.153 
+www.carlogalarza-pagani.com AAAA @8.8.8.8: carlo-pagani.github.io. 2606:50c0:8003::153 2606:50c0:8002::153 2606:50c0:8001::153 2606:50c0:8000::153 
+www.carlogalarza-pagani.com AAAA @1.1.1.1: carlo-pagani.github.io. 2606:50c0:8000::153 2606:50c0:8001::153 2606:50c0:8002::153 2606:50c0:8003::153 
+www.carlogalarza-pagani.com CNAME @8.8.8.8: carlo-pagani.github.io. 
+www.carlogalarza-pagani.com CNAME @1.1.1.1: carlo-pagani.github.io. 
+www.carlogalarza-pagani.com NS @8.8.8.8: carlo-pagani.github.io. 
+www.carlogalarza-pagani.com NS @1.1.1.1: carlo-pagani.github.io. 
+carlo-pagani.com A @ns20.domaincontrol.com.: 185.199.108.153 
+www CNAME/A @ns20.domaincontrol.com.: carlo-pagani.github.io. 
+carlo-pagani.com A @ns19.domaincontrol.com.: 185.199.108.153 
+www CNAME/A @ns19.domaincontrol.com.: carlo-pagani.github.io. 
