@@ -4,35 +4,35 @@ content-type: text/html; charset=utf-8
 last-modified: Mon, 26 Oct 2026 07:00:39 GMT
 access-control-allow-origin: *
 etag: "6adefa97-bd10"
-expires: Mon, 26 Oct 2026 13:03:49 GMT
+expires: Mon, 26 Oct 2026 13:02:51 GMT
 cache-control: max-age=600
 x-proxy-cache: MISS
-x-github-request-id: EE96:1493C5:1D2DDCC:25CDBEC:6ADF4D5C
+x-github-request-id: C53C:34A29E:1DF67B2:26949BD:6ADF4D23
 x-github-edge-region: iad
 accept-ranges: bytes
-date: Mon, 26 Oct 2026 12:54:08 GMT
+date: Mon, 26 Oct 2026 12:55:19 GMT
 via: 1.1 varnish
-age: 19
-x-served-by: cache-dfw-kdfw8210036-DFW
+age: 148
+x-served-by: cache-iad-kiad7000202-IAD
 x-cache: HIT
 x-cache-hits: 1
-x-timer: S1793019248.436548,VS0,VE2
+x-timer: S1793019320.933183,VS0,VE4
 vary: Accept-Encoding
 HTTP/2 301 
 server: GitHub.com
 content-type: text/html
 location: https://carlo-pagani.com/
-x-github-request-id: 6676:37D8AA:1F06DFF:27A5011:6ADF4D61
+x-github-request-id: 1E7E:24FE22:35F5EF7:3CC57DD:6ADF4D26
 x-github-edge-region: iad
 accept-ranges: bytes
-date: Mon, 26 Oct 2026 12:54:08 GMT
+date: Mon, 26 Oct 2026 12:55:19 GMT
 via: 1.1 varnish
-age: 14
-x-served-by: cache-dfw-kdfw8210049-DFW
+age: 146
+x-served-by: cache-iad-kcgs7200023-IAD
 x-cache: HIT
 x-cache-hits: 1
-x-timer: S1793019249.501985,VS0,VE2
+x-timer: S1793019320.969691,VS0,VE2
 vary: Accept-Encoding
-x-fastly-request-id: 3d8d4524e1b072561a63bea14f200f01ecb42ed9
+x-fastly-request-id: 4d0d23b1f8003502f940a36f547719fcd7131c60
 content-length: 162
 
