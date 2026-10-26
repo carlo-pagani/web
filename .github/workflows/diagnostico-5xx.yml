@@ -1,0 +1,48 @@
+name: Diagnóstico 5xx
+
+on:
+  push:
+    branches: [diagnostico-5xx]
+
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: DNS
+        run: |
+          sudo apt-get -qq install -y dnsutils >/dev/null 2>&1 || true
+          for h in carlo-pagani.com www.carlo-pagani.com carlogalarza-pagani.com www.carlogalarza-pagani.com; do
+            for t in A AAAA CNAME NS; do
+              for r in 8.8.8.8 1.1.1.1; do echo "$h $t @$r: $(dig +short $t $h @$r | tr '\n' ' ')"; done
+            done
+          done
+          for ns in $(dig +short NS carlo-pagani.com @8.8.8.8); do
+            echo "carlo-pagani.com A @$ns: $(dig +short A carlo-pagani.com @$ns | tr '\n' ' ')"
+            echo "www CNAME/A @$ns: $(dig +short www.carlo-pagani.com @$ns | tr '\n' ' ')"
+          done
+      - name: URLs
+        run: |
+          UA='Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+          {
+            grep -o '<loc>[^<]*' sitemap.xml | sed 's/<loc>//'
+            # Todas las rutas internas enlazadas desde las páginas
+            grep -rhoE 'href="/[^"#?]*' --include=*.html . | sed 's/href="//' | sort -u | sed 's#^#https://carlo-pagani.com#'
+            for p in "" app/ tarjeta/ pago/ consulta-express/ robots.txt sitemap.xml favicon.ico data/noticias.json data/videos.json data/agenda.json data/asistente.json data/btc.json assets/sitio.css worker/ noexiste/; do
+              echo "https://carlo-pagani.com/$p"; echo "http://carlo-pagani.com/$p"; echo "https://www.carlo-pagani.com/$p"; echo "http://www.carlo-pagani.com/$p"
+            done
+            echo https://carlogalarza-pagani.com/ ; echo http://carlogalarza-pagani.com/ ; echo https://www.carlogalarza-pagani.com/
+            echo https://asistente-analisis.carlo-pagani.workers.dev/ ; echo https://asistente-analisis.carlo-pagani.workers.dev/guia ; echo https://asistente-analisis.carlo-pagani.workers.dev/pago
+          } | sort -u > urls.txt
+          wc -l urls.txt
+          for ronda in 1 2 3; do
+            while read u; do
+              r=$(curl -s -o /dev/null -A "$UA" -m 20 -w '%{http_code} %{redirect_url} %{remote_ip} %{time_total}' "$u")
+              echo "$ronda $r $u"
+            done < urls.txt
+          done | tee resultado.txt
+          echo "=== Distintos de 200/301/302/304/404 ==="
+          awk '$2!~/^(200|301|302|304|404)$/' resultado.txt || true
+          echo "=== Cabeceras portada ==="
+          curl -sSI -A "$UA" https://carlo-pagani.com/ | head -20
+          curl -sSI -A "$UA" https://www.carlo-pagani.com/ | head -20
