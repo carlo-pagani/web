@@ -1,0 +1,7 @@
+GET /pago -> 200 campos: ['storeId', 'token']
+GET /pago/clave -> 200 campos: ['creada', 'crv', 'kid', 'kty', 'x', 'y']
+POST /pago/orden {} -> 400 {"error":"Pedido no válido"}
+POST /pago/confirmar {} -> 400 {"error":"Faltan datos"}
+web /pago/ -> 200
+web /consulta-express/ -> 200
+web /data/asistente.json -> 200
