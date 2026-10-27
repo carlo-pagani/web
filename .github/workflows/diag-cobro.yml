@@ -1,0 +1,34 @@
+name: Diagnóstico del cobro
+
+on:
+  push:
+    branches: [diag-cobro]
+
+permissions:
+  contents: write
+
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cobro
+        run: |
+          W=https://asistente-analisis.carlo-pagani.workers.dev
+          O='Origin: https://carlo-pagani.com'
+          {
+          # Solo códigos y nombres de campos: nunca valores
+          for r in /pago /pago/clave; do
+            c=$(curl -s -m 20 -H "$O" -o b.json -w '%{http_code}' "$W$r"); echo "GET $r -> $c campos: $(python3 -c 'import json;d=json.load(open("b.json"));print(sorted(d) if isinstance(d,dict) else type(d).__name__)' 2>&1)"
+          done
+          c=$(curl -s -m 20 -H "$O" -H 'Content-Type: application/json' -d '{}' -o b.json -w '%{http_code}' "$W/pago/orden"); echo "POST /pago/orden {} -> $c $(head -c 200 b.json)"
+          c=$(curl -s -m 20 -H "$O" -H 'Content-Type: application/json' -d '{}' -o b.json -w '%{http_code}' "$W/pago/confirmar"); echo "POST /pago/confirmar {} -> $c $(head -c 200 b.json)"
+          for p in pago/ consulta-express/ data/asistente.json; do echo "web /$p -> $(curl -s -o /dev/null -m 20 -w '%{http_code}' https://carlo-pagani.com/$p)"; done
+          } > cobro.txt 2>&1; rm -f b.json
+      - name: Guardar resultados
+        if: always()
+        run: |
+          mkdir -p diag && mv -f cobro.txt diag/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diag && git commit -qm "Resultados del diagnóstico [skip ci]" && git push origin HEAD:diag-cobro
