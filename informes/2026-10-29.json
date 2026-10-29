@@ -70,13 +70,13 @@
   {
    "url": "https://carlo-pagani.com/aprende/bitcoin/",
    "dispositivo": "mobile",
-   "rendimiento": 97,
+   "rendimiento": 96,
    "accesibilidad": 100,
    "buenas_practicas": 96,
    "seo": 100,
-   "lcp_s": 2.4,
+   "lcp_s": 2.56,
    "cls": 0.023,
-   "tbt_ms": 2
+   "tbt_ms": 6
   },
   {
    "url": "https://carlo-pagani.com/aprende/",
@@ -85,7 +85,7 @@
    "accesibilidad": 100,
    "buenas_practicas": 96,
    "seo": 100,
-   "lcp_s": 0.65,
+   "lcp_s": 0.63,
    "cls": 0.001,
    "tbt_ms": 0
   },
@@ -96,20 +96,20 @@
    "accesibilidad": 98,
    "buenas_practicas": 96,
    "seo": 100,
-   "lcp_s": 2.35,
-   "cls": 0,
-   "tbt_ms": 0
+   "lcp_s": 2.48,
+   "cls": 0.001,
+   "tbt_ms": 10
   },
   {
    "url": "https://carlo-pagani.com/aprende/",
    "dispositivo": "mobile",
-   "rendimiento": 90,
+   "rendimiento": 97,
    "accesibilidad": 100,
    "buenas_practicas": 96,
    "seo": 100,
-   "lcp_s": 2.6,
-   "cls": 0,
-   "tbt_ms": 0
+   "lcp_s": 2.04,
+   "cls": 0.001,
+   "tbt_ms": 14
   },
   {
    "url": "https://carlo-pagani.com/consulta-express/",
@@ -118,8 +118,8 @@
    "accesibilidad": 100,
    "buenas_practicas": 96,
    "seo": 100,
-   "lcp_s": 0.67,
-   "cls": 0.023,
+   "lcp_s": 0.68,
+   "cls": 0.035,
    "tbt_ms": 0
   },
   {
@@ -129,20 +129,31 @@
    "accesibilidad": 100,
    "buenas_practicas": 96,
    "seo": 100,
-   "lcp_s": 2.93,
-   "cls": 0,
-   "tbt_ms": 5
+   "lcp_s": 2.96,
+   "cls": 0.001,
+   "tbt_ms": 19
   },
   {
    "url": "https://carlo-pagani.com/",
    "dispositivo": "desktop",
-   "rendimiento": 71,
+   "rendimiento": 100,
    "accesibilidad": 100,
    "buenas_practicas": 96,
    "seo": 100,
-   "lcp_s": 1.48,
+   "lcp_s": 0.65,
    "cls": 0.02,
-   "tbt_ms": 472
+   "tbt_ms": 0
+  },
+  {
+   "url": "https://carlo-pagani.com/",
+   "dispositivo": "mobile",
+   "rendimiento": 82,
+   "accesibilidad": 100,
+   "buenas_practicas": 96,
+   "seo": 100,
+   "lcp_s": 3.27,
+   "cls": 0,
+   "tbt_ms": 220
   }
  ],
  "google": {
