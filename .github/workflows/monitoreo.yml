@@ -32,21 +32,22 @@ jobs:
         with:
           node-version: "20"
       - name: Lighthouse
+        # Bloquea el contador de visitas de Cloudflare para que estas mediciones no se cuenten como visitas.
         if: steps.toca.outputs.si
         run: |
           mkdir -p lighthouse
           for ruta in "" consulta-express/ aprende/; do
             nombre=$(echo "${ruta:-portada}" | tr -d /)
             npx -y lighthouse@12 "https://carlo-pagani.com/$ruta" --quiet --output=json \
-              --output-path="lighthouse/$nombre-telefono.json" --chrome-flags="--headless=new --no-sandbox" || true
+              --output-path="lighthouse/$nombre-telefono.json" --blocked-url-patterns="*cloudflareinsights.com*" --chrome-flags="--headless=new --no-sandbox" || true
             npx -y lighthouse@12 "https://carlo-pagani.com/$ruta" --quiet --output=json --preset=desktop \
-              --output-path="lighthouse/$nombre-computadora.json" --chrome-flags="--headless=new --no-sandbox" || true
+              --output-path="lighthouse/$nombre-computadora.json" --blocked-url-patterns="*cloudflareinsights.com*" --chrome-flags="--headless=new --no-sandbox" || true
           done
           # Muestra de las páginas temáticas de /aprende/, solo en teléfono
           for ruta in aprende/bitcoin/ aprende/jubilacion/; do
             nombre=$(echo "$ruta" | tr / -)
             npx -y lighthouse@12 "https://carlo-pagani.com/$ruta" --quiet --output=json \
-              --output-path="lighthouse/${nombre}telefono.json" --chrome-flags="--headless=new --no-sandbox" || true
+              --output-path="lighthouse/${nombre}telefono.json" --blocked-url-patterns="*cloudflareinsights.com*" --chrome-flags="--headless=new --no-sandbox" || true
           done
       - name: Informe
         if: steps.toca.outputs.si
