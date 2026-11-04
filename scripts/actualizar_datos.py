@@ -41,7 +41,7 @@ TEMA = {
          "foco": r"elecci|Congreso|C[aá]mara|Senado|dem[oó]crata|legislat|medio t[eé]rmino|intermedias"},
         {"region": "Ecuador", "n": 1, "gl": "EC",
          "q": 'Ecuador ("Estados Unidos" OR EE.UU. OR Trump) (elecciones OR Congreso OR demócratas OR aranceles OR "acuerdo comercial" OR exportaciones) when:5d',
-         "foco": r"Ecuador|ecuatorian|Noboa"},
+         "foco": r"(Ecuador|ecuatorian|Noboa).*(elecci|Congreso|dem[oó]crata|Trump|Estados Unidos|EE\. ?UU|EEUU)|(elecci|Congreso|dem[oó]crata|Trump|Estados Unidos|EE\. ?UU|EEUU).*(Ecuador|ecuatorian|Noboa)"},
     ],
     # Solo medios formales: el nombre de la fuente que da Google Noticias debe contener uno de estos
     "medios": re.compile(r"Reuters|\bAP\b|Associated Press|Bloomberg|\bEFE\b|swissinfo|\bBBC\b|\bCNN\b|El Pa[ií]s|\bDW\b|Deutsche Welle|France 24|\bRFI\b|Euronews|Infobae|Expansi[oó]n|El Economista|El Financiero|Forbes|La Naci[oó]n|Clar[ií]n|\bAmbito\b|[ÁA]mbito|El Tiempo|Portafolio|La Rep[uú]blica|El Comercio|El Universo|Primicias|Expreso|\bGK\b|Voz de Am[eé]rica|\bVOA\b|New York Times|Washington Post|Wall Street Journal|Financial Times|The Economist|Associated|Europa Press|El Mundo|\bABC\b|La Vanguardia|Milenio|El Universal|Bloomberg L[ií]nea|CNBC|Yahoo Finanzas|Investing", re.I),
@@ -83,8 +83,8 @@ def buscar(grupo):
     # primero los titulares que hablan de economía y de esa región; si no alcanzan, se completa con los de economía
     foco = re.compile(grupo["foco"], re.I)
     items = [i for i in items if not SUCESOS.search(i["titulo"]) and not NO_LATINA.search(i["fuente"] or "")]
-    if grupo.get("medios"):
-        items = [i for i in items if grupo["medios"].search(i["fuente"] or "")]
+    if grupo.get("medios"):  # tema de la semana: solo medios formales y solo titulares del tema
+        return [i for i in items if grupo["medios"].search(i["fuente"] or "") and foco.search(i["titulo"]) and ECONOMIA.search(i["titulo"])]
     mejores = [i for i in items if ECONOMIA.search(i["titulo"]) and foco.search(i["titulo"])]
     return mejores + [i for i in items if ECONOMIA.search(i["titulo"]) and i not in mejores]
 
@@ -92,7 +92,7 @@ def buscar(grupo):
 def noticias():
     ruta = RAIZ / "data" / "noticias.json"
     anteriores = json.loads(ruta.read_text("utf-8")).get("items", []) if ruta.exists() else []
-    vistas, out = set(), []
+    vistas, out, sobrantes = set(), [], []
     tema = datetime.now(timezone.utc) < TEMA["hasta"]
     grupos = [dict(g, medios=TEMA["medios"]) for g in TEMA["grupos"]] if tema else GRUPOS
     for grupo in grupos:
@@ -102,7 +102,7 @@ def noticias():
             print(f"noticias {grupo['region']}: error {exc!r}")
             candidatos = []
         # si una región no trae nada, se conservan sus titulares anteriores (durante el tema, solo si son del tema)
-        candidatos += [i for i in anteriores if (not tema or grupo["medios"].search(i.get("fuente", ""))) and i.get("region") == grupo["region"] and not SUCESOS.search(i.get("titulo", "")) and not NO_LATINA.search(i.get("fuente", "")) and str(i.get("url", "")).startswith("https://")]
+        candidatos += [i for i in anteriores if (not tema or (grupo["medios"].search(i.get("fuente", "")) and re.search(grupo["foco"], i.get("titulo", ""), re.I) and ECONOMIA.search(i.get("titulo", "")))) and i.get("region") == grupo["region"] and not SUCESOS.search(i.get("titulo", "")) and not NO_LATINA.search(i.get("fuente", "")) and str(i.get("url", "")).startswith("https://")]
         tomados = 0
         for i in candidatos:
             clave = i["titulo"].lower()[:60]
@@ -113,6 +113,14 @@ def noticias():
             tomados += 1
             if tomados == grupo["n"]:
                 break
+        sobrantes += candidatos
+    # durante el tema, si a una región le faltan titulares, se completan los cinco con los que sobraron de las otras
+    for i in sobrantes if tema else []:
+        if len(out) >= sum(g["n"] for g in grupos):
+            break
+        if i["titulo"].lower()[:60] not in vistas:
+            vistas.add(i["titulo"].lower()[:60])
+            out.append(i)
     return out
 
 
