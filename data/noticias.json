@@ -1,6 +1,13 @@
 {
- "actualizado": "2026-11-05T01:17+00:00",
+ "actualizado": "2026-11-05T07:29+00:00",
  "items": [
+  {
+   "region": "EE. UU.",
+   "titulo": "El Congreso pondrá trabas a los aranceles pero impulsará aún más el gasto público",
+   "fuente": "El Economista",
+   "url": "https://news.google.com/rss/articles/CBMi4AFBVV95cUxOSER1SkNidDlfOEVHYmJPZG5JOEFISjhGaWFfXzdXNDZuR1g1a2NwWWRUU2hqNE51WjdTbTV0UEFPSmhFeGNOMmF6NndyNWpqenVWaVR0bTFjcnJJbnVVaFp4S0I2NUZJaDNMMVhCc204MDdoWXhNSmdGRjhnS3VHWEppVTc1NnYxcHREdGg1eDd6SU1RR1J0b19LOFpfWEpXQXBISUZkeHhHbmtkd01haVRFZVN2MTJyS04xUjdqR1FZYWhNaHBTRUwxREVMdjRBbTBnV2lEOENQRmVzd2NlYg?oc=5",
+   "fecha": "2026-11-05T05:00:31+00:00"
+  },
   {
    "region": "EE. UU.",
    "titulo": "IP advierte: Triunfo de los demócratas en EEUU no garantiza solución a los aranceles ni a los desafíos en la revisión del T-MEC",
@@ -9,18 +16,11 @@
    "fecha": "2026-11-04T22:23:00+00:00"
   },
   {
-   "region": "EE. UU.",
-   "titulo": "El posible futuro de la economía de EE. UU. tras la victoria demócrata",
-   "fuente": "DW.com",
-   "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQRU1Qci1wY1V4MlBWbWRpanM2dkE3UkpwSmZaOG5mVGxjdUJtcldNV3RWak9ISEd2UXNaWDlmeWZZV1A3UnFVSEowZlUzRWU4dGFoSW90Ty1IUmFnbGoyZW5xRlB5V2hMUlpXcDZBZV9xM1NoSVdWR0RRQzJTbFpGT0Nack9UbHZ3VFJLWU5TSkRBQVVaRGdJUDg0allFWlgxN0NlOG9VOFlOM2pD0gGsAUFVX3lxTE5tYnZEWkRwOEtTZ2NQdVQ2YlBmTXYyUm1SQ21tOGpRRHc0cFExUGRoQVNYZzFoRHU4VmVRak5RZnM3X212R0p2dGY5dGYzMFB6UW43ZGl6cFFnS0xDQXNBc25XblNuem0weU1iVlh3bXlLenE3bzVkV3g3QW54RGtrRHJDUDBBOURSWTRaeGtzZDBlLXpJdTZVTjdySUJVLUdSd3BSY21yOXhhNW8?oc=5",
-   "fecha": "2026-11-04T21:38:08+00:00"
-  },
-  {
    "region": "Mercados",
-   "titulo": "Peso ‘hace leña’ de derrota de Trump en elecciones en EU: Gana 27 centavos al dólar",
-   "fuente": "El Financiero",
-   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNNk1Sa1AtMy1UMVQtYVJoSmRiSmdCRS1aM0o0a05TS0xTTjdDaUtOb09pcDhvdWRtM3doN1N2QkJCR01NbnBtVHRzbWpCS1NPUGp5QzRVdC1CSmZTUHlDcEFkN3YxQ1lraDJpVEFwNFpxR3pGVXgyZ1ZHYzIyMXpBQ1dOMnZrNXBHUXllelMxM0tpaFpXaTZ3V1h3SHdCaDRvWFJoTml4V1FRN3pmRGdKUjFB?oc=5",
-   "fecha": "2026-11-04T23:15:06+00:00"
+   "titulo": "Precio del dólar HOY 5 de noviembre: peso mexicano avanza tras las elecciones",
+   "fuente": "ABC Noticias",
+   "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxObDdDZlZ4TVRWNEwxRlJrNDlHR0hEMDlJcWlYNVlSV0ZaZlh5S28ydnN0cnNOTGZ2Nm0tYlBOeUZHTENpUERpSFpDN1dsd25uZ0J3cnVzY1pDd0JQbGVJMGY0YlQxRFlVZUxvenMzakNpeGRndDBwSm5KT3VucGJEMjJoN2phTXd1LXRtM0NSNHE4MlVFNDlXaDdIRkVzMUREc2wteXRkRzBrcmFnS3RqYXpUOGhzd1ZOVl9sZ2wtdW94NFZ5aF91OFV3?oc=5",
+   "fecha": "2026-11-05T06:05:00+00:00"
   },
   {
    "region": "América Latina",
@@ -31,10 +31,10 @@
   },
   {
    "region": "EE. UU.",
-   "titulo": "Ebrard ‘baja el entusiamo’ por derrota de Trump en elecciones: No influirá en aranceles, admite",
-   "fuente": "El Financiero",
-   "url": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxQWEVTVS1McWFHZkVsamxDclJuY050Z3pnc2pWS2tPa1hTY2RUZWtLUHBETXc4UXl6VUloUmtLWmZKdDhyb2ZEOWN3RFl3eEpZYWVNRWFLSV9kSlVCNUh4UzJTR01kMXE3UkNvZjBBQTJyeVA0WExVeGxNMVNYamJUR1MzVWFrdTZtVzM3RGx1eUdiVWh6ZnNVUXBuZFAxYjNJZm1qcW9CeUNOQXVKU0w3MERYY2lqd09rSXBHSURzQVA4bHRaTTNlZm9zM3Jic3FrcUZNOUFySmRPS3VT?oc=5",
-   "fecha": "2026-11-04T20:34:35+00:00"
+   "titulo": "El posible futuro de la economía de EE. UU. tras la victoria demócrata",
+   "fuente": "DW.com",
+   "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQRU1Qci1wY1V4MlBWbWRpanM2dkE3UkpwSmZaOG5mVGxjdUJtcldNV3RWak9ISEd2UXNaWDlmeWZZV1A3UnFVSEowZlUzRWU4dGFoSW90Ty1IUmFnbGoyZW5xRlB5V2hMUlpXcDZBZV9xM1NoSVdWR0RRQzJTbFpGT0Nack9UbHZ3VFJLWU5TSkRBQVVaRGdJUDg0allFWlgxN0NlOG9VOFlOM2pD0gGsAUFVX3lxTE5tYnZEWkRwOEtTZ2NQdVQ2YlBmTXYyUm1SQ21tOGpRRHc0cFExUGRoQVNYZzFoRHU4VmVRak5RZnM3X212R0p2dGY5dGYzMFB6UW43ZGl6cFFnS0xDQXNBc25XblNuem0weU1iVlh3bXlLenE3bzVkV3g3QW54RGtrRHJDUDBBOURSWTRaeGtzZDBlLXpJdTZVTjdySUJVLUdSd3BSY21yOXhhNW8?oc=5",
+   "fecha": "2026-11-04T21:41:15+00:00"
   }
  ]
 }
