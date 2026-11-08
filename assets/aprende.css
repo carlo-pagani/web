@@ -8,7 +8,7 @@
 .ap-hero .lede { font-size: var(--t-l); color: var(--on-navy-soft); max-width: 40rem; margin: 1.2rem 0 2rem; line-height: 1.5; }
 .ap-indice { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem 2rem; border-top: 1px solid rgba(238,242,247,.14); padding-top: 1.5rem; }
 .ap-indice div { display: grid; gap: .35rem; align-content: start; }
-.ap-indice span { font-family: var(--mono); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--brass); margin-bottom: .2rem; }
+.ap-indice span { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--brass); margin-bottom: .2rem; }
 .ap-indice a { color: var(--on-navy); text-decoration: none; font-size: var(--t-s); line-height: 1.35; }
 .ap-indice a:hover { color: var(--brass); }
 
@@ -26,7 +26,7 @@
 .yt { display: block; width: 100%; aspect-ratio: 16 / 9; position: relative; padding: 0; border: 0; border-radius: 4px; overflow: hidden; background: var(--navy-2); cursor: pointer; margin: 0 0 1.5rem; }
 .yt img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease, filter .3s ease; }
 .yt:hover img { transform: scale(1.02); filter: brightness(.92); }
-.yt span { position: absolute; left: 1rem; bottom: 1rem; background: var(--brass); color: #10151C; font-family: var(--mono); font-size: var(--t-s); padding: .45rem .75rem; border-radius: 3px; }
+.yt span { position: absolute; left: 1rem; bottom: 1rem; background: var(--brass); color: #10151C; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--t-s); padding: .45rem .75rem; border-radius: 3px; }
 .yt iframe { width: 100%; height: 100%; border: 0; display: block; }
 
 /* Herramientas */
@@ -49,18 +49,18 @@
 .veredicto.ok { border-color: var(--ok); }
 .veredicto.bad { border-color: var(--bad); }
 .herr .chart-box { margin-top: .5rem; }
-.herr .chart-box svg text { font-family: var(--mono); font-size: 11px; fill: var(--ink-soft); }
+.herr .chart-box svg text { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 11px; fill: var(--ink-soft); }
 .herr input[type="range"] { width: 100%; accent-color: var(--accent); }
 .rango { padding: .6rem 0; border-top: 1px solid var(--rule); }
 .rango label { display: flex; justify-content: space-between; font-size: var(--t-s); gap: 1rem; }
-.rango output { font-family: var(--mono); font-weight: 500; }
+.rango output { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 500; }
 
 /* Barras apiladas del costo del auto */
 .pila { display: flex; height: 2.2rem; border-radius: 3px; overflow: hidden; margin: .5rem 0 .6rem; }
 .pila i { display: block; height: 100%; min-width: 2px; }
 .pila-ley { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: var(--t-xs); color: var(--ink-soft); list-style: none; padding: 0; margin: 0 0 .75rem; }
 .pila-ley i { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; margin-right: .35rem; vertical-align: -1px; }
-.pila-ley b { color: var(--ink); font-family: var(--mono); font-weight: 500; }
+.pila-ley b { color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 500; }
 
 /* Eléctricos */
 .usos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
@@ -74,8 +74,8 @@
 .ruta-bat i { position: absolute; inset: 0 auto 0 0; transition: width .5s ease, background-color .5s ease; }
 .casos { list-style: none; padding: 0; margin: 0; counter-reset: caso; display: grid; gap: 0; }
 .casos li { position: relative; padding: 1rem 0 1rem 2.6rem; border-top: 1px solid var(--rule); font-size: var(--t-s); counter-increment: caso; }
-.casos li::before { content: counter(caso, decimal-leading-zero); position: absolute; left: 0; top: 1.05rem; font-family: var(--mono); font-size: var(--t-xs); color: var(--brass); }
-.casos .pais { display: block; font-family: var(--mono); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-bottom: .2rem; }
+.casos li::before { content: counter(caso, decimal-leading-zero); position: absolute; left: 0; top: 1.05rem; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--t-xs); color: var(--brass); }
+.casos .pais { display: block; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--t-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin-bottom: .2rem; }
 .casos b { display: block; font-size: var(--t-m); margin-bottom: .2rem; }
 .casos a { font-size: var(--t-xs); white-space: nowrap; }
 
