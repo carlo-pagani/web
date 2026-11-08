@@ -16,10 +16,10 @@
   --neg: #A3352B;
   --c1: #2F5D9E; --c2: #B8893E; --muted-mark: #C3CBD6;
   --s0: #1E4A8C; --s1: #4672B8; --s2: #7F9FD2; --s3: #B3C6E6;
-  --display: "Libre Caslon", "Big Caslon", Georgia, serif;
-  --body: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
-  /* Etiquetas y cifras: la misma Franklin con números tabulares (antes una monoespaciada de máquina de escribir). */
-  --mono: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  /* Etiquetas y cifras: la misma Schibsted con números tabulares (antes una monoespaciada de máquina de escribir). */
+  --mono: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
   color-scheme: light;
   --t-xs: .78rem; --t-s: .9rem; --t-m: 1.05rem; --t-l: 1.3rem; --t-xl: clamp(1.7rem, 3.2vw, 2.3rem); --t-hero: clamp(2.3rem, 5.4vw, 3.9rem);
 }
@@ -32,7 +32,7 @@ img { max-width: 100%; display: block; }
 .wrap { max-width: 72rem; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
 a { color: var(--accent); text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
-h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.12; text-wrap: balance; margin: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -.015em; line-height: 1.12; text-wrap: balance; margin: 0; }
 h2 { font-size: var(--t-xl); }
 h3 { font-size: var(--t-l); }
 .eyebrow { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--t-xs); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 .6rem; }
@@ -46,7 +46,7 @@ h3 { font-size: var(--t-l); }
 /* Banda superior */
 .navy { background: var(--navy); color: var(--on-navy); }
 .topbar .wrap { display: flex; flex-wrap: wrap; gap: .75rem 2rem; align-items: center; justify-content: space-between; padding-block: 1rem; border-bottom: 1px solid rgba(238,242,247,.12); }
-.brand { font-family: var(--display); font-size: 1.35rem; font-weight: 600; color: var(--on-navy); text-decoration: none; letter-spacing: .01em; }
+.brand { font-family: var(--display); font-size: 1.35rem; font-weight: 700; color: var(--on-navy); text-decoration: none; letter-spacing: .01em; }
 .topbar nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1.4rem; }
 .topbar nav a { color: var(--on-navy-soft); text-decoration: none; font-size: var(--t-s); }
 .topbar nav a:hover { color: var(--on-navy); }
