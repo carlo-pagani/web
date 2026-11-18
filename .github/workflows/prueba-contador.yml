@@ -8,7 +8,7 @@ jobs:
   prueba:
     runs-on: ubuntu-latest
     steps:
-      - run: pip install playwright==1.48.0 && python -m playwright install --with-deps chromium
+      - run: pip install playwright && python -m playwright install --with-deps chromium
       - name: Abre la web como visitante
         shell: python
         run: |
